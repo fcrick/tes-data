@@ -306,4 +306,23 @@ export function onOpen(err: NodeJS.ErrnoException, fd: number) {
   fs.fstat(fd, createOnFstat(fd));
 }
 
-fs.open(process.argv[2], 'r', onOpen);
+//fs.open(process.argv[2], 'r', onOpen);
+
+class TESDataImpl implements TESData {
+  constructor(private path:string) {
+  }
+
+  count(): number {
+    return 0;
+  }
+}
+
+export interface TESData {
+  count(): number;
+}
+
+export module TESData {
+  export function open(path:string) {
+    return new TESDataImpl(path);
+  }
+}
