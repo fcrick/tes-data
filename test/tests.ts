@@ -14,8 +14,6 @@ import dump = require('../dump');
 
 var TesData = dump.TESData;
 
-dump.TESData;
-
 // test('test test', t => {
   
 //   fs.open('C:/Program Files (x86)/Steam/steamapps/common/Skyrim/Data/Skyrim.esm', 'r',
@@ -30,7 +28,7 @@ dump.TESData;
 //   );
 // });
 
-test('how it should be', t => {
+//test('how it should be', t => {
   
   // this should do very little
   var myData = TesData.open('C:/Program Files (x86)/Steam/steamapps/common/Skyrim/Data/Skyrim.esm');
@@ -49,6 +47,5 @@ test('how it should be', t => {
   // you're accessing this data is done async, meaning that the API needs to signal
   // that somehow.
 
-  console.log(myData.count());
-  t.end();
-});
+  myData.count().then(c => console.log(c));
+//});
