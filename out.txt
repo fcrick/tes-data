@@ -1,0 +1,851 @@
+[
+  {
+    "type": "TES4",
+    "dataSize": 44,
+    "flags": 129,
+    "version": 40,
+    "subRecords": [
+      {
+        "type": "HEDR",
+        "dataSize": 12,
+        "data": "<blob>"
+      },
+      {
+        "type": "CNAM",
+        "dataSize": 10,
+        "data": "<blob>"
+      },
+      {
+        "type": "INTV",
+        "dataSize": 4,
+        "data": "<blob>"
+      }
+    ]
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 96805,
+    "label": 1414745415,
+    "stamp": 19212,
+    "unknown1": 10
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 41348,
+    "label": 1146575179,
+    "stamp": 18969,
+    "unknown1": 35
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 25880,
+    "label": 1414677324,
+    "stamp": 19210,
+    "unknown1": 14
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 3239,
+    "label": 1413693761,
+    "stamp": 19225,
+    "unknown1": 14
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 126505,
+    "label": 1414748244,
+    "stamp": 15633,
+    "unknown1": 2
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 43679,
+    "label": 1112493127,
+    "stamp": 15619,
+    "unknown1": 2
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 15357,
+    "label": 1396788291,
+    "stamp": 19463,
+    "unknown1": 43
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 149072,
+    "label": 1413693766,
+    "stamp": 15619,
+    "unknown1": 2
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 249127,
+    "label": 1414546504,
+    "stamp": 20760,
+    "unknown1": 3
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 24,
+    "label": 1380532552,
+    "stamp": 19485,
+    "unknown1": 8
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 861,
+    "label": 1397053765,
+    "stamp": 16141,
+    "unknown1": 3
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 1083222,
+    "label": 1162035538,
+    "stamp": 15619,
+    "unknown1": 2
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 127655,
+    "label": 1314213715,
+    "stamp": 18962,
+    "unknown1": 39
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 4357,
+    "label": 1129337665,
+    "stamp": 20234,
+    "unknown1": 39
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 325851,
+    "label": 1178945357,
+    "stamp": 18948,
+    "unknown1": 32
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 24,
+    "label": 1414546259,
+    "stamp": 18968,
+    "unknown1": 29
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 6035,
+    "label": 1480938572,
+    "stamp": 15633,
+    "unknown1": 2
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 100551,
+    "label": 1212370501,
+    "stamp": 18962,
+    "unknown1": 32
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 174449,
+    "label": 1279610963,
+    "stamp": 18948,
+    "unknown1": 32
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 22266,
+    "label": 1280459603,
+    "stamp": 23824,
+    "unknown1": 43
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 829232,
+    "label": 1230259009,
+    "stamp": 18968,
+    "unknown1": 12
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 4738,
+    "label": 1413693780,
+    "stamp": 20252,
+    "unknown1": 60
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 913168,
+    "label": 1330467393,
+    "stamp": 16922,
+    "unknown1": 3
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 221930,
+    "label": 1263488834,
+    "stamp": 19477,
+    "unknown1": 47
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 222759,
+    "label": 1414418243,
+    "stamp": 15633,
+    "unknown1": 2
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 52345,
+    "label": 1380929348,
+    "stamp": 15619,
+    "unknown1": 2
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 30816,
+    "label": 1380404809,
+    "stamp": 19457,
+    "unknown1": 47
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 60178,
+    "label": 1212631372,
+    "stamp": 18948,
+    "unknown1": 2
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 75812,
+    "label": 1129531725,
+    "stamp": 15619,
+    "unknown1": 2
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 4956,
+    "label": 1095782465,
+    "stamp": 21006,
+    "unknown1": 43
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 3087977,
+    "label": 1413567571,
+    "stamp": 15619,
+    "unknown1": 2
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 24,
+    "label": 1280262995,
+    "stamp": 20226,
+    "unknown1": 48
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 125151,
+    "label": 1414812493,
+    "stamp": 19211,
+    "unknown1": 37
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 24,
+    "label": 1413568336,
+    "stamp": 20500,
+    "unknown1": 75
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 4689,
+    "label": 1396789831,
+    "stamp": 15633,
+    "unknown1": 2
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 35138,
+    "label": 1162170964,
+    "stamp": 19457,
+    "unknown1": 10
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 24,
+    "label": 1128549443,
+    "stamp": 23554,
+    "unknown1": 10
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 21535,
+    "label": 1380928582,
+    "stamp": 19477,
+    "unknown1": 47
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 115634,
+    "label": 1314018630,
+    "stamp": 15879,
+    "unknown1": 2
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 1313123,
+    "label": 1346454871,
+    "stamp": 15619,
+    "unknown1": 2
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 7650,
+    "label": 1330466113,
+    "stamp": 19726,
+    "unknown1": 43
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 2229153,
+    "label": 1598246990,
+    "stamp": 15619,
+    "unknown1": 2
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 106351,
+    "label": 1313625676,
+    "stamp": 20246,
+    "unknown1": 56
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 72885,
+    "label": 1297696075,
+    "stamp": 19457,
+    "unknown1": 47
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 111703,
+    "label": 1212369985,
+    "stamp": 15619,
+    "unknown1": 2
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 8389,
+    "label": 1296843849,
+    "stamp": 19973,
+    "unknown1": 17
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 105968,
+    "label": 1245859651,
+    "stamp": 21261,
+    "unknown1": 35
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 38894,
+    "label": 1246712400,
+    "stamp": 18957,
+    "unknown1": 37
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 9309,
+    "label": 1146765640,
+    "stamp": 21266,
+    "unknown1": 37
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 3861,
+    "label": 1296518227,
+    "stamp": 22296,
+    "unknown1": 43
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 661403,
+    "label": 1229739596,
+    "stamp": 19486,
+    "unknown1": 35
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 238897,
+    "label": 1380471895,
+    "stamp": 15619,
+    "unknown1": 2
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 878,
+    "label": 1414351939,
+    "stamp": 15619,
+    "unknown1": 2
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 2097,
+    "label": 1145524307,
+    "stamp": 20764,
+    "unknown1": 34
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 7544,
+    "label": 1413695058,
+    "stamp": 22296,
+    "unknown1": 35
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 58837,
+    "label": 1313293650,
+    "stamp": 18962,
+    "unknown1": 39
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 2703662,
+    "label": 1230389582,
+    "stamp": 19213,
+    "unknown1": 2
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 36693002,
+    "label": 1280066883,
+    "stamp": 15619,
+    "unknown1": 2
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 175628441,
+    "label": 1145852503,
+    "stamp": 15619,
+    "unknown1": 2
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 8302711,
+    "label": 1279347012,
+    "stamp": 19224,
+    "unknown1": 14
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 2842762,
+    "label": 1414747473,
+    "stamp": 18968,
+    "unknown1": 29
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 572917,
+    "label": 1162626121,
+    "stamp": 17689,
+    "unknown1": 9
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 3358391,
+    "label": 1262698832,
+    "stamp": 17689,
+    "unknown1": 9
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 29226,
+    "label": 1498698563,
+    "stamp": 15619,
+    "unknown1": 2
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 56534,
+    "label": 1380143948,
+    "stamp": 20248,
+    "unknown1": 43
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 3745,
+    "label": 1347638860,
+    "stamp": 20765,
+    "unknown1": 43
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 7428,
+    "label": 1330204225,
+    "stamp": 21787,
+    "unknown1": 44
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 16876,
+    "label": 1381253463,
+    "stamp": 15619,
+    "unknown1": 2
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 94255,
+    "label": 1213417029,
+    "stamp": 19217,
+    "unknown1": 37
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 32357,
+    "label": 1280333893,
+    "stamp": 18964,
+    "unknown1": 37
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 3289,
+    "label": 1380074820,
+    "stamp": 22557,
+    "unknown1": 75
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 41750,
+    "label": 1397181769,
+    "stamp": 15619,
+    "unknown1": 2
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 284898,
+    "label": 1145130313,
+    "stamp": 15619,
+    "unknown1": 2
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 82124,
+    "label": 1414745158,
+    "stamp": 17928,
+    "unknown1": 9
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 115714,
+    "label": 1263682896,
+    "stamp": 22032,
+    "unknown1": 43
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 24159,
+    "label": 1146376258,
+    "stamp": 15619,
+    "unknown1": 2
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 13526,
+    "label": 1313096769,
+    "stamp": 20238,
+    "unknown1": 37
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 28424,
+    "label": 1179211329,
+    "stamp": 19739,
+    "unknown1": 43
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 12655,
+    "label": 1397571907,
+    "stamp": 19980,
+    "unknown1": 12
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 7603,
+    "label": 1213485123,
+    "stamp": 15619,
+    "unknown1": 2
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 7803,
+    "label": 1348031574,
+    "stamp": 15619,
+    "unknown1": 2
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 9350,
+    "label": 1414807885,
+    "stamp": 19205,
+    "unknown1": 14
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 91912,
+    "label": 1413697609,
+    "stamp": 18970,
+    "unknown1": 11
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 175474,
+    "label": 1396985929,
+    "stamp": 18970,
+    "unknown1": 11
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 339719,
+    "label": 1095586369,
+    "stamp": 18437,
+    "unknown1": 12
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 18576,
+    "label": 1314538309,
+    "stamp": 15619,
+    "unknown1": 2
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 373849,
+    "label": 1314145100,
+    "stamp": 18962,
+    "unknown1": 28
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 54185,
+    "label": 1196639565,
+    "stamp": 18969,
+    "unknown1": 35
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 24,
+    "label": 1279543122,
+    "stamp": 21250,
+    "unknown1": 15
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 2478,
+    "label": 1245859652,
+    "stamp": 15619,
+    "unknown1": 2
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 18078,
+    "label": 1297368908,
+    "stamp": 21001,
+    "unknown1": 54
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 6066,
+    "label": 1129534797,
+    "stamp": 19484,
+    "unknown1": 11
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 9911,
+    "label": 1347703622,
+    "stamp": 18970,
+    "unknown1": 11
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 4788,
+    "label": 1398035270,
+    "stamp": 18970,
+    "unknown1": 11
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 15947,
+    "label": 1312968019,
+    "stamp": 19226,
+    "unknown1": 14
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 98133,
+    "label": 1313951059,
+    "stamp": 19226,
+    "unknown1": 14
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 2064,
+    "label": 1313164627,
+    "stamp": 19226,
+    "unknown1": 14
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 294791,
+    "label": 1380076612,
+    "stamp": 19471,
+    "unknown1": 35
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 39145,
+    "label": 1414747469,
+    "stamp": 19484,
+    "unknown1": 11
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 116450,
+    "label": 1465273412,
+    "stamp": 19725,
+    "unknown1": 35
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 4894,
+    "label": 1347374935,
+    "stamp": 19740,
+    "unknown1": 43
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 10129,
+    "label": 1431259219,
+    "stamp": 19740,
+    "unknown1": 43
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 402,
+    "label": 1347768645,
+    "stamp": 19969,
+    "unknown1": 41
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 43487,
+    "label": 1095517522,
+    "stamp": 19739,
+    "unknown1": 35
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 2557065,
+    "label": 1313162067,
+    "stamp": 19972,
+    "unknown1": 35
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 2371,
+    "label": 1347703617,
+    "stamp": 19983,
+    "unknown1": 35
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 33913,
+    "label": 1413895247,
+    "stamp": 19991,
+    "unknown1": 35
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 34531,
+    "label": 1330926145,
+    "stamp": 20244,
+    "unknown1": 37
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 9811,
+    "label": 1330921805,
+    "stamp": 20490,
+    "unknown1": 37
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 12300,
+    "label": 1414942541,
+    "stamp": 21012,
+    "unknown1": 19
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 24,
+    "label": 1146765640,
+    "stamp": 21264,
+    "unknown1": 37
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 613156,
+    "label": 1380208211,
+    "stamp": 21782,
+    "unknown1": 39
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 227,
+    "label": 1279350084,
+    "stamp": 22019,
+    "unknown1": 37
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 1676,
+    "label": 1413697107,
+    "stamp": 22032,
+    "unknown1": 11
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 7336,
+    "label": 1297108819,
+    "stamp": 23324,
+    "unknown1": 39
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 11002,
+    "label": 1280069443,
+    "stamp": 23565,
+    "unknown1": 15
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 13763,
+    "label": 1296452675,
+    "stamp": 23837,
+    "unknown1": 3
+  },
+  {
+    "type": "GRUP",
+    "groupSize": 741,
+    "label": 1112950098,
+    "stamp": 513,
+    "unknown1": 39
+  }
+]
