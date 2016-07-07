@@ -12,27 +12,19 @@ interface Callback<T> {
 }
 
 interface FileContinuation<T> {
-  (err: NodeJS.ErrnoException, fd: number, callback: Callback<T>): void;
+  (fd: number, callback: Callback<T>): void;
 }
 
-function loadrecordOffsets(err:NodeJS.ErrnoException, fd: number, callback: Callback<number[]>, origOffset: number) {
+function loadRecordOffsets(fd: number, callback: Callback<number[]>, origOffset: number) {
   // close the file if we finish without errors
   let success = (err: NodeJS.ErrnoException, offsets: number[]) => {
-    // move this
-    if (typeof fd === 'string') {
-      fs.close(fd, (err: NodeJS.ErrnoException) => {
-        if (err) {
-          callback(err, null);
-        }
-        else {
-          callback(null, offsets);
-        }
-      });
+    if (err) {
+      callback(err, null);
     }
     else {
       callback(null, offsets);
     }
-  }
+  };
 
   let offsets = [];
 
@@ -43,7 +35,7 @@ function loadrecordOffsets(err:NodeJS.ErrnoException, fd: number, callback: Call
     }
 
     if (stats.size == 0) {
-      success(null, offsets);
+      callback(null, offsets);
     }
     else {
       // if origOffset isn't set, we're reading the whole file at the top level
@@ -72,7 +64,7 @@ function loadrecordOffsets(err:NodeJS.ErrnoException, fd: number, callback: Call
           fs.read(fd, buffer, 0, 8, nextOffset, createRead(nextOffset));
         }
         else {
-          success(null, offsets);
+          callback(null, offsets);
         }
       }
 
@@ -82,7 +74,7 @@ function loadrecordOffsets(err:NodeJS.ErrnoException, fd: number, callback: Call
   });
 }
 
-function loadRecord(err:NodeJS.ErrnoException, fd: number, callback: Callback<Record>, origOffset: number) {
+function loadRecord(fd: number, callback: Callback<Record>, origOffset: number) {
   // first we need to check if this is a group or not, as group records have a fixed size
   // var buffer = new Buffer(8);
   // fs.read(fd, buffer, 0, 8, origOffset, (err, bytesRead, buffer) => {
@@ -94,15 +86,20 @@ function loadRecord(err:NodeJS.ErrnoException, fd: number, callback: Callback<Re
 function handlePathOrFd<T>(file: string | number, continuation: FileContinuation<T>, callback: Callback<T>) {
   var onOpen = (err: NodeJS.ErrnoException, fd: number) => {
     if (err) {
-      continuation(err, null, callback);
+      callback(err, null);
     }
 
     var withClose: Callback<T> = (err, result) => {
-      fs.close(fd);
-      callback(err, result);
+      // make sure the file is closed if we opened it
+      if (typeof fd === 'string') {
+        fs.close(fd, err => err ? callback(err, null) : callback(null, result));
+      }
+      else {
+        callback(null, result);
+      }
     }
 
-    continuation(null, fd, callback);
+    continuation(fd, withClose);
   };
 
   if (typeof file === 'string') {
@@ -112,20 +109,20 @@ function handlePathOrFd<T>(file: string | number, continuation: FileContinuation
     onOpen(null, file);
   }
   else {
-    continuation({name:'BadArgument', message:'argument not a string or number'}, null, callback);
+    callback({name:'BadArgument', message:'argument not a string or number'}, null);
   }
 }
 
 export function getRecordOffsets(file: string|number, origOffset: number, callback: Callback<number[]>) {
   // make a callback that embeds the arguments we're passing
-  var continuation: FileContinuation<number[]> = (err, fd, callback) => loadrecordOffsets(err, fd, callback, origOffset);
+  var continuation: FileContinuation<number[]> = (fd, callback) => loadRecordOffsets(fd, callback, origOffset);
 
   handlePathOrFd(file, continuation, callback);
 }
 
 export function getRecord(file: string|number, origOffset: number, callback: Callback<Record>) {
   // make a callback that embeds the arguments we're passing
-  var continuation: FileContinuation<Record> = (err, fd, callback) => loadRecord(err, fd, callback, origOffset);
+  var continuation: FileContinuation<Record> = (fd, callback) => loadRecord(fd, callback, origOffset);
 
   handlePathOrFd(file, continuation, callback);
 }
