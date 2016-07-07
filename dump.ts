@@ -399,6 +399,7 @@ export module TESData {
           success(null, offsets);
         }
         else {
+          // if origOffset isn't set, we're reading the whole file at the top level
           if (!origOffset) {
             var endOffset = stats.size;
           }
@@ -408,10 +409,17 @@ export module TESData {
               callback(err, null);
               return;
             }
+
             var nextOffset = offset + buffer.readUInt32LE(4);
             if (buffer.toString('utf8', 0, 4) !== 'GRUP') {
               nextOffset += 24;
             }
+            else if (!endOffset) {
+              // we just started reading a group, use its size to scope our scan
+              endOffset = nextOffset;
+              nextOffset = offset + 24;
+            }
+
             if (nextOffset < endOffset) {
               offsets.push(nextOffset);
               fs.read(fd, buffer, 0, 8, nextOffset, createRead(nextOffset));
@@ -422,8 +430,7 @@ export module TESData {
           }
 
           var buffer = new Buffer(8);
-          offsets.push(0);
-          fs.read(fd, buffer, 0, 8, 0, createRead(0));
+          fs.read(fd, buffer, 0, 8, origOffset, createRead(origOffset));
         }
       });
     });

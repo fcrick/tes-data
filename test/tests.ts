@@ -9,4 +9,10 @@ var path = 'C:/Program Files (x86)/Steam/steamapps/common/Skyrim/Data/Skyrim.esm
 
 TesData.getRecordOffsets(path, 0, (err: NodeJS.ErrnoException, offsets: number[]) => {
   console.log(JSON.stringify(offsets));
+
+  offsets.forEach(offset => {
+    TesData.getRecordOffsets(path, offset, (err: NodeJS.ErrnoException, offsets: number[]) => {
+      console.log(JSON.stringify(offsets));
+    })
+  });
 });
