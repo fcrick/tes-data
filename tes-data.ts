@@ -2,16 +2,20 @@
 
 import fs = require('fs');
 
+// dummy thing I'll figure out later
+interface Record {
+  someField: string;
+}
+
 interface Callback<T> {
-  (err:NodeJS.ErrnoException, offsets: T): void;
+  (err:NodeJS.ErrnoException, result: T): void;
 }
 
 interface FileContinuation<T> {
   (err: NodeJS.ErrnoException, fd: number, callback: Callback<T>): void;
 }
 
-
-function recordOffsets(err:NodeJS.ErrnoException, fd: number, callback: Callback<number[]>, origOffset: number) {
+function loadrecordOffsets(err:NodeJS.ErrnoException, fd: number, callback: Callback<number[]>, origOffset: number) {
   // close the file if we finish without errors
   let success = (err: NodeJS.ErrnoException, offsets: number[]) => {
     // move this
@@ -78,15 +82,24 @@ function recordOffsets(err:NodeJS.ErrnoException, fd: number, callback: Callback
   });
 }
 
+function loadRecord(err:NodeJS.ErrnoException, fd: number, callback: Callback<Record>, origOffset: number) {
+  // first we need to check if this is a group or not, as group records have a fixed size
+  // var buffer = new Buffer(8);
+  // fs.read(fd, buffer, 0, 8, origOffset, (err, bytesRead, buffer) => {
+  //   if (err)
+  // }); 
+  callback(null, {someField: 'some value'});
+}
+
 function handlePathOrFd<T>(file: string | number, continuation: FileContinuation<T>, callback: Callback<T>) {
   var onOpen = (err: NodeJS.ErrnoException, fd: number) => {
     if (err) {
       continuation(err, null, callback);
     }
 
-    var withClose: Callback<T> = (err, offsets) => {
+    var withClose: Callback<T> = (err, result) => {
       fs.close(fd);
-      callback(err, offsets);
+      callback(err, result);
     }
 
     continuation(null, fd, callback);
@@ -105,11 +118,14 @@ function handlePathOrFd<T>(file: string | number, continuation: FileContinuation
 
 export function getRecordOffsets(file: string|number, origOffset: number, callback: Callback<number[]>) {
   // make a callback that embeds the arguments we're passing
-  var continuation: FileContinuation<number[]> = (err, fd, callback) => recordOffsets(err, fd, callback, origOffset);
+  var continuation: FileContinuation<number[]> = (err, fd, callback) => loadrecordOffsets(err, fd, callback, origOffset);
 
   handlePathOrFd(file, continuation, callback);
 }
 
-// export function parseRecord(file: string|number, origOffset: number, callback: (err:NodeJS.ErrnoException, offsets: number[]) => void) {
+export function getRecord(file: string|number, origOffset: number, callback: Callback<Record>) {
+  // make a callback that embeds the arguments we're passing
+  var continuation: FileContinuation<Record> = (err, fd, callback) => loadRecord(err, fd, callback, origOffset);
 
-// }
+  handlePathOrFd(file, continuation, callback);
+}
