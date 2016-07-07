@@ -2,15 +2,16 @@
 
 import fs = require('fs');
 
-interface OffsetsCallback {
-  (err:NodeJS.ErrnoException, offsets: number[]): void;
+interface Callback<T> {
+  (err:NodeJS.ErrnoException, offsets: T): void;
 }
 
-interface ContinuationCallback {
-  (err: NodeJS.ErrnoException, fd: number, callback: OffsetsCallback): void;
+interface FileContinuation<T> {
+  (err: NodeJS.ErrnoException, fd: number, callback: Callback<T>): void;
 }
 
-function recordOffsets(origOffset: number, err:NodeJS.ErrnoException, fd: number, callback: OffsetsCallback) {
+
+function recordOffsets(err:NodeJS.ErrnoException, fd: number, callback: Callback<number[]>, origOffset: number) {
   // close the file if we finish without errors
   let success = (err: NodeJS.ErrnoException, offsets: number[]) => {
     // move this
@@ -77,13 +78,13 @@ function recordOffsets(origOffset: number, err:NodeJS.ErrnoException, fd: number
   });
 }
 
-function handlePathOrFd(file: string | number, continuation: ContinuationCallback, callback: OffsetsCallback) {
+function handlePathOrFd<T>(file: string | number, continuation: FileContinuation<T>, callback: Callback<T>) {
   var onOpen = (err: NodeJS.ErrnoException, fd: number) => {
     if (err) {
       continuation(err, null, callback);
     }
 
-    var withClose: OffsetsCallback = (err, offsets) => {
+    var withClose: Callback<T> = (err, offsets) => {
       fs.close(fd);
       callback(err, offsets);
     }
@@ -102,9 +103,9 @@ function handlePathOrFd(file: string | number, continuation: ContinuationCallbac
   }
 }
 
-export function getRecordOffsets(file: string|number, origOffset: number, callback: OffsetsCallback) {
+export function getRecordOffsets(file: string|number, origOffset: number, callback: Callback<number[]>) {
   // make a callback that embeds the arguments we're passing
-  var continuation: ContinuationCallback = (err, fd, callback) => recordOffsets(origOffset, err, fd, callback);
+  var continuation: FileContinuation<number[]> = (err, fd, callback) => recordOffsets(err, fd, callback, origOffset);
 
   handlePathOrFd(file, continuation, callback);
 }
