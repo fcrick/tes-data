@@ -1,9 +1,7 @@
 import test = require('tape')
 import fs = require('fs');
 
-import dump = require('../dump');
-
-var TesData = dump.TESData;
+import tesData = require('../tes-data');
 
 var prefix = 'C:/Program Files (x86)/Steam/steamapps/common/Skyrim/Data/'
 var paths = [
@@ -18,7 +16,7 @@ paths.forEach(filename => {
   var logPrefix = filename + ' - ';
 
   console.time(logPrefix + 'find top records');
-  TesData.getRecordOffsets(path, 0, (err: NodeJS.ErrnoException, offsets: number[]) => {
+  tesData.getRecordOffsets(path, 0, (err: NodeJS.ErrnoException, offsets: number[]) => {
     //console.log(logPrefix + JSON.stringify(offsets));
     console.timeEnd(logPrefix + 'find top records');
   });
@@ -50,7 +48,7 @@ paths.forEach(filename => {
         else {
           seen.add(next);
           
-          TesData.getRecordOffsets(fd, next, (err, offsets) => {
+          tesData.getRecordOffsets(fd, next, (err, offsets) => {
             for (var offset of offsets) {
               queue.push(offset);
             }
