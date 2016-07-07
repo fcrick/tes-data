@@ -15,7 +15,8 @@
         "preserveConstEnums": true,
         "suppressImplicitAnyIndexErrors": true,
         "sourceMap": true,
-        "outDir": "bin"
+        "outDir": "bin",
+        "watch": true
     },
     "exclude": [
         "node_modules",
