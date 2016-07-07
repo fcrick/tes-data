@@ -1,6 +1,4 @@
-import test = require('tape')
 import fs = require('fs');
-
 import tesData = require('../tes-data');
 
 var prefix = 'C:/Program Files (x86)/Steam/steamapps/common/Skyrim/Data/'
