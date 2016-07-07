@@ -308,83 +308,30 @@ export function onOpen(err: NodeJS.ErrnoException, fd: number) {
 
 //fs.open(process.argv[2], 'r', onOpen);
 
-class TESDataImpl implements TESData {
-  private m_count: number; 
-
-  constructor(private path:string) {
-  }
-
-  count(): Promise<number> {
-    return new Promise<number>((fulfill, reject) => {
-      if (typeof this.m_count !== 'undefined') {
-        fulfill(this.m_count);
-        return; 
-      }
-
-      // ok, let's do some read work
-
-      // to know the number of records in the top level of the file, we need
-      // to read the size of every single one, which is crazy, but that's the
-      // only way
-
-      // lets try this craziness first
-      var runningTotal = 0;
-
-      fs.open(this.path, 'r', (err: NodeJS.ErrnoException, fd: number) => {
-        fs.fstat(fd, (err: NodeJS.ErrnoException, stats: fs.Stats) => {
-          if (stats.size == 0) {
-            fulfill(0);
-          }
-          else {
-            var createRead = (offset: number) => (err: NodeJS.ErrnoException, bytesRead: number, buffer: Buffer) => {
-              var newOffset = offset + buffer.readUInt32LE(4);
-              if (buffer.toString('utf8', 0, 4) !== 'GRUP') {
-                newOffset += 24;
-              }
-              runningTotal += 1;
-              if (newOffset < stats.size) {
-                fs.read(fd, buffer, 0, 8, newOffset, createRead(newOffset));
-              }
-              else {
-                this.m_count = runningTotal;
-                fulfill(runningTotal);
-              }
-            }
-
-            var buffer = new Buffer(8);
-            fs.read(fd, buffer, 0, 8, 0, createRead(0));
-          }
-        });
-      });
-    });
-  }
-}
-
-export interface TESData {
-  count(): Promise<number>;
-}
-
+// everything above this is deprecated
+// moving to this approach as it's much more simple
 export module TESData {
-  export function open(path:string) {
-    return <TESData>new TESDataImpl(path);
-  }
-
-  export function getRecordOffsets(path: string, origOffset: number, callback: (err:NodeJS.ErrnoException, offsets: number[]) => void) {
-    fs.open(path, 'r', (err: NodeJS.ErrnoException, fd: number) => {
+  export function getRecordOffsets(file: string|number, origOffset: number, callback: (err:NodeJS.ErrnoException, offsets: number[]) => void) {
+    var onOpen = (err: NodeJS.ErrnoException, fd: number) => {
       if (err) {
         callback(err, null);
       }
 
       // close the file if we finish without errors
       let success = (err: NodeJS.ErrnoException, offsets: number[]) => {
-        fs.close(fd, (err: NodeJS.ErrnoException) => {
-          if (err) {
-            callback(err, null);
-          }
-          else {
-            callback(null, offsets);
-          }
-        });
+        if (typeof file === 'string') {
+          fs.close(fd, (err: NodeJS.ErrnoException) => {
+            if (err) {
+              callback(err, null);
+            }
+            else {
+              callback(null, offsets);
+            }
+          });
+        }
+        else {
+          callback(null, offsets);
+        }
       }
 
       let offsets = [];
@@ -433,6 +380,16 @@ export module TESData {
           fs.read(fd, buffer, 0, 8, origOffset, createRead(origOffset));
         }
       });
-    });
+    };
+
+    if (typeof file === 'string') {
+      fs.open(file, 'r', onOpen);
+    }
+    else if (typeof file === 'number') {
+      onOpen(null, file);
+    }
+    else {
+      callback({name:'BadArgument', message:'argument not a string or number'}, null);
+    }
   }
 }
