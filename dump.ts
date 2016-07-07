@@ -346,6 +346,7 @@ class TESDataImpl implements TESData {
                 fs.read(fd, buffer, 0, 8, newOffset, createRead(newOffset));
               }
               else {
+                this.m_count = runningTotal;
                 fulfill(runningTotal);
               }
             }
@@ -357,9 +358,6 @@ class TESDataImpl implements TESData {
       });
     });
   }
-
-  
-  //alsoCount(Promise<)
 }
 
 export interface TESData {
@@ -369,5 +367,65 @@ export interface TESData {
 export module TESData {
   export function open(path:string) {
     return <TESData>new TESDataImpl(path);
+  }
+
+  export function getRecordOffsets(path: string, origOffset: number, callback: (err:NodeJS.ErrnoException, offsets: number[]) => void) {
+    fs.open(path, 'r', (err: NodeJS.ErrnoException, fd: number) => {
+      if (err) {
+        callback(err, null);
+      }
+
+      // close the file if we finish without errors
+      let success = (err: NodeJS.ErrnoException, offsets: number[]) => {
+        fs.close(fd, (err: NodeJS.ErrnoException) => {
+          if (err) {
+            callback(err, null);
+          }
+          else {
+            callback(null, offsets);
+          }
+        });
+      }
+
+      let offsets = [];
+
+      fs.fstat(fd, (err: NodeJS.ErrnoException, stats: fs.Stats) => {
+        if (err) {
+          callback(err, null);
+          return;
+        }
+
+        if (stats.size == 0) {
+          success(null, offsets);
+        }
+        else {
+          if (!origOffset) {
+            var endOffset = stats.size;
+          }
+
+          var createRead = (offset: number) => (err: NodeJS.ErrnoException, bytesRead: number, buffer: Buffer) => {
+            if (err) {
+              callback(err, null);
+              return;
+            }
+            var nextOffset = offset + buffer.readUInt32LE(4);
+            if (buffer.toString('utf8', 0, 4) !== 'GRUP') {
+              nextOffset += 24;
+            }
+            if (nextOffset < endOffset) {
+              offsets.push(nextOffset);
+              fs.read(fd, buffer, 0, 8, nextOffset, createRead(nextOffset));
+            }
+            else {
+              success(null, offsets);
+            }
+          }
+
+          var buffer = new Buffer(8);
+          offsets.push(0);
+          fs.read(fd, buffer, 0, 8, 0, createRead(0));
+        }
+      });
+    });
   }
 }
