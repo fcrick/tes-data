@@ -24,8 +24,7 @@ export function getRecord(buffer: Buffer): Record {
   };
 
   var offset = 8;
-  var fields = recordTypes[record.type];
-
+  var fields = record.type === 'GRUP' ? fieldsGRUP : recordFields;
   var read = (offset, field) => readField(record, buffer, offset, field);
 
   if (fields) {
@@ -91,6 +90,13 @@ var fieldsGRUP: RecordField[] = [
   {name: 'unknown2', type: RecordFieldType.UInt16LE},
 ];
 
+var recordFields: RecordField[] = [
+  {name: 'flags', type: RecordFieldType.UInt32LE},
+  {name: 'id', type: RecordFieldType.UInt32LE},
+  {name: 'revision', type: RecordFieldType.UInt32LE},
+  {name: 'version', type: RecordFieldType.UInt16LE},
+  {name: 'unknown', type: RecordFieldType.UInt16LE},
+];
+
 var recordTypes: {[type:string]: RecordField[]} = {
-  'GRUP': fieldsGRUP,
 };

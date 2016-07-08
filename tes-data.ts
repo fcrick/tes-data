@@ -2,9 +2,7 @@
 
 import fs = require('fs');
 
-
-
-interface Callback<T> {
+export interface Callback<T> {
   (err:NodeJS.ErrnoException, result: T): void;
 }
 
