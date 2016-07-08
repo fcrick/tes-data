@@ -27,8 +27,22 @@ export function getRecord(buffer: Buffer): Record {
   var fields = record.type === 'GRUP' ? fieldsGRUP : recordFields;
   var read = (offset, field) => readField(record, buffer, offset, field);
 
-  if (fields) {
-    fields.forEach(field => offset = read(offset, field));
+  fields.forEach(field => offset = read(offset, field));
+
+  if (offset < buffer.length) {
+    record['subRecords'] = [];
+  }
+
+  // read subrecords
+  while (offset < buffer.length) {
+    var subRecord: Record = {
+      type: buffer.toString('utf8', offset, offset + 4),
+      size: buffer.readUInt16LE(offset + 4),
+    };
+
+    record['subRecords'].push(subRecord);
+
+    offset += 6 + subRecord.size;
   }
 
   return record;

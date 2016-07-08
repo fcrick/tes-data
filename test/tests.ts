@@ -93,8 +93,9 @@ function readRecords() {
     // cause it's nice to get the first one, too
     offsets.forEach(handleOffset);
 
-    if (offsets.length > 0) {
+    if (offsets.length > 1) {
       tesData.getRecordOffsets(path, offsets[offsets.length-1], handleOffsets);
+      tesData.getRecordOffsets(path, offsets[offsets.length-2], handleOffsets);
     }
   };
 
