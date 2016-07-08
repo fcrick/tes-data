@@ -7,17 +7,17 @@ export interface Record {
 
 interface RecordField {
   name: string;
-  type: RecordFieldType;
+  type: FieldType;
 }
 
-enum RecordFieldType {
+enum FieldType {
   UInt8,
   UInt16LE,
   UInt32LE,
   FourChar,
   ZString,
   LString,
-  RBG,
+  RGB,
 }
 
 export function getRecord(buffer: Buffer): Record {
@@ -43,7 +43,7 @@ export function getRecord(buffer: Buffer): Record {
     return record;
   }
 
-  var subRecordFields = subRecordMap[record.type];
+  //var subRecordFields = subRecordMap[record.type];
 
   // read subrecords
   while (offset < buffer.length) {
@@ -73,28 +73,28 @@ function readField(record: Record, buffer: Buffer, offset: number, field: Record
 
   var value = null;
   switch (field.type) {
-    case RecordFieldType.UInt8:
+    case FieldType.UInt8:
       value = buffer.readUInt8(offset);
       if (value === 0)
         value = null;
       break;
-    case RecordFieldType.UInt16LE:
+    case FieldType.UInt16LE:
       value = buffer.readUInt16LE(offset);
       if (value === 0)
         value = null;
       break;
-    case RecordFieldType.UInt32LE:
+    case FieldType.UInt32LE:
       value = buffer.readUInt32LE(offset);
       if (value === 0)
         value = null;
       break;
-    case RecordFieldType.FourChar:
+    case FieldType.FourChar:
       value = buffer.toString('utf8', offset, offset + 4);
       break;
-    case RecordFieldType.ZString:
+    case FieldType.ZString:
       value = buffer.toString('utf8', offset, offset + size);
       break;
-    case RecordFieldType.LString:
+    case FieldType.LString:
       value = buffer.readUInt32LE(offset); 
       break;
   }
@@ -106,13 +106,13 @@ function readField(record: Record, buffer: Buffer, offset: number, field: Record
 
 function fieldSize(fieldDef: RecordField, record?: Record) {
   switch(fieldDef.type) {
-    case RecordFieldType.UInt8:
+    case FieldType.UInt8:
       return 1;
-    case RecordFieldType.UInt16LE:
+    case FieldType.UInt16LE:
       return 2;
-    case RecordFieldType.UInt32LE:
+    case FieldType.UInt32LE:
       return 4;
-    case RecordFieldType.FourChar:
+    case FieldType.FourChar:
       return 4;
   }
   return 0;
@@ -120,27 +120,32 @@ function fieldSize(fieldDef: RecordField, record?: Record) {
 
 // http://www.uesp.net/wiki/Tes5Mod:Mod_File_Format#Groups
 var fieldsGRUP: RecordField[] = [
-  {name: 'label', type: RecordFieldType.UInt32LE},
-  {name: 'groupType', type: RecordFieldType.UInt32LE},
-  {name: 'stamp', type: RecordFieldType.UInt16LE},
-  {name: 'unknown1', type: RecordFieldType.UInt16LE},
-  {name: 'version', type: RecordFieldType.UInt16LE},
-  {name: 'unknown2', type: RecordFieldType.UInt16LE},
+  {name: 'label', type: FieldType.UInt32LE},
+  {name: 'groupType', type: FieldType.UInt32LE},
+  {name: 'stamp', type: FieldType.UInt16LE},
+  {name: 'unknown1', type: FieldType.UInt16LE},
+  {name: 'version', type: FieldType.UInt16LE},
+  {name: 'unknown2', type: FieldType.UInt16LE},
 ];
 
 var recordFields: RecordField[] = [
-  {name: 'flags', type: RecordFieldType.UInt32LE},
-  {name: 'id', type: RecordFieldType.UInt32LE},
-  {name: 'revision', type: RecordFieldType.UInt32LE},
-  {name: 'version', type: RecordFieldType.UInt16LE},
-  {name: 'unknown', type: RecordFieldType.UInt16LE},
+  {name: 'flags', type: FieldType.UInt32LE},
+  {name: 'id', type: FieldType.UInt32LE},
+  {name: 'revision', type: FieldType.UInt32LE},
+  {name: 'version', type: FieldType.UInt16LE},
+  {name: 'unknown', type: FieldType.UInt16LE},
 ];
 
-var subRecordMap: {[type:string]: {[type:string]: RecordFieldType}} = {
-  'CLFM': {
-    'EDID': RecordFieldType.ZString,
-    'FULL': RecordFieldType.LString,
-    'CNAM': RecordFieldType.RBG,
-    'FNAM': RecordFieldType.UInt32LE,
-  },
+var subRecordFields: {[type:string]: FieldType} = {
+  'CNAM': FieldType.RGB,
+  'EDID': FieldType.ZString,
+  'FNAM': FieldType.UInt32LE,
+  'FULL': FieldType.LString,
+  'INAM': FieldType.UInt32LE,
+  'NAME': FieldType.UInt32LE,
+  'PTDO': FieldType.UInt32LE, // x2
+  'XEZN': FieldType.UInt32LE,
+  // 'XPPA': FieldType.Empty,
+  // 'XPRD': FieldType.Float,
+  // 'VMAD': FieldType.VMAD,
 };
