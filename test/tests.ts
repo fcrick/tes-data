@@ -82,5 +82,21 @@ function loadBuffers() {
   });
 }
 
+function readRecords() {
+  var path = prefix + paths[0];
+
+  tesData.getRecordOffsets(path, 0, (err, offsets) => {
+    // cause it's nice to get the first one, too
+    offsets.unshift(0);
+    
+    offsets.forEach(offset => {
+      tesData.getRecordBuffer(path, offset, (err, buffer) => {
+        console.log(JSON.stringify(record.getRecord(buffer)));
+      })
+    });
+  });
+}
+
 //loadOffsets();
-loadBuffers();
+//loadBuffers();
+readRecords();

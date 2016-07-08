@@ -23,12 +23,63 @@ export function getRecord(buffer: Buffer): Record {
     size: buffer.readUInt32LE(4),
   };
 
-  if (record.type == 'GRUP') {
+  var offset = 8;
+  var fields = recordTypes[record.type];
+
+  var read = (offset, field) => readField(record, buffer, offset, field);
+
+  if (fields) {
+    fields.forEach(field => offset = read(offset, field));
   }
 
   return record;
 }
 
+function readField(record: Record, buffer: Buffer, offset: number, field: RecordField): number {
+  if (offset >= buffer.length) {
+    return offset;
+  } 
+
+  var value = null;
+  switch (field.type) {
+    case RecordFieldType.UInt8:
+      value = buffer.readUInt8(offset);
+      if (value === 0)
+        value = null;
+      break;
+    case RecordFieldType.UInt16LE:
+      value = buffer.readUInt16LE(offset);
+      if (value === 0)
+        value = null;
+      break;
+    case RecordFieldType.UInt32LE:
+      value = buffer.readUInt32LE(offset);
+      if (value === 0)
+        value = null;
+      break;
+    case RecordFieldType.FourChar:
+      value = buffer.toString('utf8', offset, offset + 4);
+      break;
+  }
+  if (value !== null)
+    record[field.name] = value;
+
+  return offset + fieldSize(field, record);
+}
+
+function fieldSize(fieldDef: RecordField, record?: Record) {
+  switch(fieldDef.type) {
+    case RecordFieldType.UInt8:
+      return 1;
+    case RecordFieldType.UInt16LE:
+      return 2;
+    case RecordFieldType.UInt32LE:
+      return 4;
+    case RecordFieldType.FourChar:
+      return 4;
+  }
+  return 0;
+}
 
 // http://www.uesp.net/wiki/Tes5Mod:Mod_File_Format#Groups
 var fieldsGRUP: RecordField[] = [
