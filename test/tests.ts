@@ -85,16 +85,20 @@ function loadBuffers() {
 function readRecords() {
   var path = prefix + paths[0];
 
-  tesData.getRecordOffsets(path, 0, (err, offsets) => {
+  var printRecord = (err, buffer) => console.log(JSON.stringify(record.getRecord(buffer)));
+  var handleOffset = offset => tesData.getRecordBuffer(path, offset, printRecord);
+  var handleOffsets: tesData.Callback<number[]>;
+  handleOffsets = (err, offsets) => {
+    console.log(JSON.stringify(offsets));
     // cause it's nice to get the first one, too
-    offsets.unshift(0);
-    
-    offsets.forEach(offset => {
-      tesData.getRecordBuffer(path, offset, (err, buffer) => {
-        console.log(JSON.stringify(record.getRecord(buffer)));
-      })
-    });
-  });
+    offsets.forEach(handleOffset);
+
+    if (offsets.length > 0) {
+      tesData.getRecordOffsets(path, offsets[offsets.length-1], handleOffsets);
+    }
+  };
+
+  tesData.getRecordOffsets(path, 0, handleOffsets);
 }
 
 //loadOffsets();
