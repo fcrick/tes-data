@@ -2,10 +2,7 @@
 
 import fs = require('fs');
 
-// dummy thing I'll figure out later
-interface Record {
-  someField: string;
-}
+
 
 interface Callback<T> {
   (err:NodeJS.ErrnoException, result: T): void;
@@ -74,13 +71,19 @@ function loadRecordOffsets(fd: number, callback: Callback<number[]>, origOffset:
   });
 }
 
-function loadRecord(fd: number, callback: Callback<Record>, origOffset: number) {
+function loadRecordBuffer(fd: number, callback: Callback<Buffer>, origOffset: number) {
   // first we need to check if this is a group or not, as group records have a fixed size
-  // var buffer = new Buffer(8);
-  // fs.read(fd, buffer, 0, 8, origOffset, (err, bytesRead, buffer) => {
-  //   if (err)
-  // }); 
-  callback(null, {someField: 'some value'});
+  var buffer = new Buffer(8);
+  fs.read(fd, buffer, 0, 8, origOffset, (err, bytesRead, buffer) => {
+    var type = buffer.toString('utf8', 0, 4);
+    var size = type == 'GRUP' ? 24 : buffer.readUInt32LE(4)
+
+    var buffer = new Buffer(size);
+    fs.read(fd, buffer, 0, size, origOffset, (err, bytesRead, buffer) => {
+      callback(null, buffer);
+    });
+  });
+  
 }
 
 function handlePathOrFd<T>(file: string | number, continuation: FileContinuation<T>, callback: Callback<T>) {
@@ -120,9 +123,10 @@ export function getRecordOffsets(file: string|number, origOffset: number, callba
   handlePathOrFd(file, continuation, callback);
 }
 
-export function getRecord(file: string|number, origOffset: number, callback: Callback<Record>) {
+export function getRecordBuffer(file: string|number, origOffset: number, callback: Callback<Buffer>) {
   // make a callback that embeds the arguments we're passing
-  var continuation: FileContinuation<Record> = (fd, callback) => loadRecord(fd, callback, origOffset);
+  var continuation: FileContinuation<Buffer> = (fd, callback) => loadRecordBuffer(fd, callback, origOffset);
 
   handlePathOrFd(file, continuation, callback);
 }
+

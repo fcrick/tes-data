@@ -1,5 +1,6 @@
 import fs = require('fs');
 import tesData = require('../tes-data');
+import record = require('../record-tes5');
 
 var prefix = 'C:/Program Files (x86)/Steam/steamapps/common/Skyrim/Data/'
 var paths = [
@@ -66,17 +67,20 @@ function loadOffsets() {
   });
 }
 
-function loadRecords() {
+function loadBuffers() {
   var path = prefix + paths[0];
 
   tesData.getRecordOffsets(path, 0, (err, offsets) => {
+    // cause it's nice to get the first one, too
+    offsets.unshift(0);
+    
     offsets.forEach(offset => {
-      tesData.getRecord(path, offset, (err, record) => {
-        console.log(offset + ' is ' + JSON.stringify(record));
+      tesData.getRecordBuffer(path, offset, (err, buffer) => {
+        console.log(offset + ' is ' + buffer.length + ' bytes');
       })
     });
   });
 }
 
 //loadOffsets();
-loadRecords();
+loadBuffers();
