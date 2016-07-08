@@ -74,7 +74,7 @@ function loadRecordBuffer(fd: number, callback: Callback<Buffer>, origOffset: nu
   var buffer = new Buffer(8);
   fs.read(fd, buffer, 0, 8, origOffset, (err, bytesRead, buffer) => {
     var type = buffer.toString('utf8', 0, 4);
-    var size = type == 'GRUP' ? 24 : buffer.readUInt32LE(4)
+    var size = type == 'GRUP' ? 24 : buffer.readUInt32LE(4) + 24
 
     var buffer = new Buffer(size);
     fs.read(fd, buffer, 0, size, origOffset, (err, bytesRead, buffer) => {

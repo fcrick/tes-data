@@ -15,6 +15,9 @@ enum RecordFieldType {
   UInt16LE,
   UInt32LE,
   FourChar,
+  ZString,
+  LString,
+  RBG,
 }
 
 export function getRecord(buffer: Buffer): Record {
@@ -33,6 +36,15 @@ export function getRecord(buffer: Buffer): Record {
     record['subRecords'] = [];
   }
 
+  var compressed = record.type === 'GRUP' ? false : record['flags'] & 0x40000;
+  if (compressed) {
+    // not yet supported
+    record['compressed'] = true;
+    return record;
+  }
+
+  var subRecordFields = subRecordMap[record.type];
+
   // read subrecords
   while (offset < buffer.length) {
     var subRecord: Record = {
@@ -40,15 +52,21 @@ export function getRecord(buffer: Buffer): Record {
       size: buffer.readUInt16LE(offset + 4),
     };
 
-    record['subRecords'].push(subRecord);
+    offset += 6;
+    var subRecordEnd = offset + subRecord.size;
 
-    offset += 6 + subRecord.size;
+    if (subRecordFields && subRecord.type in subRecordFields) {
+      readField(subRecord, buffer, offset, {name:'value', type:subRecordFields[subRecord.type]}, subRecord.size);
+    }
+
+    offset += subRecord.size;
+    record['subRecords'].push(subRecord);
   }
 
   return record;
 }
 
-function readField(record: Record, buffer: Buffer, offset: number, field: RecordField): number {
+function readField(record: Record, buffer: Buffer, offset: number, field: RecordField, size?: number): number {
   if (offset >= buffer.length) {
     return offset;
   } 
@@ -72,6 +90,12 @@ function readField(record: Record, buffer: Buffer, offset: number, field: Record
       break;
     case RecordFieldType.FourChar:
       value = buffer.toString('utf8', offset, offset + 4);
+      break;
+    case RecordFieldType.ZString:
+      value = buffer.toString('utf8', offset, offset + size);
+      break;
+    case RecordFieldType.LString:
+      value = buffer.readUInt32LE(offset); 
       break;
   }
   if (value !== null)
@@ -112,5 +136,11 @@ var recordFields: RecordField[] = [
   {name: 'unknown', type: RecordFieldType.UInt16LE},
 ];
 
-var recordTypes: {[type:string]: RecordField[]} = {
+var subRecordMap: {[type:string]: {[type:string]: RecordFieldType}} = {
+  'CLFM': {
+    'EDID': RecordFieldType.ZString,
+    'FULL': RecordFieldType.LString,
+    'CNAM': RecordFieldType.RBG,
+    'FNAM': RecordFieldType.UInt32LE,
+  },
 };
