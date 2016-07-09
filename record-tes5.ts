@@ -36,7 +36,7 @@ export function getRecord(buffer: Buffer): Record {
 
     readFields(subRecord, buffer, offset, subRecordFields);
 
-    offset += subRecord.size;
+    offset += subRecord.size + 6;
     record['subRecords'].push(subRecord);
   }
 

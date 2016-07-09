@@ -85,20 +85,25 @@ function loadBuffers() {
 function readRecords() {
   var path = prefix + paths[0];
 
-  var printRecord = (err, buffer) => console.log(JSON.stringify(record.getRecord(buffer)));
-  var handleOffset = offset => tesData.getRecordBuffer(path, offset, printRecord);
-  var handleOffsets: tesData.Callback<[number,string][]>;
-  handleOffsets = (err, offsets) => {
-    console.log(JSON.stringify(offsets));
-    offsets.forEach(handleOffset);
+  fs.open(path, 'r', (err, fd) => {
+    var printRecord = (err, buffer) => console.log(JSON.stringify(record.getRecord(buffer)));
+    var handleOffset = offset => tesData.getRecordBuffer(fd, offset[0], printRecord);
+    var handleOffsets: tesData.Callback<[number,string][]>;
+    handleOffsets = (err, offsets) => {
+      console.log(JSON.stringify(offsets));
 
-    if (offsets.length > 1) {
-      tesData.getRecordOffsets(path, offsets[offsets.length-1][0], handleOffsets);
-      tesData.getRecordOffsets(path, offsets[offsets.length-2][0], handleOffsets);
-    }
-  };
-
-  tesData.getRecordOffsets(path, 0, handleOffsets);
+      if (offsets) {
+        offsets.forEach(handleOffset);
+        offsets.map(o => o[0]).forEach(o => tesData.getRecordOffsets(fd, o, handleOffsets));
+      }
+      // if (offsets.length > 1) {
+      //   tesData.getRecordOffsets(path, offsets[offsets.length-1][0], handleOffsets);
+      //   tesData.getRecordOffsets(path, offsets[offsets.length-2][0], handleOffsets);
+      // }
+    };
+  
+    tesData.getRecordOffsets(fd, 0, handleOffsets);
+  });
 }
 
 //loadOffsets();
