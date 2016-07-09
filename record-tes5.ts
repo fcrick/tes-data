@@ -3,11 +3,7 @@
 export interface Record {
   type: string;
   size: number;
-}
-
-interface RecordField {
-  name: string;
-  type: FieldType;
+  subRecords?: Record[];
 }
 
 export function getRecord(buffer: Buffer): Record {
@@ -20,7 +16,7 @@ export function getRecord(buffer: Buffer): Record {
   var offset = 24;
 
   if (offset < buffer.length) {
-    record['subRecords'] = [];
+    record.subRecords = [];
   }
 
   var compressed = record.type === 'GRUP' ? false : record['flags'] & 0x40000;
@@ -37,7 +33,7 @@ export function getRecord(buffer: Buffer): Record {
     readFields(subRecord, buffer, offset, subRecordFields);
 
     offset += subRecord.size + 6;
-    record['subRecords'].push(subRecord);
+    record.subRecords.push(subRecord);
   }
 
   return record;
@@ -55,26 +51,6 @@ function readFields(record: Record, buffer: Buffer, offset: number, fields: Fiel
   return offset;
 }
 
-function nullIfEqual<T>(value: T, test: T) {
-  return value === test ? null : value;  
-}
-
-interface FieldReader {
-  (buffer:Buffer, offset:number, count: number): any;
-}
-
-var fieldReaders: {[fieldType:string]: FieldReader} = {
-  char: (b,o,c) => nullIfEqual(b.toString('utf8', o, o+c), ''),
-  uint16le: (b,o,c) => nullIfEqual(b.readUInt16LE(o), 0),
-  uint32le: (b,o,c) => nullIfEqual(b.readUInt32LE(o), 0),
-};
-
-var fieldSize: {[fieldType: string]: number} = {
-  char: 1,
-  uint16le: 2,
-  uint32le: 4,
-}
-
 function readField(record: Record, buffer: Buffer, offset: number, field: Field): number {
   if (offset >= buffer.length) {
     return offset;
@@ -85,17 +61,28 @@ function readField(record: Record, buffer: Buffer, offset: number, field: Field)
   let type:string;
   let count = 1;
 
+  if (field.length === 3 && typeof field[2] === 'object' && !Array.isArray(field[2])) {
+    var options = <FieldOptions>field[2];
+    if (typeof options.size === 'string') {
+      count = record[options.size];
+    }
+    else {
+      count = <number>options.size;
+    }
+  }
+
   if (typeof field[1] === 'string') {
     type = <string>field[1];
   }
-  else if (typeof field[1] === 'number') {
-    count = <number>field[1];
-    type = <string>field[2];
-  }
   else if (Array.isArray(field[1])) {
-    var newRecord = <Record>{};
-    record[name] = newRecord;
-    return readFields(newRecord, buffer, offset, <FieldArray>field[1]);
+    if (count) {
+      record[name] = [];
+      for (var i = 0; i < count; ++i) {
+        var newRecord = <Record>{};
+        record[name].push(newRecord);
+        offset = readFields(newRecord, buffer, offset, <FieldArray>field[1]);
+      }
+    }
   }
   else if (typeof field[1] === 'object') {
     var valueMap = <{[type:string]:FieldArray}>field[1];
@@ -108,26 +95,68 @@ function readField(record: Record, buffer: Buffer, offset: number, field: Field)
 
   var reader = fieldReaders[type];
   if (reader) {
-    if (count === -1) {
-      count = record['size'];
-    }
     var value = reader(buffer, offset, count)
     if (value !== null) {
       record[name] = value;
-      return offset + count * fieldSize[type];
     }
+
+    if (count === -1) {
+      count = value === null ? 1 : value.length + 1;
+    }
+
+    return offset + count * fieldSize[type];
   }
 
-  return 0;
+  return offset;
 }
 
-type FieldType = 'uint32le'|'uint16le'|'uint8'|'char'|'byte';
-type SimpleField = [string, FieldType];
-type CountField = [string, number, FieldType];
+function nullIfEqual<T>(value: T, test: T) {
+  return value === test ? null : value;  
+}
+
+interface FieldReader {
+  (buffer:Buffer, offset:number, count: number): any;
+}
+
+var fieldReaders: {[fieldType:string]: FieldReader} = {
+  char: (b,o,c) => {
+    if (c === -1) {
+      var all = b.toString('utf8', o, b.length);
+      return all.substr(0, all.indexOf('\0'));
+    }
+    else {
+      return nullIfEqual(b.toString('utf8', o, o+c), '');
+    }
+  },
+  int8: (b,o,c) => nullIfEqual(b.readInt8(o), 0),
+  int16le: (b,o,c) => nullIfEqual(b.readInt16LE(o), 0),
+  int32le: (b,o,c) => nullIfEqual(b.readInt32LE(o), 0),
+  uint8: (b,o,c) => nullIfEqual(b.readUInt8(o), 0),
+  uint16le: (b,o,c) => nullIfEqual(b.readUInt16LE(o), 0),
+  uint32le: (b,o,c) => nullIfEqual(b.readUInt32LE(o), 0),
+};
+
+var fieldSize: {[fieldType: string]: number} = {
+  char: 1,
+  int8: 1,
+  int16le: 2,
+  int32le: 4,
+  uint8: 1,
+  uint16le: 2,
+  uint32le: 4,
+}
+
+interface FieldOptions {
+  size?: string|number;
+}
+
+type FieldTypes = 'int32le'|'int16le'|'int8'|'uint32le'|'uint16le'|'uint8'|'char'|'byte';
+type SimpleField = [string, FieldTypes];
+type SimpleFieldOpt = [string, FieldTypes, FieldOptions];
 type ConditionalFieldSet = [string, {[type:string]:FieldArray}, FieldArray];
-type ConditionalFieldSet2 = [string, {[type:string]:FieldArray}];
 type NestedFieldSet = [string, FieldArray];
-type Field = SimpleField|CountField|ConditionalFieldSet|ConditionalFieldSet2|NestedFieldSet;
+type NestedFieldSetOpt = [string, FieldArray, FieldOptions];
+type Field = SimpleField|SimpleFieldOpt|ConditionalFieldSet|NestedFieldSet|NestedFieldSetOpt;
 
 // trick to make this being recursive not blow up
 // https://github.com/Microsoft/TypeScript/issues/3496#issuecomment-128553540
@@ -135,7 +164,7 @@ interface FieldArray extends Array<Field> {}
 
 // http://www.uesp.net/wiki/Tes5Mod:Mod_File_Format
 var recordHeader: FieldArray = [
-  ['type', 4, 'char'],
+  ['type', 'char', {size:4}],
   ['size','uint32le'],
   ['type', {GRUP: [
     ['label', 'uint32le'],
@@ -154,7 +183,7 @@ var recordHeader: FieldArray = [
 ];
 
 var subRecordFields: FieldArray = [
-  ['type', 4, 'char'],
+  ['type', 'char', {size:4}],
   ['size', 'uint16le'],
   ['type', {
     CNAM: [
@@ -164,20 +193,31 @@ var subRecordFields: FieldArray = [
       ['unused', 'byte'],
     ],
     EDID: [
-      ['value', -1, 'char'],
+      ['value', 'char', {size:-1}],
     ],
-  }],
-]
-// var subRecordFields: {[type:string]: FieldType} = {
-//   'CNAM': FieldType.RGB,
-//   'EDID': FieldType.ZString,
-//   'FNAM': FieldType.UInt32LE,
-//   'FULL': FieldType.LString,
-//   'INAM': FieldType.UInt32LE,
-//   'NAME': FieldType.UInt32LE,
-//   'PTDO': FieldType.UInt32LE, // x2
-//   'XEZN': FieldType.UInt32LE,
-//   // 'XPPA': FieldType.Empty,
-//   // 'XPRD': FieldType.Float,
-//   // 'VMAD': FieldType.VMAD,
-// };
+    VMAD: [
+      ['version', 'int16le'],
+      ['objFormat', 'int16le'],
+      ['scriptCount', 'uint16le'],
+      ['scripts', [
+        ['scriptNameSize', 'uint16le'],
+        ['scriptName', 'char', {size:'scriptNameSize'}],
+        ['status', 'uint8'],
+        ['propertyCount', 'uint16le'],
+        ['properties', [
+          ['propertyNameSize', 'uint16le'],
+          ['propertyName', 'char', {size:'propertyNameSize'}],
+          ['propertyType', 'uint8'],
+          ['status', 'uint8'],
+          ['propertyType', {
+
+          }, []]
+
+        ], {size:'propertyCount'}],
+      ], {size:'scriptCount'}],
+      ['fragments', [
+
+      ]],
+    ]
+  }, []],
+];
