@@ -81,39 +81,40 @@ function loadBuffers() {
   });
 }
 
-var counter = 1;
+var counter = 0;
 
 function readRecords() {
   var path = prefix + paths[0];
 
   fs.open(path, 'r', (err, fd) => {
-    var printRecord = (err, buffer, type: string) => {
-      if (type === 'ACHR' && counter < 5) {
+    var printRecord: (err: NodeJS.ErrnoException, buffer: Buffer, loc: [number, string]) => void;
+    printRecord = (err, buffer, loc) => {
+      if (loc[1] === 'ACHR' && counter < 2) {
         var record = recordTES5.getRecord(buffer);
         if (record.subRecords.filter(r => r.type === 'VMAD').length) {
           counter += 1;
-          console.log(JSON.stringify(record));
+          console.log(loc[0]);
+          console.log(JSON.stringify(record, null, 2));
         }
       }
       // else if (counter % 10000000 === 0) {
       //   console.log(record);
       // }
     };
-    var handleOffset = offset => tesData.getRecordBuffer(fd, offset[0], (e,b) => printRecord(e, b, offset[1]));
+    var handleOffset: (loc:[number, string]) => void;
+    handleOffset = loc => tesData.getRecordBuffer(fd, loc[0], (e,b) => printRecord(e, b, loc));
     var handleOffsets: tesData.Callback<[number,string][]>;
     handleOffsets = (err, offsets) => {
-      console.log(JSON.stringify(offsets));
-
+      // ignore the first entry as we should have already processed it
+      offsets = offsets.slice(1);
+      //console.log(JSON.stringify(offsets));
       if (offsets) {
         offsets.forEach(handleOffset);
-        offsets.map(o => o[0]).slice(1).forEach(o => tesData.getRecordOffsets(fd, o, handleOffsets));
+        offsets.map(o => o[0]).forEach(o => tesData.getRecordOffsets(fd, o, handleOffsets));
       }
-      // if (offsets.length > 1) {
-      //   tesData.getRecordOffsets(path, offsets[offsets.length-1][0], handleOffsets);
-      //   tesData.getRecordOffsets(path, offsets[offsets.length-2][0], handleOffsets);
-      // }
     };
   
+    handleOffset([0, 'TES4']);
     tesData.getRecordOffsets(fd, 0, handleOffsets);
   });
 }

@@ -9,8 +9,13 @@ export interface Record {
 export function getRecord(buffer: Buffer): Record {
   var record = <Record>{};
 
+  // context is a way to persist values that are considered
+  // elsewhere in parsing. Fields with the persist flag are added.
+  // hopefully good enough
+  var context = {};
+
   // read in the header
-  readFields(record, buffer, 0, recordHeader);
+  readFields(record, buffer, 0, recordHeader, context);
 
   // header is always the same size
   var offset = 24;
@@ -30,7 +35,7 @@ export function getRecord(buffer: Buffer): Record {
   while (offset < buffer.length) {
     var subRecord = <Record>{};
 
-    readFields(subRecord, buffer, offset, subRecordFields);
+    readFields(subRecord, buffer, offset, subRecordFields, context);
 
     offset += subRecord.size + 6;
     record.subRecords.push(subRecord);
@@ -39,19 +44,19 @@ export function getRecord(buffer: Buffer): Record {
   return record;
 }
 
-function readFields(record: Record, buffer: Buffer, offset: number, fields: FieldArray): number {
+function readFields(record: Record, buffer: Buffer, offset: number, fields: FieldArray, context: Object): number {
   if (!fields) {
     return offset;
   }
 
   for (var field of fields) {
-    offset = readField(record, buffer, offset, field);
+    offset = readField(record, buffer, offset, field, context);
   }
 
   return offset;
 }
 
-function readField(record: Record, buffer: Buffer, offset: number, field: Field): number {
+function readField(record: Record, buffer: Buffer, offset: number, field: Field, context: Object): number {
   if (offset >= buffer.length) {
     return offset;
   }
@@ -61,12 +66,15 @@ function readField(record: Record, buffer: Buffer, offset: number, field: Field)
   let type:string;
   let count = 1;
 
-  if (field.length === 3 && typeof field[2] === 'object' && !Array.isArray(field[2])) {
+  // really seems like the below logic should be put into a function
+  // and given callbacks for the different scenarios or something, so
+  // the code understanding the format is limited, and exposed for others.
+  if (field.length === 3 && field[2] && typeof field[2] === 'object' && !Array.isArray(field[2])) {
     var options = <FieldOptions>field[2];
     if (typeof options.size === 'string') {
       count = record[options.size];
     }
-    else {
+    else if (typeof options.size === 'number') {
       count = <number>options.size;
     }
   }
@@ -80,7 +88,7 @@ function readField(record: Record, buffer: Buffer, offset: number, field: Field)
       for (var i = 0; i < count; ++i) {
         var newRecord = <Record>{};
         record[name].push(newRecord);
-        offset = readFields(newRecord, buffer, offset, <FieldArray>field[1]);
+        offset = readFields(newRecord, buffer, offset, <FieldArray>field[1], context);
       }
     }
   }
@@ -88,14 +96,22 @@ function readField(record: Record, buffer: Buffer, offset: number, field: Field)
     var valueMap = <{[type:string]:FieldArray}>field[1];
     var fields = valueMap[record[name]];
     if (!fields) {
-      fields = <FieldArray>field[2];
+      fields = valueMap[context[name]];
+      if (!fields) {
+        fields = <FieldArray>field[2];
+      }
     }
-    return readFields(record, buffer, offset, fields);
+
+    return fields ? readFields(record, buffer, offset, fields, context) : offset;
   }
 
   var reader = fieldReaders[type];
   if (reader) {
     var value = reader(buffer, offset, count)
+    if (options && options.persist) {
+      context[name] = value;
+    }
+
     if (value !== null) {
       record[name] = value;
     }
@@ -148,15 +164,17 @@ var fieldSize: {[fieldType: string]: number} = {
 
 interface FieldOptions {
   size?: string|number;
+  persist?: boolean;
 }
 
 type FieldTypes = 'int32le'|'int16le'|'int8'|'uint32le'|'uint16le'|'uint8'|'char'|'byte';
 type SimpleField = [string, FieldTypes];
 type SimpleFieldOpt = [string, FieldTypes, FieldOptions];
-type ConditionalFieldSet = [string, {[type:string]:FieldArray}, FieldArray];
+type ConditionalFieldSet = [string, {[value:string]:FieldArray}, FieldArray];
+type ConditionalFieldSet2 = [string, {[value:string]:FieldArray}];
 type NestedFieldSet = [string, FieldArray];
 type NestedFieldSetOpt = [string, FieldArray, FieldOptions];
-type Field = SimpleField|SimpleFieldOpt|ConditionalFieldSet|NestedFieldSet|NestedFieldSetOpt;
+type Field = SimpleField|SimpleFieldOpt|ConditionalFieldSet|ConditionalFieldSet2|NestedFieldSet|NestedFieldSetOpt;
 
 // trick to make this being recursive not blow up
 // https://github.com/Microsoft/TypeScript/issues/3496#issuecomment-128553540
@@ -164,7 +182,7 @@ interface FieldArray extends Array<Field> {}
 
 // http://www.uesp.net/wiki/Tes5Mod:Mod_File_Format
 var recordHeader: FieldArray = [
-  ['type', 'char', {size:4}],
+  ['type', 'char', {size:4,persist:true}],
   ['size','uint32le'],
   ['type', {GRUP: [
     ['label', 'uint32le'],
@@ -197,7 +215,7 @@ var subRecordFields: FieldArray = [
     ],
     VMAD: [
       ['version', 'int16le'],
-      ['objFormat', 'int16le'],
+      ['objFormat', 'int16le', {persist:true}],
       ['scriptCount', 'uint16le'],
       ['scripts', [
         ['scriptNameSize', 'uint16le'],
@@ -210,8 +228,21 @@ var subRecordFields: FieldArray = [
           ['propertyType', 'uint8'],
           ['status', 'uint8'],
           ['propertyType', {
-
-          }, []]
+            1: [
+              ['objFormat', {
+                1: [
+                  ['formId', 'uint32le'],
+                ],
+              }],
+              ['alias', 'int16le'], // doc says this is unsigned in v2 but i think that's an error
+              ['unused', 'uint16le'],
+              ['objFormat', {
+                2: [
+                  ['formId', 'uint32le'],
+                ],
+              }],
+            ],
+          }]
 
         ], {size:'propertyCount'}],
       ], {size:'scriptCount'}],
@@ -219,5 +250,5 @@ var subRecordFields: FieldArray = [
 
       ]],
     ]
-  }, []],
+  }],
 ];
