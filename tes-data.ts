@@ -36,6 +36,7 @@ function loadRecordOffsets(fd: number, callback: Callback<[number,string][]>, or
 
         var nextOffset = offset + buffer.readUInt32LE(4);
         var type = buffer.toString('utf8', 0, 4);
+        offsets.push([offset, type]);
         if (type !== 'GRUP') {
           nextOffset += 24;
         }
@@ -46,7 +47,6 @@ function loadRecordOffsets(fd: number, callback: Callback<[number,string][]>, or
         }
 
         if (nextOffset < endOffset) {
-          offsets.push([nextOffset, type]);
           fs.read(fd, buffer, 0, 8, nextOffset, createRead(nextOffset));
         }
         else {
