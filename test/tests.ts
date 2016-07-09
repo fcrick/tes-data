@@ -90,7 +90,6 @@ function readRecords() {
   var handleOffsets: tesData.Callback<number[]>;
   handleOffsets = (err, offsets) => {
     console.log(JSON.stringify(offsets));
-    // cause it's nice to get the first one, too
     offsets.forEach(handleOffset);
 
     if (offsets.length > 1) {
