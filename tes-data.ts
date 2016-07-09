@@ -10,18 +10,8 @@ interface FileContinuation<T> {
   (fd: number, callback: Callback<T>): void;
 }
 
-function loadRecordOffsets(fd: number, callback: Callback<number[]>, origOffset: number) {
-  // close the file if we finish without errors
-  let success = (err: NodeJS.ErrnoException, offsets: number[]) => {
-    if (err) {
-      callback(err, null);
-    }
-    else {
-      callback(null, offsets);
-    }
-  };
-
-  let offsets = [];
+function loadRecordOffsets(fd: number, callback: Callback<[number,string][]>, origOffset: number) {
+  let offsets: [number,string][] = [];
 
   fs.fstat(fd, (err: NodeJS.ErrnoException, stats: fs.Stats) => {
     if (err) {
@@ -45,7 +35,8 @@ function loadRecordOffsets(fd: number, callback: Callback<number[]>, origOffset:
         }
 
         var nextOffset = offset + buffer.readUInt32LE(4);
-        if (buffer.toString('utf8', 0, 4) !== 'GRUP') {
+        var type = buffer.toString('utf8', 0, 4);
+        if (type !== 'GRUP') {
           nextOffset += 24;
         }
         else if (!endOffset) {
@@ -55,7 +46,7 @@ function loadRecordOffsets(fd: number, callback: Callback<number[]>, origOffset:
         }
 
         if (nextOffset < endOffset) {
-          offsets.push(nextOffset);
+          offsets.push([nextOffset, type]);
           fs.read(fd, buffer, 0, 8, nextOffset, createRead(nextOffset));
         }
         else {
@@ -114,9 +105,9 @@ function handlePathOrFd<T>(file: string | number, continuation: FileContinuation
   }
 }
 
-export function getRecordOffsets(file: string|number, origOffset: number, callback: Callback<number[]>) {
+export function getRecordOffsets(file: string|number, origOffset: number, callback: Callback<[number, string][]>) {
   // make a callback that embeds the arguments we're passing
-  var continuation: FileContinuation<number[]> = (fd, callback) => loadRecordOffsets(fd, callback, origOffset);
+  var continuation: FileContinuation<[number,string][]> = (fd, callback) => loadRecordOffsets(fd, callback, origOffset);
 
   handlePathOrFd(file, continuation, callback);
 }

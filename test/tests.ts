@@ -16,7 +16,7 @@ function loadOffsets() {
     var logPrefix = filename + ' - ';
 
     console.time(logPrefix + 'find top records');
-    tesData.getRecordOffsets(path, 0, (err: NodeJS.ErrnoException, offsets: number[]) => {
+    tesData.getRecordOffsets(path, 0, (err: NodeJS.ErrnoException, offsets: [number,string][]) => {
       //console.log(logPrefix + JSON.stringify(offsets));
       console.timeEnd(logPrefix + 'find top records');
     });
@@ -50,7 +50,7 @@ function loadOffsets() {
             
             tesData.getRecordOffsets(fd, next, (err, offsets) => {
               for (var offset of offsets) {
-                queue.push(offset);
+                queue.push(offset[0]);
               }
 
               remaining -= 1;
@@ -72,10 +72,10 @@ function loadBuffers() {
 
   tesData.getRecordOffsets(path, 0, (err, offsets) => {
     // cause it's nice to get the first one, too
-    offsets.unshift(0);
+    offsets.unshift([0,'TESV']);
     
     offsets.forEach(offset => {
-      tesData.getRecordBuffer(path, offset, (err, buffer) => {
+      tesData.getRecordBuffer(path, offset[0], (err, buffer) => {
         console.log(offset + ' is ' + buffer.length + ' bytes');
       })
     });
@@ -87,14 +87,14 @@ function readRecords() {
 
   var printRecord = (err, buffer) => console.log(JSON.stringify(record.getRecord(buffer)));
   var handleOffset = offset => tesData.getRecordBuffer(path, offset, printRecord);
-  var handleOffsets: tesData.Callback<number[]>;
+  var handleOffsets: tesData.Callback<[number,string][]>;
   handleOffsets = (err, offsets) => {
     console.log(JSON.stringify(offsets));
     offsets.forEach(handleOffset);
 
     if (offsets.length > 1) {
-      tesData.getRecordOffsets(path, offsets[offsets.length-1], handleOffsets);
-      tesData.getRecordOffsets(path, offsets[offsets.length-2], handleOffsets);
+      tesData.getRecordOffsets(path, offsets[offsets.length-1][0], handleOffsets);
+      tesData.getRecordOffsets(path, offsets[offsets.length-2][0], handleOffsets);
     }
   };
 
