@@ -83,15 +83,27 @@ function loadBuffers() {
 
 var counter = 0;
 
+var selectMany = (() => {
+    var apply = Function.prototype.apply;
+    var flatten = apply.bind(Array.prototype.concat, []);
+
+    return (this_: any[], fn) => flatten(this_.map(fn));
+})();
+
 function readRecords() {
   var path = prefix + paths[0];
 
   fs.open(path, 'r', (err, fd) => {
     var printRecord: (err: NodeJS.ErrnoException, buffer: Buffer, loc: [number, string]) => void;
     printRecord = (err, buffer, loc) => {
-      if (loc[1] === 'ACHR' && counter < 2) {
+      if (loc[1] === 'ACHR' && counter < 1) {
         var record = recordTES5.getRecord(buffer);
-        if (record.subRecords.filter(r => r.type === 'VMAD').length) {
+        var xezns = record.subRecords.filter(r => r.type === 'XEZN');
+        var vmads = record.subRecords.filter(r => r.type === 'VMAD');
+        var scripts = selectMany(vmads, vmad => vmad['scripts'] || []);
+        var properties = selectMany(scripts, sc => sc['properties'] || []);
+        //if (properties.filter(p => [1,2,3,4,5].indexOf(p['propertyType']) === -1).length > 0) {
+        if (xezns.length) {
           counter += 1;
           console.log(loc[0]);
           console.log(JSON.stringify(record, null, 2));

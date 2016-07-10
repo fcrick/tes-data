@@ -94,9 +94,9 @@ function readField(record: Record, buffer: Buffer, offset: number, field: Field,
   }
   else if (typeof field[1] === 'object') {
     var valueMap = <{[type:string]:FieldArray}>field[1];
-    var fields = valueMap[record[name]];
+    var fields = valueMap['_'+record[name]];
     if (!fields) {
-      fields = valueMap[context[name]];
+      fields = valueMap['_'+context[name]];
       if (!fields) {
         fields = <FieldArray>field[2];
       }
@@ -144,6 +144,7 @@ var fieldReaders: {[fieldType:string]: FieldReader} = {
       return nullIfEqual(b.toString('utf8', o, o+c), '');
     }
   },
+  float: (b,o,c) => nullIfEqual(b.readFloatLE(o), 0),
   int8: (b,o,c) => nullIfEqual(b.readInt8(o), 0),
   int16le: (b,o,c) => nullIfEqual(b.readInt16LE(o), 0),
   int32le: (b,o,c) => nullIfEqual(b.readInt32LE(o), 0),
@@ -154,6 +155,7 @@ var fieldReaders: {[fieldType:string]: FieldReader} = {
 
 var fieldSize: {[fieldType: string]: number} = {
   char: 1,
+  float: 4,
   int8: 1,
   int16le: 2,
   int32le: 4,
@@ -167,7 +169,7 @@ interface FieldOptions {
   persist?: boolean;
 }
 
-type FieldTypes = 'int32le'|'int16le'|'int8'|'uint32le'|'uint16le'|'uint8'|'char'|'byte';
+type FieldTypes = 'int32le'|'int16le'|'int8'|'uint32le'|'uint16le'|'uint8'|'char'|'byte'|'float';
 type SimpleField = [string, FieldTypes];
 type SimpleFieldOpt = [string, FieldTypes, FieldOptions];
 type ConditionalFieldSet = [string, {[value:string]:FieldArray}, FieldArray];
@@ -184,7 +186,7 @@ interface FieldArray extends Array<Field> {}
 var recordHeader: FieldArray = [
   ['type', 'char', {size:4,persist:true}],
   ['size','uint32le'],
-  ['type', {GRUP: [
+  ['type', {_GRUP: [
     ['label', 'uint32le'],
     ['groupType', 'uint32le'],
     ['stamp', 'uint16le'],
@@ -204,16 +206,24 @@ var subRecordFields: FieldArray = [
   ['type', 'char', {size:4}],
   ['size', 'uint16le'],
   ['type', {
-    CNAM: [
+    _CNAM: [
       ['r', 'byte'],
       ['g', 'byte'],
       ['b', 'byte'],
       ['unused', 'byte'],
     ],
-    EDID: [
-      ['value', 'char', {size:-1}],
+    // probably should add a null-terminated option instead
+    _EDID: [['value', 'char', {size:-1}]],
+    _INAM: [['value', 'uint32le']],
+    _NAME: [['value', 'uint32le']],
+    _PTDO: [
+      ['type', 'uint32le'],
+      ['type', {
+        _0: [['formId', 'uint32le']],
+        _1: [['topic', 'char', {size:4}]],
+      }],
     ],
-    VMAD: [
+    _VMAD: [
       ['version', 'int16le'],
       ['objFormat', 'int16le', {persist:true}],
       ['scriptCount', 'uint16le'],
@@ -228,27 +238,27 @@ var subRecordFields: FieldArray = [
           ['propertyType', 'uint8'],
           ['status', 'uint8'],
           ['propertyType', {
-            1: [
-              ['objFormat', {
-                1: [
-                  ['formId', 'uint32le'],
-                ],
-              }],
+            _1: [
+              ['objFormat', {_1:[['formId','uint32le']]}],
               ['alias', 'int16le'], // doc says this is unsigned in v2 but i think that's an error
               ['unused', 'uint16le'],
-              ['objFormat', {
-                2: [
-                  ['formId', 'uint32le'],
-                ],
-              }],
+              ['objFormat', {_2:[['formId','uint32le']]}],
             ],
-          }]
-
+            _2: [
+              ['valueSize', 'uint16le'],
+              ['value', 'char', {size:'valueSize'}],
+            ],
+            _3: [['value', 'int32le']],
+            _4: [['value', 'float']],
+            _5: [['value', 'int8']],
+          }],
         ], {size:'propertyCount'}],
       ], {size:'scriptCount'}],
-      ['fragments', [
+      // ['fragments', [
 
-      ]],
-    ]
+      // ]],
+    ],
+    _XEZN: [['value', 'uint32le']],
+    _XPRD: [['value', 'float']],
   }],
 ];
