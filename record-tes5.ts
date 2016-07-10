@@ -194,16 +194,18 @@ interface FieldOptions {
   persist?: boolean;
   format?: 'hex';
   repeat?: boolean;
+  flag?: boolean;
 }
 
 type FieldTypes = 'int32le'|'int16le'|'int8'|'uint32le'|'uint16le'|'uint8'|'char'|'byte'|'float';
 type SimpleField = [string, FieldTypes];
 type SimpleFieldOpt = [string, FieldTypes, FieldOptions];
-type ConditionalFieldSet = [string, {[value:string]:FieldArray}, FieldArray];
-type ConditionalFieldSet2 = [string, {[value:string]:FieldArray}];
+type ConditionalFieldSet = [string, {[value:string]:FieldArray}];
+type ConditionalFieldSet2 = [string, {[value:string]:FieldArray}, FieldArray];
+type ConditionalFieldSet3 = [string, {[value:string]:FieldArray}, FieldArray, FieldOptions];
 type NestedFieldSet = [string, FieldArray];
 type NestedFieldSetOpt = [string, FieldArray, FieldOptions];
-type Field = SimpleField|SimpleFieldOpt|ConditionalFieldSet|ConditionalFieldSet2|NestedFieldSet|NestedFieldSetOpt;
+type Field = SimpleField|SimpleFieldOpt|ConditionalFieldSet|ConditionalFieldSet2|ConditionalFieldSet3|NestedFieldSet|NestedFieldSetOpt;
 
 // trick to make this being recursive not blow up
 // https://github.com/Microsoft/TypeScript/issues/3496#issuecomment-128553540
@@ -390,9 +392,28 @@ var subRecordFields: FieldArray = [
             ['areaOfEffect', 'uint32le'],
             ['duration', 'uint32le'],
           ],
-          // _CTDA: [
-
-          // ],
+          _CTDA: [
+            ['operator', 'uint8'],
+            ['unknown1', 'uint8', {size:3}],
+            ['operator', {_4: [
+              ['comparisonFormId', 'uint32le'],
+            ]}, [
+              ['comparisonValue', 'float'],
+            ], {flag:true}],
+            ['functionIndex', 'uint16le'],
+            ['unknown2', 'uint16le'],
+            ['functionIndex', {_576: [
+              ['param1', 'uint16le'],
+              ['param2', 'char', {size:2}],
+              ['param3', 'uint32le'],
+              ['runOnType', 'uint32le'],
+              ['reference', 'uint32le'],
+              ['unknown3', 'int32le'],
+            ]}, [
+              ['param1', 'uint32le'],
+              ['param2', 'uint32le'],
+            ]],
+          ],
         }],
       ], {repeat: true}],
     ],
