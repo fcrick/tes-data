@@ -327,6 +327,7 @@ var subRecordFields: FieldArray = [
     _ANAM: wString,
     _DMDL: zString,
     _EDID: zString,
+    _EFID: uint32le,
     _FNAM: uint16le,
     _FULL: uint32le,
     _ICON: zString,
@@ -356,6 +357,29 @@ var subRecordFields: FieldArray = [
     _ZNAM: uint32le,
     // complex subrecords
     _CNAM: rgb,
+    _CTDA: [
+      ['operator', 'uint8'],
+      ['unknown1', 'uint8'],
+      ['unknown2', 'uint16le'],
+      ['operator', {_4: [
+        ['comparisonFormId', 'uint32le'],
+      ]}, [
+        ['comparisonValue', 'float'],
+      ], {flag:true}], // unimplemented until i find an example
+      ['functionIndex', 'uint16le'],
+      ['unknown3', 'uint16le'],
+      ['functionIndex', {_576: [
+        ['param1', 'uint16le'],
+        ['param2', 'char', {size:2}],
+        ['param3', 'uint32le'],
+        ['runOnType', 'uint32le'],
+        ['reference', 'uint32le'],
+        ['unknown4', 'int32le'],
+      ]}, [
+        ['param1', 'uint32le'],
+        ['param2', 'uint32le'],
+      ]],
+    ],
     _DATA: [
       ['recordType', {
         _ACHR: [
@@ -400,46 +424,17 @@ var subRecordFields: FieldArray = [
       ['particleCap', 'uint16le'],
       ['flags', 'uint16le'],
     ],
+    _EFIT: [
+      ['magnitude', 'float'],
+      ['areaOfEffect', 'uint32le'],
+      ['duration', 'uint32le'],
+    ],
     _ENIT: [
       ['potionValue', 'uint32le'],
       ['flags', 'uint32le'],
       ['addiction', 'uint32le'],
       ['addictionChance', 'uint32le'],
       ['useSound', 'uint32le'],
-      ['effects', [
-        ['type', 'char', {size:4}],
-        ['size', 'uint16le'],
-        ['type', {
-          _EFID: uint32le,
-          _EFIT: [
-            ['magnitude', 'float'],
-            ['areaOfEffect', 'uint32le'],
-            ['duration', 'uint32le'],
-          ],
-          _CTDA: [
-            ['operator', 'uint8'],
-            ['unknown1', 'uint8', {size:3}],
-            ['operator', {_4: [
-              ['comparisonFormId', 'uint32le'],
-            ]}, [
-              ['comparisonValue', 'float'],
-            ], {flag:true}],
-            ['functionIndex', 'uint16le'],
-            ['unknown2', 'uint16le'],
-            ['functionIndex', {_576: [
-              ['param1', 'uint16le'],
-              ['param2', 'char', {size:2}],
-              ['param3', 'uint32le'],
-              ['runOnType', 'uint32le'],
-              ['reference', 'uint32le'],
-              ['unknown3', 'int32le'],
-            ]}, [
-              ['param1', 'uint32le'],
-              ['param2', 'uint32le'],
-            ]],
-          ],
-        }],
-      ], {repeat: true}],
     ],
     _KSIZ: [['keywordCount', 'uint32le', {persist:true}]],
     _KWDA: [['keywords', 'uint32le', {size:'keywordCount'}]],
