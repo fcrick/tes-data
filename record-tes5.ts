@@ -73,6 +73,12 @@ function readField(record: Record, buffer: Buffer, offset: number, field: Field,
     var options = <FieldOptions>field[2];
     if (typeof options.size === 'string') {
       count = record[options.size];
+      if (typeof count === 'undefined') {
+        count = context[options.size];
+        if (typeof count === 'undefined') {
+          count = 0;
+        }
+      }
     }
     else if (typeof options.size === 'number') {
       count = <number>options.size;
@@ -121,7 +127,12 @@ function readField(record: Record, buffer: Buffer, offset: number, field: Field,
 
   var reader = fieldReaders[type];
   if (reader) {
-    var value = reader(buffer, offset, count)
+    var value = null;
+
+    if (count !== 0) {
+      value = reader(buffer, offset, count);
+    }
+
     if (options && options.persist) {
       context[name] = value;
     }
@@ -156,6 +167,11 @@ interface FieldReader {
   (buffer:Buffer, offset:number, count: number): any;
 }
 
+let range = function*(max: number) {
+  for (let i = 0; i < max; i += 1)
+    yield i
+}
+
 var fieldReaders: {[fieldType:string]: FieldReader} = {
   char: (b,o,c) => {
     if (c === -1) {
@@ -173,7 +189,15 @@ var fieldReaders: {[fieldType:string]: FieldReader} = {
   int32le: (b,o,c) => nullIfEqual(b.readInt32LE(o), 0),
   uint8: (b,o,c) => nullIfEqual(b.readUInt8(o), 0),
   uint16le: (b,o,c) => nullIfEqual(b.readUInt16LE(o), 0),
-  uint32le: (b,o,c) => nullIfEqual(b.readUInt32LE(o), 0),
+  uint32le: (b,o,c) => {
+    // TODO all numerics should have this behavior
+    if (c === 1) {
+      return nullIfEqual(b.readUInt32LE(o), 0)
+    }
+    else {
+      return [...range(Math.min(c, Math.floor((b.length-o)/4)))].map(i => b.readUInt32LE(o+i*4));
+    }
+  },
 };
 
 var fieldSize: {[fieldType: string]: number} = {

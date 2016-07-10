@@ -111,6 +111,8 @@ function readRecords() {
           if ((edids||[]).filter(edid => edid['value'] === 'FoodMammothMeat').length) {
             (edids || []).forEach(sub => console.log(JSON.stringify(sub)));
             subs.forEach(sub => console.log(JSON.stringify(sub)));
+
+            recordTES5.getRecord(buffer);
           }
           // console.log(JSON.stringify(record, null, 2));
         }
