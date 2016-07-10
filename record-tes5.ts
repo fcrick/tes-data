@@ -93,9 +93,6 @@ function readField(record: Record, buffer: Buffer, offset: number, field: Field,
     type = <string>field[1];
   }
   else if (Array.isArray(field[1])) {
-    if (options && options.repeat) {
-      count = 99999999;
-    }
     if (count) {
       record[name] = [];
       for (var i = 0; i < count && offset < buffer.length; ++i) {
@@ -114,13 +111,6 @@ function readField(record: Record, buffer: Buffer, offset: number, field: Field,
         fields = <FieldArray>field[2];
       }
     }
-
-    // if (options && options.repeat) {
-    //   while (offset < buffer.length) {
-    //     offset = readFields(record, buffer, offset, fields, context);
-    //   }
-    //   return offset;
-    // }
 
     return fields ? readFields(record, buffer, offset, fields, context) : offset;
   }
@@ -217,7 +207,6 @@ interface FieldOptions {
   sizeOffset?: number;
   persist?: boolean;
   format?: 'hex';
-  repeat?: boolean;
   flag?: boolean;
 }
 
@@ -279,6 +268,14 @@ var byte: FieldArray = [
   ['value', 'byte']
 ];
 
+// not implemented other thing but keeping them separate for later
+var lString = uint32le;
+
+// just 'string' on uesp docs
+var sString: FieldArray = [
+  ['value', 'char', {size:'size'}],
+];
+
 var wString: FieldArray = [
   ['valueSize', 'uint16le'],
   ['value', 'char', {size:'valueSize'}],
@@ -325,11 +322,12 @@ var subRecordFields: FieldArray = [
   ['type', {
     // simple subrecords
     _ANAM: wString,
+    _DESC: lString,
     _DMDL: zString,
     _EDID: zString,
     _EFID: uint32le,
     _FNAM: uint16le,
-    _FULL: uint32le,
+    _FULL: lString,
     _ICON: zString,
     _INAM: uint32le,
     _KNAM: uint32le,
@@ -337,6 +335,7 @@ var subRecordFields: FieldArray = [
     _MODL: zString,
     _MOD2: zString,
     _NAME: uint32le,
+    _ONAM: sString,
     _RNAM: uint32le,
     _SNAM: uint32le,
     _VNAM: uint32le,
@@ -392,6 +391,12 @@ var subRecordFields: FieldArray = [
         ],
         _ADDN: uint32le,
         _ALCH: float,
+        _AMMO: [
+          ['formId', 'uint32le'],
+          ['flags', 'uint32le'],
+          ['damage', 'float'],
+          ['goldValue', 'uint32le'],
+        ],
       }],
     ],
     _DEST: [
@@ -400,29 +405,19 @@ var subRecordFields: FieldArray = [
       ['flag', 'uint8'],
       ['unknown1', 'uint8'],
       ['unknown2', 'uint8'],
-      ['stages', [
-        ['type', 'char', {size:4}],
-        ['size', 'uint16le'],
-        ['type', {
-          _DSTD: [
-            ['healthPercent', 'uint16le'],
-            ['damageStage', 'uint8'],
-            ['flags', 'uint8'],
-            ['selfDamageRate', 'uint32le'],
-            ['explosionId', 'uint32le'],
-            ['debrisId', 'uint32le'],
-            ['debrisCount', 'uint32le'],
-          ],
-          _DMDL: zString,
-          _DMDT: modt,
-          _DMDS: mods,
-          _DSTF: [],
-        }],
-      ], {repeat:true}]
     ],
     _DNAM: [
       ['particleCap', 'uint16le'],
       ['flags', 'uint16le'],
+    ],
+    _DSTD: [
+      ['healthPercent', 'uint16le'],
+      ['damageStage', 'uint8'],
+      ['flags', 'uint8'],
+      ['selfDamageRate', 'uint32le'],
+      ['explosionId', 'uint32le'],
+      ['debrisId', 'uint32le'],
+      ['debrisCount', 'uint32le'],
     ],
     _EFIT: [
       ['magnitude', 'float'],
