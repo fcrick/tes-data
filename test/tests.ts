@@ -96,16 +96,19 @@ function readRecords() {
   fs.open(path, 'r', (err, fd) => {
     var printRecord: (err: NodeJS.ErrnoException, buffer: Buffer, loc: [number, string]) => void;
     printRecord = (err, buffer, loc) => {
-      if (loc[1] === 'ACHR' && counter < 1) {
+      if (loc[1] === 'ACTI' && counter < 3) {
         var record = recordTES5.getRecord(buffer);
-        var xezns = record.subRecords.filter(r => r.type === 'XEZN');
+        var edids = record.subRecords.filter(r => r.type === 'EDID');
+        var subs = record.subRecords.filter(r => r.type === 'DEST');
         var vmads = record.subRecords.filter(r => r.type === 'VMAD');
         var scripts = selectMany(vmads, vmad => vmad['scripts'] || []);
         var properties = selectMany(scripts, sc => sc['properties'] || []);
         //if (properties.filter(p => [1,2,3,4,5].indexOf(p['propertyType']) === -1).length > 0) {
-        if (xezns.length) {
+        if (subs.length) {
           counter += 1;
           console.log(loc[0]);
+          (edids || []).forEach(sub => console.log(JSON.stringify(sub)));
+          //subs.forEach(sub => console.log(JSON.stringify(sub)));
           console.log(JSON.stringify(record, null, 2));
         }
       }

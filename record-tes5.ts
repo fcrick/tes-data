@@ -77,15 +77,22 @@ function readField(record: Record, buffer: Buffer, offset: number, field: Field,
     else if (typeof options.size === 'number') {
       count = <number>options.size;
     }
+
+    if (typeof options.sizeOffset === 'number') {
+      count += options.sizeOffset;
+    }
   }
 
   if (typeof field[1] === 'string') {
     type = <string>field[1];
   }
   else if (Array.isArray(field[1])) {
+    if (options && options.repeat) {
+      count = 99999999;
+    }
     if (count) {
       record[name] = [];
-      for (var i = 0; i < count; ++i) {
+      for (var i = 0; i < count && offset < buffer.length; ++i) {
         var newRecord = <Record>{};
         record[name].push(newRecord);
         offset = readFields(newRecord, buffer, offset, <FieldArray>field[1], context);
@@ -102,6 +109,13 @@ function readField(record: Record, buffer: Buffer, offset: number, field: Field,
       }
     }
 
+    // if (options && options.repeat) {
+    //   while (offset < buffer.length) {
+    //     offset = readFields(record, buffer, offset, fields, context);
+    //   }
+    //   return offset;
+    // }
+
     return fields ? readFields(record, buffer, offset, fields, context) : offset;
   }
 
@@ -113,6 +127,14 @@ function readField(record: Record, buffer: Buffer, offset: number, field: Field,
     }
 
     if (value !== null) {
+      if (options && options.format === 'hex') {
+        if (typeof value === 'number') {
+          value = '0x'+value.toString(16);
+        }
+        else {
+          value = value.split('').map(c => c.charCodeAt(0).toString(16)).join('');
+        }
+      }
       record[name] = value;
     }
 
@@ -144,6 +166,7 @@ var fieldReaders: {[fieldType:string]: FieldReader} = {
       return nullIfEqual(b.toString('utf8', o, o+c), '');
     }
   },
+  byte: (b,o,c) => nullIfEqual(b.readUInt8(o), 0),
   float: (b,o,c) => nullIfEqual(b.readFloatLE(o), 0),
   int8: (b,o,c) => nullIfEqual(b.readInt8(o), 0),
   int16le: (b,o,c) => nullIfEqual(b.readInt16LE(o), 0),
@@ -155,6 +178,7 @@ var fieldReaders: {[fieldType:string]: FieldReader} = {
 
 var fieldSize: {[fieldType: string]: number} = {
   char: 1,
+  byte: 1,
   float: 4,
   int8: 1,
   int16le: 2,
@@ -166,7 +190,10 @@ var fieldSize: {[fieldType: string]: number} = {
 
 interface FieldOptions {
   size?: string|number;
+  sizeOffset?: number;
   persist?: boolean;
+  format?: 'hex';
+  repeat?: boolean;
 }
 
 type FieldTypes = 'int32le'|'int16le'|'int8'|'uint32le'|'uint16le'|'uint8'|'char'|'byte'|'float';
@@ -184,9 +211,9 @@ interface FieldArray extends Array<Field> {}
 
 // http://www.uesp.net/wiki/Tes5Mod:Mod_File_Format
 var recordHeader: FieldArray = [
-  ['type', 'char', {size:4,persist:true}],
+  ['recordType', 'char', {size:4,persist:true}],
   ['size','uint32le'],
-  ['type', {_GRUP: [
+  ['recordType', {_GRUP: [
     ['label', 'uint32le'],
     ['groupType', 'uint32le'],
     ['stamp', 'uint16le'],
@@ -195,27 +222,193 @@ var recordHeader: FieldArray = [
     ['unknown2', 'uint16le'],
   ]}, [
     ['flags','uint32le'],
-    ['id','uint32le'],
+    ['id','uint32le',{format:'hex'}],
     ['revision','uint32le'],
     ['version','uint16le'],
     ['unknown','uint16le'],
   ]],
 ];
 
+var unknown: FieldArray = [
+  ['value', 'char', {size:'size', format:'hex'}]
+];
+
+var uint16le: FieldArray = [
+  ['value', 'uint16le']
+];
+
+var uint32le: FieldArray = [
+  ['value', 'uint32le']
+];
+
+var int8: FieldArray = [
+  ['value', 'int8']
+];
+
+var float: FieldArray = [
+  ['value', 'float']
+];
+
+var byte: FieldArray = [
+  ['value', 'byte']
+];
+
+var wString: FieldArray = [
+  ['valueSize', 'uint16le'],
+  ['value', 'char', {size:'valueSize'}],
+];
+
+// probably should add a null-terminated option instead
+var zString: FieldArray = [
+  ['value', 'char', {size:-1}]
+];
+
+var rgb: FieldArray = [
+  ['r', 'byte'],
+  ['g', 'byte'],
+  ['b', 'byte'],
+  ['unused', 'byte'],
+];
+
+var modt: FieldArray = [
+  ['count', 'uint32le'],
+  ['unknown4count', 'uint32le'],
+  ['unknown5count', 'uint32le'],
+  ['unknown3', 'uint32le', {size:'count', sizeOffset:-2}],
+  ['unknown4', [
+    ['unknown1', 'uint32le'],
+    ['textureType', 'char', {size:4}],
+    ['unknown2', 'uint32le'],
+  ], {size:'unknown4count'}],
+  ['unknown5', 'uint32le', {size:'unknown5count'}],
+];
+
+var mods: FieldArray = [
+  ['count', 'uint32le'],
+  ['alternateTexture', [
+    ['size', 'uint32le'],
+    ['name', 'char', {size:'size'}],
+    ['textureSet', 'uint32le'],
+    ['index', 'uint32le'],
+  ], {size:'count'}],
+];
+
 var subRecordFields: FieldArray = [
   ['type', 'char', {size:4}],
   ['size', 'uint16le'],
   ['type', {
-    _CNAM: [
-      ['r', 'byte'],
-      ['g', 'byte'],
-      ['b', 'byte'],
-      ['unused', 'byte'],
+    // simple subrecords
+    _ANAM: wString,
+    _DMDL: zString,
+    _EDID: zString,
+    _FNAM: uint16le,
+    _FULL: uint32le,
+    _ICON: zString,
+    _INAM: uint32le,
+    _KNAM: uint32le,
+    _MICO: zString,
+    _MODL: zString,
+    _MOD2: zString,
+    _NAME: uint32le,
+    _RNAM: uint32le,
+    _SNAM: uint32le,
+    _VNAM: uint32le,
+    _WNAM: uint32le,
+    _XAPD: byte,
+    _XEZN: uint32le,
+    _XHOR: uint32le,
+    _XLCM: uint32le,
+    _XLCN: uint32le,
+    _XLRL: uint32le,
+    _XLRT: uint32le,
+    _XOWN: uint32le,
+    _XPRD: float,
+    _XRGD: unknown,
+    _XRGB: unknown,
+    _XSCL: float,
+    _YNAM: uint32le,
+    _ZNAM: uint32le,
+    // complex subrecords
+    _CNAM: rgb,
+    _DATA: [
+      ['recordType', {
+        _ACHR: [
+          ['x', 'float'],
+          ['y', 'float'],
+          ['z', 'float'],
+          ['rX', 'float'],
+          ['rY', 'float'],
+          ['rZ', 'float'],
+        ],
+        _ADDN: uint32le,
+        _ALCH: float,
+      }],
     ],
-    // probably should add a null-terminated option instead
-    _EDID: [['value', 'char', {size:-1}]],
-    _INAM: [['value', 'uint32le']],
-    _NAME: [['value', 'uint32le']],
+    _DEST: [
+      ['health', 'uint32le'],
+      ['count', 'uint8'],
+      ['flag', 'uint8'],
+      ['unknown1', 'uint8'],
+      ['unknown2', 'uint8'],
+      ['stages', [
+        ['type', 'char', {size:4}],
+        ['size', 'uint16le'],
+        ['type', {
+          _DSTD: [
+            ['healthPercent', 'uint16le'],
+            ['damageStage', 'uint8'],
+            ['flags', 'uint8'],
+            ['selfDamageRate', 'uint32le'],
+            ['explosionId', 'uint32le'],
+            ['debrisId', 'uint32le'],
+            ['debrisCount', 'uint32le'],
+          ],
+          _DMDL: zString,
+          _DMDT: modt,
+          _DMDS: mods,
+          _DSTF: [],
+        }],
+      ], {repeat:true}]
+    ],
+    _DNAM: [
+      ['particleCap', 'uint16le'],
+      ['flags', 'uint16le'],
+    ],
+    _ENIT: [
+      ['potionValue', 'uint32le'],
+      ['flags', 'uint32le'],
+      ['addiction', 'uint32le'],
+      ['addictionChance', 'uint32le'],
+      ['useSound', 'uint32le'],
+      ['effects', [
+        ['type', 'char', {size:4}],
+        ['size', 'uint16le'],
+        ['type', {
+          _EFID: uint32le,
+          _EFIT: [
+            ['magnitude', 'float'],
+            ['areaOfEffect', 'uint32le'],
+            ['duration', 'uint32le'],
+          ],
+          // _CTDA: [
+
+          // ],
+        }],
+      ], {repeat: true}],
+    ],
+    _KSIZ: [['keywordCount', 'uint32le', {persist:true}]],
+    _KWDA: [['keywords', 'uint32le', {size:'keywordCount'}]],
+    _MODT: modt, _DMDT: modt, _MO2T: modt,
+    _MODS: mods, _DMDS: mods, _MO2S: mods,
+    _OBND: [
+      ['x1', 'int16le'],
+      ['y1', 'int16le'],
+      ['z1', 'int16le'],
+      ['x2', 'int16le'],
+      ['y2', 'int16le'],
+      ['z2', 'int16le'],
+    ],
+    _PNAM: rgb,
     _PTDO: [
       ['type', 'uint32le'],
       ['type', {
@@ -244,13 +437,10 @@ var subRecordFields: FieldArray = [
               ['unused', 'uint16le'],
               ['objFormat', {_2:[['formId','uint32le']]}],
             ],
-            _2: [
-              ['valueSize', 'uint16le'],
-              ['value', 'char', {size:'valueSize'}],
-            ],
-            _3: [['value', 'int32le']],
-            _4: [['value', 'float']],
-            _5: [['value', 'int8']],
+            _2: wString,
+            _3: uint32le,
+            _4: float,
+            _5: int8,
           }],
         ], {size:'propertyCount'}],
       ], {size:'scriptCount'}],
@@ -258,7 +448,17 @@ var subRecordFields: FieldArray = [
 
       // ]],
     ],
-    _XEZN: [['value', 'uint32le']],
-    _XPRD: [['value', 'float']],
+    _XAPR: [
+      ['formId', 'uint32le'],
+      ['delay', 'float'],
+    ],
+    _XESP: [
+      ['formId', 'uint32le'],
+      ['flags', 'uint32le'],
+    ],
+    _XLKR: [
+      ['formIdKYWD', 'uint32le'],
+      ['formIdSTAT', 'uint32le'],
+    ],
   }],
 ];
