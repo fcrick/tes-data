@@ -322,6 +322,7 @@ var subRecordFields: FieldArray = [
   ['type', {
     // simple subrecords
     _ANAM: wString,
+    _BNAM: zString,
     _DESC: lString,
     _DMDL: zString,
     _EDID: zString,
@@ -332,12 +333,20 @@ var subRecordFields: FieldArray = [
     _INAM: uint32le,
     _KNAM: uint32le,
     _MICO: zString,
-    _MODL: zString,
     _MOD2: zString,
+    _MOD3: zString,
+    _MOD4: zString,
+    _MOD5: zString,
     _NAME: uint32le,
-    _ONAM: sString,
+    _NAM0: uint32le,
+    _NAM1: uint32le,
+    _NAM2: uint32le,
+    _NAM3: uint32le,
+    
+    _QUAL: uint32le,
     _RNAM: uint32le,
     _SNAM: uint32le,
+    _SNDD: uint32le,
     _VNAM: uint32le,
     _WNAM: uint32le,
     _XAPD: byte,
@@ -355,6 +364,17 @@ var subRecordFields: FieldArray = [
     _YNAM: uint32le,
     _ZNAM: uint32le,
     // complex subrecords
+    _BODT: [
+      ['bodyPartFlags', 'uint32le'],
+      ['flags', 'uint8'],
+      ['unknown1', 'uint8'],
+      ['unknown2', 'uint16le'],
+      ['skill', 'uint32le'],
+    ],
+    _BOD2: [
+      ['bodyPartFlags', 'uint32le'],
+      ['skill', 'uint32le'],
+    ],
     _CNAM: rgb,
     _CTDA: [
       ['operator', 'uint8'],
@@ -379,26 +399,6 @@ var subRecordFields: FieldArray = [
         ['param2', 'uint32le'],
       ]],
     ],
-    _DATA: [
-      ['recordType', {
-        _ACHR: [
-          ['x', 'float'],
-          ['y', 'float'],
-          ['z', 'float'],
-          ['rX', 'float'],
-          ['rY', 'float'],
-          ['rZ', 'float'],
-        ],
-        _ADDN: uint32le,
-        _ALCH: float,
-        _AMMO: [
-          ['formId', 'uint32le'],
-          ['flags', 'uint32le'],
-          ['damage', 'float'],
-          ['goldValue', 'uint32le'],
-        ],
-      }],
-    ],
     _DEST: [
       ['health', 'uint32le'],
       ['count', 'uint8'],
@@ -406,10 +406,7 @@ var subRecordFields: FieldArray = [
       ['unknown1', 'uint8'],
       ['unknown2', 'uint8'],
     ],
-    _DNAM: [
-      ['particleCap', 'uint16le'],
-      ['flags', 'uint16le'],
-    ],
+
     _DSTD: [
       ['healthPercent', 'uint16le'],
       ['damageStage', 'uint8'],
@@ -433,8 +430,8 @@ var subRecordFields: FieldArray = [
     ],
     _KSIZ: [['keywordCount', 'uint32le', {persist:true}]],
     _KWDA: [['keywords', 'uint32le', {size:'keywordCount'}]],
-    _MODT: modt, _DMDT: modt, _MO2T: modt,
-    _MODS: mods, _DMDS: mods, _MO2S: mods,
+    _MODT: modt, _DMDT: modt, _MO2T: modt, _MO3T: modt, _MO4T: modt, _MO5T: modt,
+    _MODS: mods, _DMDS: mods, _MO2S: mods, _MO3S: mods, _MO4S: mods, _MO5S: mods,
     _OBND: [
       ['x1', 'int16le'],
       ['y1', 'int16le'],
@@ -467,10 +464,10 @@ var subRecordFields: FieldArray = [
           ['status', 'uint8'],
           ['propertyType', {
             _1: [
-              ['objFormat', {_1:[['formId','uint32le']]}],
+              ['objFormat', {_1:[['formId','uint32le']]}], // prefix if objFormat is 1 (v1)
               ['alias', 'int16le'], // doc says this is unsigned in v2 but i think that's an error
               ['unused', 'uint16le'],
-              ['objFormat', {_2:[['formId','uint32le']]}],
+              ['objFormat', {_2:[['formId','uint32le']]}], // suffix in objFormat is 2 (v2)
             ],
             _2: wString,
             _3: uint32le,
@@ -479,9 +476,6 @@ var subRecordFields: FieldArray = [
           }],
         ], {size:'propertyCount'}],
       ], {size:'scriptCount'}],
-      // ['fragments', [
-
-      // ]],
     ],
     _XAPR: [
       ['formId', 'uint32le'],
@@ -495,5 +489,52 @@ var subRecordFields: FieldArray = [
       ['formIdKYWD', 'uint32le'],
       ['formIdSTAT', 'uint32le'],
     ],
+    // subrecords that are different depending record type
+    _DATA: [
+      ['recordType', {
+        _ACHR: [
+          ['x', 'float'],
+          ['y', 'float'],
+          ['z', 'float'],
+          ['rX', 'float'],
+          ['rY', 'float'],
+          ['rZ', 'float'],
+        ],
+        _ADDN: uint32le,
+        _ALCH: float,
+        _AMMO: [
+          ['formId', 'uint32le'],
+          ['flags', 'uint32le'],
+          ['damage', 'float'],
+          ['goldValue', 'uint32le'],
+        ],
+        _APPA: [
+          ['goldValue', 'uint32le'],
+          ['weight', 'float'],
+        ],
+      }],
+    ],
+    _DNAM: [['recordType', {
+      _ADDN: [
+        ['particleCap', 'uint16le'],
+        ['flags', 'uint16le'],
+      ],
+      _ARMA: [
+        ['male', 'uint8'],
+        ['female', 'uint8'],
+        ['unknown1', 'uint32le'],
+        ['detection', 'uint8'],
+        ['unknown2', 'uint8'],
+        ['weaponAdjust', 'float'],
+      ]}],
+    ],
+    _MODL: [['recordType', {
+      _APPA: zString,
+      _ARMA: uint32le,
+    }]],
+    _ONAM: [['recordType', {
+      _AMMO: sString,
+      _ARMA: uint32le,
+    }]],
   }],
 ];
