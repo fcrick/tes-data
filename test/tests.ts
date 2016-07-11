@@ -138,6 +138,33 @@ function readRecords() {
   });
 }
 
+var path = prefix + paths[0];
+var count = 0;
+
+function checkBuffer(buffer: Buffer, offset: number, type: string) {
+  var record = recordTES5.getRecord(buffer);
+  var newBuffer = recordTES5.writeRecord(record);
+
+  if (buffer.compare(newBuffer) !== 0 && count < 10) {
+    console.log(`mismatch at ${offset}`);
+    console.log(buffer.toString('hex'));
+    console.log(newBuffer.toString('hex'));
+    console.log(JSON.stringify(record));
+
+    count += 1;
+  }
+}
+
+function visitOffset(offset: number, type: string, file: string) {
+  tesData.getRecordBuffer(path, offset, (e, b) => checkBuffer(b, offset, type));
+}
+
+function comparisonTest() {
+  tesData.visit(path, {visitOffset: (o, t) => visitOffset(o, t, path)});
+}
+
 //loadOffsets();
 //loadBuffers();
-readRecords();
+//readRecords();
+
+comparisonTest();

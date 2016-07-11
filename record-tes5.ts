@@ -1,5 +1,8 @@
 // <reference path="./tes-data.ts"/>
 
+import textEncoding = require('text-encoding');
+var TextEncoder = textEncoding.TextEncoder;
+
 export interface Record {
   type: string;
   size: number;
@@ -43,6 +46,103 @@ export function getRecord(buffer: Buffer): Record {
 
   return record;
 }
+
+export function writeRecord(record: Record): Buffer {
+  var context = new Object();
+
+  var results: Uint8Array[] = [];
+  var write = (arr: Uint8Array) => results.push(arr); 
+
+  writeFields(write, record, recordHeader, context);
+
+  if (record.subRecords) {
+    for (var subRecord of record.subRecords) {
+      writeFields(write, subRecord, subRecordFields, context);
+    }
+  }
+
+  var length = results.reduce((sum, array) => sum + array.length, 0);
+  var array = new Uint8Array(length);
+  
+  var offset = 0;
+  for (var result of results) {
+    array.set(result, offset);
+    offset += result.length;
+  }
+
+  return Buffer.from(<any>array);
+}
+
+function writeFields(write: (arr: Uint8Array) => void, record: Record, fields: FieldArray, context: Object) {
+  for (var field of fields) {
+    writeField(write, record, field, context);
+  }
+}
+
+var textEncoder = new TextEncoder();
+
+function writeField(write: (arr: Uint8Array) => void, record: Record, field: Field, context: Object) {
+  handleField(field, record, context, (name, type, count, options) => {
+    // simple
+    var writer = fieldWriters[type];
+    if (writer) {
+      writer(write, record, name, type, count);
+    }
+
+    if (options.persist) {
+      context[name] = record[name];
+    }
+  }, (name, fields) => {
+    // nested
+
+  }, fields => {
+    // condition resolve
+    writeFields(write, record, fields, context);
+  }, () => {
+
+  });
+}
+
+interface FieldWriter {
+  (write: (arr: Uint8Array) => void, record: Record, name: string, type: FieldTypes, count: number): void;
+}
+
+function numericWriter<T>(
+  arrayType: { new (buffer: ArrayBuffer): T},
+  write: (arr: Uint8Array) => void,
+  record: Record,
+  name: string,
+  type: FieldTypes,
+  count: number
+) {
+  var buffer = new ArrayBuffer(fieldSize[type] * count);
+  var array = new arrayType(buffer);
+  array[0] = record[name];
+  write(new Uint8Array(buffer));
+}
+
+var fieldWriters: {[fieldType:string]: FieldWriter} = {
+  char: (write, record, name, type, count) => {
+    write(textEncoder.encode(record[name]));
+
+    if (count === -1) {
+      write(new Uint8Array(1));
+    }
+  },
+  // float: (b,o,c) => nullIfEqual(b.readFloatLE(o), 0),
+  float: (write, record, name, type, count) => numericWriter(Float32Array, write, record, name, type, count),
+  int8: (write, record, name, type, count) => numericWriter(Int8Array, write, record, name, type, count),
+  int16le: (write, record, name, type, count) => numericWriter(Int16Array, write, record, name, type, count),
+  int32le: (write, record, name, type, count) => numericWriter(Int32Array, write, record, name, type, count),
+  uint8: (write, record, name, type, count) => numericWriter(Uint8Array, write, record, name, type, count),
+  uint16le: (write, record, name, type, count) => numericWriter(Uint16Array, write, record, name, type, count),
+  uint32le: (write, record, name, type, count) => numericWriter(Uint32Array, write, record, name, type, count),
+};
+
+  // handleSimple: (name: string, type: FieldTypes, count: number) => void,
+  // handleNesting: (name: string, fields: FieldArray) => void,
+  // handleCondition: (fields: FieldArray) => void,
+  // handleError: () => void
 
 function readFields(record: Record, buffer: Buffer, offset: number, fields: FieldArray, context: Object): number {
   if (!fields) {
@@ -147,6 +247,66 @@ function readField(record: Record, buffer: Buffer, offset: number, field: Field,
   }
 
   return offset;
+}
+
+function getFieldCount(field: Field, record: Record, context: Object): number {
+  var count = 1;
+
+  if (field.length === 3 && field[2] && typeof field[2] === 'object' && !Array.isArray(field[2])) {
+    var options = <FieldOptions>field[2];
+    if (typeof options.size === 'string') {
+      count = record[options.size];
+      if (typeof count === 'undefined') {
+        count = context[options.size];
+        if (typeof count === 'undefined') {
+          count = 0;
+        }
+      }
+    }
+    else if (typeof options.size === 'number') {
+      count = <number>options.size;
+    }
+
+    if (typeof options.sizeOffset === 'number') {
+      count += options.sizeOffset;
+    }
+  }
+
+  return count;
+}
+
+function handleField(
+  field: Field,
+  record: Record,
+  context: Object,
+  handleSimple: (name: string, type: FieldTypes, count: number, options: FieldOptions) => void,
+  handleNesting: (name: string, fields: FieldArray) => void,
+  handleCondition: (fields: FieldArray) => void,
+  handleError: () => void
+) {
+  // control flow analysis will magically make this awesome someday
+  let name = field[0];
+
+  if (typeof field[1] === 'string') {
+    return handleSimple(name, <FieldTypes>field[1], getFieldCount(field, record, context), field[2] || {});
+  }
+  else if (Array.isArray(field[1])) {
+    return handleNesting(name, <FieldArray>field[1] || []);
+  }
+  else if (typeof field[1] === 'object') {
+    var valueMap = <{[type:string]:FieldArray}>field[1];
+    var fields = valueMap['_'+record[name]];
+    if (!fields) {
+      fields = valueMap['_'+context[name]];
+      if (!fields) {
+        fields = <FieldArray>field[2];
+      }
+    }
+
+    return handleCondition(fields || []);
+  }
+
+  handleError();
 }
 
 function nullIfEqual<T>(value: T, test: T) {
@@ -347,6 +507,7 @@ var subRecordFields: FieldArray = [
     _ICON: zString,
     _ICO2: zString,
     _INAM: uint32le,
+    _INTV: uint32le,
     _KNAM: uint32le,
     _MCHT: zString, 
     _MICO: zString,
@@ -484,6 +645,11 @@ var subRecordFields: FieldArray = [
       ['addictionChance', 'uint32le'],
       ['useSound', 'uint32le'],
     ],
+    _HEDR: [
+      ['version', 'float'],
+      ['numRecords', 'int32le'],
+      ['nextObjectId', 'uint32le'],
+    ],
     _KSIZ: [['keywordCount', 'uint32le', {persist:true}]],
     _KWDA: [['keywords', 'uint32le', {size:'keywordCount'}]],
     _MODT: modt, _DMDT: modt, _MO2T: modt, _MO3T: modt, _MO4T: modt, _MO5T: modt,
@@ -556,6 +722,7 @@ var subRecordFields: FieldArray = [
         _AACT: rgb,
         _AVIF: uint32le,
         _BOOK: lString,
+        _TES4: zString,
       }],
     ],
     _DATA: [

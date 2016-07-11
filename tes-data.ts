@@ -119,3 +119,22 @@ export function getRecordBuffer(file: string|number, origOffset: number, callbac
   handlePathOrFd(file, continuation, callback);
 }
 
+export interface VisitOptions {
+  origOffset?: number; // alternative scan start location (default 0)
+  visitOffset?: (offset: number, type: string) => void;
+}
+
+export function visit(file: string|number, options: VisitOptions) {
+  var origOffset = options.origOffset;
+  if (typeof origOffset == 'undefined') {
+    origOffset = 0;
+  }
+
+  getRecordOffsets(file, origOffset, (err, pairs) => {
+    for (var pair of pairs) {
+      if (options.visitOffset) {
+        options.visitOffset(pair[0], pair[1]);
+      }
+    }
+  })
+}
