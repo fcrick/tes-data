@@ -326,11 +326,10 @@ var subRecordFields: FieldArray = [
   ['size', 'uint16le'],
   ['type', {
     // simple subrecords
-    _ANAM: wString,
+    _ANAM: zString,
     _BAMT: uint32le,
     _BIDS: uint32le,
     _BMCT: sString,
-    _BNAM: zString,
     _DESC: lString,
     _DMDL: zString,
     _EAMT: uint16le,
@@ -338,29 +337,34 @@ var subRecordFields: FieldArray = [
     _EFID: uint32le,
     _EITM: uint32le,
     _ETYP: uint32le,
+    _FCHT: zString,
     _FNAM: uint16le,
+    _FPRT: zString,
     _FULL: lString,
+    _HNAM: float,
     _ICON: zString,
     _ICO2: zString,
     _INAM: uint32le,
     _KNAM: uint32le,
+    _MCHT: zString, 
     _MICO: zString,
     _MIC2: zString,
     _MOD2: zString,
     _MOD3: zString,
     _MOD4: zString,
     _MOD5: zString,
+    _MPRT: zString,
     _NAME: uint32le,
     _NAM0: uint32le,
     _NAM1: uint32le,
     _NAM2: uint32le,
     _NAM3: uint32le,
     _QUAL: uint32le,
+    _RDAT: uint32le,
     _RNAM: uint32le,
     _SNAM: uint32le,
     _SNDD: uint32le,
     _TNAM: uint32le,
-    _VNAM: uint32le,
     _WNAM: uint32le,
     _XAPD: byte,
     _XEZN: uint32le,
@@ -369,6 +373,7 @@ var subRecordFields: FieldArray = [
     _XLCN: uint32le,
     _XLRL: uint32le,
     _XLRT: uint32le,
+    _XNAM: uint32le,
     _XOWN: uint32le,
     _XPRD: float,
     _XRGD: unknown,
@@ -376,7 +381,13 @@ var subRecordFields: FieldArray = [
     _XSCL: float,
     _YNAM: uint32le,
     _ZNAM: uint32le,
-    // complex subrecords
+    // complex subrecords similar across all subrecords
+    _AVSK: [
+      ['skillUseMult', 'float'],
+      ['skillUseOffset', 'float'],
+      ['skillImproveMult', 'float'],
+      ['skillImproveOffset', 'float'],
+    ],
     _BODT: [
       ['bodyPartFlags', 'uint32le'],
       ['flags', 'uint8'],
@@ -388,7 +399,7 @@ var subRecordFields: FieldArray = [
       ['bodyPartFlags', 'uint32le'],
       ['skill', 'uint32le'],
     ],
-    _CNAM: rgb,
+    
     _CTDA: [
       ['operator', 'uint8'],
       ['unknown1', 'uint8'],
@@ -452,7 +463,6 @@ var subRecordFields: FieldArray = [
       ['y2', 'int16le'],
       ['z2', 'int16le'],
     ],
-    _PNAM: rgb,
     _PTDO: [
       ['type', 'uint32le'],
       ['type', {
@@ -502,6 +512,18 @@ var subRecordFields: FieldArray = [
       ['formIdSTAT', 'uint32le'],
     ],
     // subrecords that are different depending record type
+    _BNAM: [
+      ['recordType', {
+        _ANIO: zString,
+        _ASPC: uint32le,
+      }],
+    ],
+    _CNAM: [
+      ['recordType', {
+        _AACT: rgb,
+        _AVIF: uint32le,
+      }],
+    ],
     _DATA: [
       ['recordType', {
         _ACHR: [
@@ -512,7 +534,6 @@ var subRecordFields: FieldArray = [
           ['rY', 'float'],
           ['rZ', 'float'],
         ],
-        _ADDN: uint32le,
         _ALCH: float,
         _AMMO: [
           ['formId', 'uint32le'],
@@ -522,7 +543,7 @@ var subRecordFields: FieldArray = [
         ],
         _APPA: goldAndWeight,
         _ARMO: goldAndWeight,
-      }],
+      }, uint32le],
     ],
     _DNAM: [['recordType', {
       _ADDN: [
@@ -537,14 +558,21 @@ var subRecordFields: FieldArray = [
         ['unknown2', 'uint8'],
         ['weaponAdjust', 'float'],
       ],
-      _DNAM: uint32le,
-    }]],
+    }, uint32le]],
     _MODL: [['recordType', {
       _APPA: zString,
     }, uint32le]],
     _ONAM: [['recordType', {
       _AMMO: sString,
       _ARMA: uint32le,
+    }]],
+    _PNAM: [['recordType', {
+      _ACTI: rgb,
+      _AVIF: uint32le,
+    }]],
+    _VNAM: [['recordType', {
+      _ACTI: uint32le,
+      _AVIF: float,
     }]],
   }],
 ];

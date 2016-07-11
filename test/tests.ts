@@ -96,7 +96,7 @@ function readRecords() {
   fs.open(path, 'r', (err, fd) => {
     var printRecord: (err: NodeJS.ErrnoException, buffer: Buffer, loc: [number, string]) => void;
     printRecord = (err, buffer, loc) => {
-      if (loc[1] === 'ARMO' && counter < 100000) {
+      if (loc[1] === 'AVIF' && counter < 100000) {
         var record = recordTES5.getRecord(buffer);
         var edids = record.subRecords.filter(r => r.type === 'EDID');
         var subs = record.subRecords.filter(r => r.type === 'CTDA');
