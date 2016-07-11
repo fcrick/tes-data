@@ -293,6 +293,11 @@ var rgb: FieldArray = [
   ['unused', 'byte'],
 ];
 
+var goldAndWeight: FieldArray = [
+  ['goldValue', 'uint32le'],
+  ['weight', 'float'],
+];
+
 var modt: FieldArray = [
   ['count', 'uint32le'],
   ['unknown4count', 'uint32le'],
@@ -322,17 +327,25 @@ var subRecordFields: FieldArray = [
   ['type', {
     // simple subrecords
     _ANAM: wString,
+    _BAMT: uint32le,
+    _BIDS: uint32le,
+    _BMCT: sString,
     _BNAM: zString,
     _DESC: lString,
     _DMDL: zString,
+    _EAMT: uint16le,
     _EDID: zString,
     _EFID: uint32le,
+    _EITM: uint32le,
+    _ETYP: uint32le,
     _FNAM: uint16le,
     _FULL: lString,
     _ICON: zString,
+    _ICO2: zString,
     _INAM: uint32le,
     _KNAM: uint32le,
     _MICO: zString,
+    _MIC2: zString,
     _MOD2: zString,
     _MOD3: zString,
     _MOD4: zString,
@@ -342,11 +355,11 @@ var subRecordFields: FieldArray = [
     _NAM1: uint32le,
     _NAM2: uint32le,
     _NAM3: uint32le,
-    
     _QUAL: uint32le,
     _RNAM: uint32le,
     _SNAM: uint32le,
     _SNDD: uint32le,
+    _TNAM: uint32le,
     _VNAM: uint32le,
     _WNAM: uint32le,
     _XAPD: byte,
@@ -406,7 +419,6 @@ var subRecordFields: FieldArray = [
       ['unknown1', 'uint8'],
       ['unknown2', 'uint8'],
     ],
-
     _DSTD: [
       ['healthPercent', 'uint16le'],
       ['damageStage', 'uint8'],
@@ -508,10 +520,8 @@ var subRecordFields: FieldArray = [
           ['damage', 'float'],
           ['goldValue', 'uint32le'],
         ],
-        _APPA: [
-          ['goldValue', 'uint32le'],
-          ['weight', 'float'],
-        ],
+        _APPA: goldAndWeight,
+        _ARMO: goldAndWeight,
       }],
     ],
     _DNAM: [['recordType', {
@@ -526,12 +536,12 @@ var subRecordFields: FieldArray = [
         ['detection', 'uint8'],
         ['unknown2', 'uint8'],
         ['weaponAdjust', 'float'],
-      ]}],
-    ],
+      ],
+      _DNAM: uint32le,
+    }]],
     _MODL: [['recordType', {
       _APPA: zString,
-      _ARMA: uint32le,
-    }]],
+    }, uint32le]],
     _ONAM: [['recordType', {
       _AMMO: sString,
       _ARMA: uint32le,
