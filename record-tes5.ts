@@ -522,6 +522,7 @@ var subRecordFields: FieldArray = [
       ['recordType', {
         _AACT: rgb,
         _AVIF: uint32le,
+        _BOOK: lString,
       }],
     ],
     _DATA: [
@@ -543,6 +544,13 @@ var subRecordFields: FieldArray = [
         ],
         _APPA: goldAndWeight,
         _ARMO: goldAndWeight,
+        _BOOK: [
+          ['flags', 'byte'],
+          ['type', 'byte'],
+          ['unknown', 'uint16le'],
+          ['teachFlags', 'uint32le'],
+          ...goldAndWeight,
+        ],
       }, uint32le],
     ],
     _DNAM: [['recordType', {
