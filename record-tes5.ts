@@ -172,7 +172,6 @@ var fieldReaders: {[fieldType:string]: FieldReader} = {
       return nullIfEqual(b.toString('utf8', o, o+c), '');
     }
   },
-  byte: (b,o,c) => nullIfEqual(b.readUInt8(o), 0),
   float: (b,o,c) => nullIfEqual(b.readFloatLE(o), 0),
   int8: (b,o,c) => nullIfEqual(b.readInt8(o), 0),
   int16le: (b,o,c) => nullIfEqual(b.readInt16LE(o), 0),
@@ -192,7 +191,6 @@ var fieldReaders: {[fieldType:string]: FieldReader} = {
 
 var fieldSize: {[fieldType: string]: number} = {
   char: 1,
-  byte: 1,
   float: 4,
   int8: 1,
   int16le: 2,
@@ -210,7 +208,7 @@ interface FieldOptions {
   flag?: boolean;
 }
 
-type FieldTypes = 'int32le'|'int16le'|'int8'|'uint32le'|'uint16le'|'uint8'|'char'|'byte'|'float';
+type FieldTypes = 'int32le'|'int16le'|'int8'|'uint32le'|'uint16le'|'uint8'|'char'|'float';
 type SimpleField = [string, FieldTypes];
 type SimpleFieldOpt = [string, FieldTypes, FieldOptions];
 type ConditionalFieldSet = [string, {[value:string]:FieldArray}];
@@ -264,8 +262,8 @@ var float: FieldArray = [
   ['value', 'float']
 ];
 
-var byte: FieldArray = [
-  ['value', 'byte']
+var uint8: FieldArray = [
+  ['value', 'uint8']
 ];
 
 // not implemented other thing but keeping them separate for later
@@ -287,10 +285,10 @@ var zString: FieldArray = [
 ];
 
 var rgb: FieldArray = [
-  ['r', 'byte'],
-  ['g', 'byte'],
-  ['b', 'byte'],
-  ['unused', 'byte'],
+  ['r', 'uint8'],
+  ['g', 'uint8'],
+  ['b', 'uint8'],
+  ['unused', 'uint8'],
 ];
 
 var goldAndWeight: FieldArray = [
@@ -330,6 +328,10 @@ var subRecordFields: FieldArray = [
     _BAMT: uint32le,
     _BIDS: uint32le,
     _BMCT: sString,
+    _BPTN: lString,
+    _BPNN: zString,
+    _BPNT: zString,
+    _BPNI: zString,
     _DESC: lString,
     _DMDL: zString,
     _EAMT: uint16le,
@@ -356,17 +358,18 @@ var subRecordFields: FieldArray = [
     _MPRT: zString,
     _NAME: uint32le,
     _NAM0: uint32le,
-    _NAM1: uint32le,
     _NAM2: uint32le,
     _NAM3: uint32le,
+    _NAM4: zString,
     _QUAL: uint32le,
+    _RAGA: uint32le,
     _RDAT: uint32le,
     _RNAM: uint32le,
     _SNAM: uint32le,
     _SNDD: uint32le,
     _TNAM: uint32le,
     _WNAM: uint32le,
-    _XAPD: byte,
+    _XAPD: uint8,
     _XEZN: uint32le,
     _XHOR: uint32le,
     _XLCM: uint32le,
@@ -399,7 +402,36 @@ var subRecordFields: FieldArray = [
       ['bodyPartFlags', 'uint32le'],
       ['skill', 'uint32le'],
     ],
-    
+    _BPND: [
+      ['damageMult', 'float'],
+      ['flags', 'uint8'],
+      ['partType', 'uint8'],
+      ['healthPercent', 'uint8'],
+      ['actorValue', 'int8'],
+      ['toHitChance', 'uint8'],
+      ['explodableChance', 'uint8'],
+      ['explodableDebrisCount', 'uint16le'],
+      ['explodableDebris', 'uint32le'],
+      ['explodableExplosion', 'uint32le'],
+      ['trackingMaxAngle', 'float'],
+      ['explodableDebrisScale', 'float'],
+      ['severableDebrisCount', 'int32le'],
+      ['severableDebris', 'uint32le'],
+      ['severableExplosion', 'uint32le'],
+      ['severableDebrisScale', 'float'],
+      ['tX', 'float'],
+      ['tY', 'float'],
+      ['tZ', 'float'],
+      ['rX', 'float'],
+      ['rY', 'float'],
+      ['rZ', 'float'],
+      ['severableImpactDataSet', 'uint32le'],
+      ['explodableImpactDataSet', 'uint32le'],
+      ['severableDecalCount', 'uint8'],
+      ['explodableDecalCount', 'uint8'],
+      ['unknown', 'uint16le'],
+      ['limbReplacementScale', 'float'],
+    ],
     _CTDA: [
       ['operator', 'uint8'],
       ['unknown1', 'uint8'],
@@ -545,8 +577,8 @@ var subRecordFields: FieldArray = [
         _APPA: goldAndWeight,
         _ARMO: goldAndWeight,
         _BOOK: [
-          ['flags', 'byte'],
-          ['type', 'byte'],
+          ['flags', 'uint8'],
+          ['type', 'uint8'],
           ['unknown', 'uint16le'],
           ['teachFlags', 'uint32le'],
           ...goldAndWeight,
@@ -570,6 +602,10 @@ var subRecordFields: FieldArray = [
     _MODL: [['recordType', {
       _APPA: zString,
     }, uint32le]],
+    _NAM1: [['recordType', {
+      _FOOO: uint32le,
+      _BPTD: zString,
+    }]],
     _ONAM: [['recordType', {
       _AMMO: sString,
       _ARMA: uint32le,
