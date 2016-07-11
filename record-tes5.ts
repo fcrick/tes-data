@@ -351,6 +351,7 @@ var subRecordFields: FieldArray = [
     _MCHT: zString, 
     _MICO: zString,
     _MIC2: zString,
+    _MNAM: uint32le,
     _MOD2: zString,
     _MOD3: zString,
     _MOD4: zString,
@@ -583,6 +584,19 @@ var subRecordFields: FieldArray = [
           ['teachFlags', 'uint32le'],
           ...goldAndWeight,
         ],
+        _CAMS: [
+          ['action', 'uint32le'],
+          ['location', 'uint32le'],
+          ['target', 'uint32le'],
+          ['flags', 'uint32le'],
+          ['playerTimeMult', 'float'],
+          ['targetTimeMult', 'float'],
+          ['globalTimeMult', 'float'],
+          ['maxTime', 'float'],
+          ['minTime', 'float'],
+          ['betweenPercent', 'float'],
+          ['nearTargetDistance', 'float'],
+        ],
       }, uint32le],
     ],
     _DNAM: [['recordType', {
@@ -601,6 +615,7 @@ var subRecordFields: FieldArray = [
     }, uint32le]],
     _MODL: [['recordType', {
       _APPA: zString,
+      _CAMS: zString,
     }, uint32le]],
     _NAM1: [['recordType', {
       _FOOO: uint32le,
