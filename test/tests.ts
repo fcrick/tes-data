@@ -138,17 +138,19 @@ function readRecords() {
   });
 }
 
+// var path = 'C:/src/skyrimmods/Brigandage v.4-32706-4/Brigandage.esp';
 var path = prefix + paths[0];
-var count = 0;
+var mismatchCount = 0;
 var allCount = 0;
+var context: Object = {};
 
 function checkBuffer(buffer: Buffer, offset: number, type: string) {
-  // if (count >= 1) {
-  //   return;
-  // }
+  if (mismatchCount >= 100) {
+    return;
+  }
   allCount += 1;
-  var record = recordTES5.getRecord(buffer);
-  var newBuffer = recordTES5.writeRecord(record);
+  var record = recordTES5.getRecord(buffer, context);
+  var newBuffer = recordTES5.writeRecord(record, context);
   if (allCount % 10000 === 0) {
     console.log(allCount);
   }
@@ -164,7 +166,7 @@ function checkBuffer(buffer: Buffer, offset: number, type: string) {
     fs.writeFile(`./test/data/${offsetHex}.json`, JSON.stringify(record, null, 2));
     //console.log(JSON.stringify(record));
 
-    count += 1;
+    mismatchCount += 1;
   }
 }
 

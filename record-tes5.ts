@@ -4,18 +4,21 @@ import textEncoding = require('text-encoding');
 var TextEncoder = textEncoding.TextEncoder;
 
 export interface Record {
-  type: string;
   size: number;
+  recordType?: string;
+  type?: string; // subrecord type
   subRecords?: Record[];
 }
 
-export function getRecord(buffer: Buffer): Record {
+export function getRecord(buffer: Buffer, context?: Object): Record {
   var record = <Record>{};
 
-  // context is a way to persist values that are considered
-  // elsewhere in parsing. Fields with the persist flag are added.
-  // hopefully good enough
-  var context = {};
+  if (typeof context === 'undefined') {
+    // context is a way to persist values that are considered
+    // elsewhere in parsing. Fields with the persist flag are added.
+    // hopefully good enough
+    context = {};
+  }
 
   // read in the header
   readFields(record, buffer, 0, recordHeader, context);
@@ -24,14 +27,19 @@ export function getRecord(buffer: Buffer): Record {
   var offset = 24;
 
   if (offset < buffer.length) {
-    record.subRecords = [];
+    record['subRecords'] = [];
   }
 
-  var compressed = record.type === 'GRUP' ? false : record['flags'] & 0x40000;
+  var compressed = record['recordType'] === 'GRUP' ? false : record['flags'] & 0x40000;
   if (compressed) {
     // not yet supported
     record['compressed'] = true;
     return record;
+  }
+
+  // localization flag check
+  if (record['recordType'] === 'TES4' && record['flags'] & 0x80) {
+    context['localized'] = true;
   }
 
   // read subrecords
@@ -57,8 +65,13 @@ export function getRecord(buffer: Buffer): Record {
   return record;
 }
 
-export function writeRecord(record: Record): Buffer {
-  var context = new Object();
+export function writeRecord(record: Record, context?: Object): Buffer {
+  if (typeof context === 'undefined') {
+    // context is a way to persist values that are considered
+    // elsewhere in parsing. Fields with the persist flag are added.
+    // hopefully good enough
+    context = {};
+  }
 
   var results: Uint8Array[] = [];
   var write = (arr: Uint8Array) => results.push(arr); 
@@ -161,7 +174,6 @@ var fieldWriters: {[fieldType:string]: FieldWriter} = {
       write(new Uint8Array(1));
     }
   },
-  // float: (b,o,c) => nullIfEqual(b.readFloatLE(o), 0),
   float: (write, record, name, type, count) => numericWriter(Float32Array, write, record, name, type, count),
   int8: (write, record, name, type, count) => numericWriter(Int8Array, write, record, name, type, count),
   int16le: (write, record, name, type, count) => numericWriter(Int16Array, write, record, name, type, count),
@@ -170,11 +182,6 @@ var fieldWriters: {[fieldType:string]: FieldWriter} = {
   uint16le: (write, record, name, type, count) => numericWriter(Uint16Array, write, record, name, type, count),
   uint32le: (write, record, name, type, count) => numericWriter(Uint32Array, write, record, name, type, count),
 };
-
-  // handleSimple: (name: string, type: FieldTypes, count: number) => void,
-  // handleNesting: (name: string, fields: FieldArray) => void,
-  // handleCondition: (fields: FieldArray) => void,
-  // handleError: () => void
 
 function readFields(record: Record, buffer: Buffer, offset: number, fields: FieldArray, context: Object): number {
   if (!fields) {
@@ -502,9 +509,6 @@ var uint8: FieldArray = [
   ['value', 'uint8']
 ];
 
-// not implemented other thing but keeping them separate for later
-var lString = uint32le;
-
 // just 'string' on uesp docs
 var sString: FieldArray = [
   ['value', 'char', {size:'size'}],
@@ -517,6 +521,10 @@ var wString: FieldArray = [
 
 var zString: FieldArray = [
   ['value', 'char', {size:-1}]
+];
+
+var lString: FieldArray = [
+  ['localized', { _true: uint32le }, zString],
 ];
 
 var rgb: FieldArray = [
@@ -564,6 +572,36 @@ var mods: FieldArray = [
   ], {size:'count'}],
 ];
 
+var scriptBlock: FieldArray = [
+  ['version', 'int16le'],
+  ['objFormat', 'int16le', {persist:true}],
+  ['scriptCount', 'uint16le'],
+  ['scripts', [
+    ['scriptNameSize', 'uint16le'],
+    ['scriptName', 'char', {size:'scriptNameSize'}],
+    ['status', 'uint8'],
+    ['propertyCount', 'uint16le'],
+    ['properties', [
+      ['propertyNameSize', 'uint16le'],
+      ['propertyName', 'char', {size:'propertyNameSize'}],
+      ['propertyType', 'uint8'],
+      ['status', 'uint8'],
+      ['propertyType', {
+        _1: [
+          ['objFormat', {_1:[['formId','uint32le']]}], // prefix if objFormat is 1 (v1)
+          ['alias', 'int16le'], // doc says this is unsigned in v2 but i think that's an error
+          ['unused', 'uint16le'],
+          ['objFormat', {_2:[['formId','uint32le']]}], // suffix in objFormat is 2 (v2)
+        ],
+        _2: wString,
+        _3: uint32le,
+        _4: float,
+        _5: int8,
+      }],
+    ], {size:'propertyCount'}],
+  ], {size:'scriptCount'}]
+];
+
 var fragment: FieldArray = [
   ['unknown', 'int8'],
   ['scriptNameSize', 'uint16le'],
@@ -591,14 +629,12 @@ var subRecordFields: FieldArray = [
     _EDID: zString,
     _EFID: uint32le,
     _EITM: uint32le,
-    
     _ETYP: uint32le,
     _FCHT: zString,
     _FPRT: zString,
     _FULL: lString,
     _ICON: zString,
     _ICO2: zString,
-    
     _INTV: uint32le,
     _KNAM: uint32le,
     _LLCT: uint8,
@@ -612,15 +648,11 @@ var subRecordFields: FieldArray = [
     _MOD4: zString,
     _MOD5: zString,
     _MPRT: zString,
-    
     _NVER: uint32le,
     _QUAL: uint32le,
     _RAGA: uint32le,
-    
     _SLCP: uint8,
-    
     _SOUL: uint8,
-    
     _XAPD: uint8,
     _XEZN: uint32le,
     _XHOR: uint32le,
@@ -633,7 +665,6 @@ var subRecordFields: FieldArray = [
     _XRGD: unknown,
     _XRGB: unknown,
     _XSCL: float,
-    
     _ZNAM: uint32le,
     // complex subrecords similar across all subrecords
     _AVSK: [
@@ -717,7 +748,6 @@ var subRecordFields: FieldArray = [
       ['areaOfEffect', 'uint32le'],
       ['duration', 'uint32le'],
     ],
-    
     _HEDR: [
       ['version', 'float'],
       ['numRecords', 'int32le'],
@@ -805,34 +835,23 @@ var subRecordFields: FieldArray = [
       }],
     ],
     _VMAD: [
-      ['version', 'int16le'],
-      ['objFormat', 'int16le', {persist:true}],
-      ['scriptCount', 'uint16le'],
-      ['scripts', [
-        ['scriptNameSize', 'uint16le'],
-        ['scriptName', 'char', {size:'scriptNameSize'}],
-        ['status', 'uint8'],
-        ['propertyCount', 'uint16le'],
-        ['properties', [
-          ['propertyNameSize', 'uint16le'],
-          ['propertyName', 'char', {size:'propertyNameSize'}],
-          ['propertyType', 'uint8'],
-          ['status', 'uint8'],
-          ['propertyType', {
-            _1: [
-              ['objFormat', {_1:[['formId','uint32le']]}], // prefix if objFormat is 1 (v1)
-              ['alias', 'int16le'], // doc says this is unsigned in v2 but i think that's an error
-              ['unused', 'uint16le'],
-              ['objFormat', {_2:[['formId','uint32le']]}], // suffix in objFormat is 2 (v2)
-            ],
-            _2: wString,
-            _3: uint32le,
-            _4: float,
-            _5: int8,
-          }],
-        ], {size:'propertyCount'}],
-      ], {size:'scriptCount'}],
+      ...scriptBlock,
       ['recordType', {
+        _PACK: [
+          ['unknown', 'int8'],
+          ['flags', 'uint8'],
+          ['fileNameSize', 'uint16le'],
+          ['fileName', 'char', {size:'fileNameSize'}],
+          ['flags', {
+            _1: [['fragments', fragment, {size:1}]],
+            _2: [['fragments', fragment, {size:1}]],
+            _3: [['fragments', fragment, {size:2}]],
+            _4: [['fragments', fragment, {size:1}]],
+            _5: [['fragments', fragment, {size:2}]],
+            _6: [['fragments', fragment, {size:2}]],
+            _7: [['fragments', fragment, {size:3}]],
+          }],
+        ],
         _PERK: [
           ['unknown', 'uint8'],
           ['fileNameSize', 'uint16le'],
@@ -858,33 +877,7 @@ var subRecordFields: FieldArray = [
           ['aliasCount', 'uint16le'],
           ['aliases', [
             ['object', 'uint32le'],
-            ['version', 'int16le'],
-            ['objFormat', 'int16le'],
-            ['scriptCount', 'uint16le'],
-            ['scripts', [
-              ['scriptNameSize', 'uint16le'],
-              ['scriptName', 'char', {size:'scriptNameSize'}],
-              ['status', 'uint8'],
-              ['propertyCount', 'uint16le'],
-              ['properties', [
-                ['propertyNameSize', 'uint16le'],
-                ['propertyName', 'char', {size:'propertyNameSize'}],
-                ['propertyType', 'uint8'],
-                ['status', 'uint8'],
-                ['propertyType', {
-                  _1: [
-                    ['objFormat', {_1:[['formId','uint32le']]}], // prefix if objFormat is 1 (v1)
-                    ['alias', 'int16le'], // doc says this is unsigned in v2 but i think that's an error
-                    ['unused', 'uint16le'],
-                    ['objFormat', {_2:[['formId','uint32le']]}], // suffix in objFormat is 2 (v2)
-                  ],
-                  _2: wString,
-                  _3: uint32le,
-                  _4: float,
-                  _5: int8,
-                }],
-              ], {size: 'propertyCount'}],
-            ], {size:'scriptCount'}],
+            ...scriptBlock,
           ], {size:'aliasCount'}],
         ],
         _SCEN: [
@@ -897,7 +890,7 @@ var subRecordFields: FieldArray = [
             _2: [['fragments', fragment, {size:1}]],
             _3: [['fragments', fragment, {size:2}]],
           }],
-          ['phaseCount', 'uint32le'],
+          ['phaseCount', 'uint16le'],
           ['phases', [
             ['unknown1', 'int8'],
             ['phase', 'uint32le'],
