@@ -140,15 +140,20 @@ function readRecords() {
 
 var path = prefix + paths[0];
 var count = 0;
+var allCount = 0;
 
 function checkBuffer(buffer: Buffer, offset: number, type: string) {
-  if (count >= 1) {
-    return;
-  }
+  // if (count >= 1) {
+  //   return;
+  // }
+  allCount += 1;
   var record = recordTES5.getRecord(buffer);
   var newBuffer = recordTES5.writeRecord(record);
+  if (allCount % 10000 === 0) {
+    console.log(allCount);
+  }
 
-  if (buffer.compare(newBuffer) !== 0) {
+  if (!record['compressed'] && buffer.compare(newBuffer) !== 0) {
     var offsetHex = offset.toString(16);
     console.log(`mismatch at ${offsetHex}`);
     fs.writeFile(`./test/data/${offsetHex}A.bin`, buffer);

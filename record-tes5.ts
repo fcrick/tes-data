@@ -39,11 +39,18 @@ export function getRecord(buffer: Buffer): Record {
     var subRecord = <Record>{};
 
     // cheating a little here to simplify repeating records
-    var endOffset = offset + buffer.readUInt16LE(offset + 4) + 6;
+    var subSize = buffer.readUInt16LE(offset + 4);
+    var endOffset = offset + subSize + 6;
+
+    // include rest of buffer in this case
+    if (record['recordType'] === 'WRLD' && buffer.toString('utf8', offset, offset + 4) === 'OFST') {
+      endOffset = buffer.length;
+      context['ofstSize'] = endOffset - offset - 6;
+    }
 
     readFields(subRecord, buffer.slice(offset, endOffset), 0, subRecordFields, context);
 
-    offset += subRecord.size + 6;
+    offset = endOffset;
     record.subRecords.push(subRecord);
   }
 
@@ -60,6 +67,10 @@ export function writeRecord(record: Record): Buffer {
 
   if (record.subRecords) {
     for (var subRecord of record.subRecords) {
+      if (subRecord.type === 'OFST') {
+        context['ofstSize'] = subRecord['value'].length;
+      }
+
       writeFields(write, subRecord, subRecordFields, context);
     }
   }
@@ -88,7 +99,7 @@ function writeField(write: (arr: Uint8Array) => void, record: Record, field: Fie
   handleField(field, record, context, (name, type, count, options) => {
     // simple
     var writer = fieldWriters[type];
-    if (writer) {
+    if (writer && (!options || !options.omitIfZero || record[name])) {
       writer(write, record, name, type, count);
     }
 
@@ -128,6 +139,14 @@ function numericWriter<T>(
     array[0] = name in record ? record[name] : 0;
   } else {
     for (var i of range(count)) {
+      // debug
+      if (typeof record[name] === 'undefined') {
+        console.log(JSON.stringify(record));
+        console.log(name);
+        console.log(type);
+        console.log(count);
+      }
+      // debug
       array[i] = record[name][i];
     }
   }
@@ -199,6 +218,10 @@ function readField(record: Record, buffer: Buffer, offset: number, field: Field,
 
     if (typeof options.sizeOffset === 'number') {
       count += options.sizeOffset;
+    }
+
+    if (typeof options.sizeDivideBy === 'number') {
+      count /= options.sizeDivideBy;
     }
   }
 
@@ -291,6 +314,10 @@ function getFieldCount(field: Field, record: Record, context: Object): number {
     if (typeof options.sizeOffset === 'number') {
       count += options.sizeOffset;
     }
+
+    if (typeof options.sizeDivideBy === 'number') {
+      count /= options.sizeDivideBy;
+    }
   }
 
   return count;
@@ -344,6 +371,10 @@ function nullIfEqual<T>(value: T, test: T) {
   return value === test ? null : value;  
 }
 
+function nullIfZero(value: number) {
+  return value === 0 && !isNegativeZero(value) ? null : value;  
+}
+
 interface FieldReader {
   (buffer:Buffer, type: FieldTypes, offset:number, count: number): any;
 }
@@ -353,6 +384,12 @@ let range = function*(max: number) {
     yield i
 }
 
+// http://stackoverflow.com/a/34461694
+function isNegativeZero(n) {
+  n = Number( n );
+  return (n === 0) && (1 / n === -Infinity);
+}
+
 function numericReader(
   bufferReader: (offset: number) => number,
   fieldType: FieldTypes,
@@ -360,7 +397,7 @@ function numericReader(
   count: number
 ): number|number[] {
   if (count === 1) {
-    return nullIfEqual(bufferReader(offset), 0)
+    return nullIfZero(bufferReader(offset));
   }
   else {
     return [...range(count)].map(i => bufferReader(offset + i * fieldSize[fieldType]));
@@ -400,9 +437,11 @@ var fieldSize: {[fieldType: string]: number} = {
 interface FieldOptions {
   size?: string|number;
   sizeOffset?: number;
+  sizeDivideBy?: number;
   persist?: boolean;
   format?: 'hex';
   flag?: boolean;
+  omitIfZero?: boolean;
 }
 
 type FieldTypes = 'int32le'|'int16le'|'int8'|'uint32le'|'uint16le'|'uint8'|'char'|'float';
@@ -440,7 +479,7 @@ var recordHeader: FieldArray = [
 ];
 
 var unknown: FieldArray = [
-  ['value', 'char', {size:'size', format:'hex'}]
+  ['value', 'uint8', {size:'size'}]
 ];
 
 var uint16le: FieldArray = [
@@ -525,12 +564,19 @@ var mods: FieldArray = [
   ], {size:'count'}],
 ];
 
+var fragment: FieldArray = [
+  ['unknown', 'int8'],
+  ['scriptNameSize', 'uint16le'],
+  ['scriptName', 'char', {size:'scriptNameSize'}],
+  ['fragmentNameSize', 'uint16le'],
+  ['fragmentName', 'char', {size:'fragmentNameSize'}],
+];
+
 var subRecordFields: FieldArray = [
   ['type', 'char', {size:4}],
   ['size', 'uint16le'],
   ['type', {
     // simple subrecords
-    _ANAM: zString,
     _BAMT: uint32le,
     _BIDS: uint32le,
     _BMCT: sString,
@@ -538,22 +584,26 @@ var subRecordFields: FieldArray = [
     _BPNN: zString,
     _BPNT: zString,
     _BPNI: zString,
+    _CITC: uint32le,
     _DESC: lString,
     _DMDL: zString,
     _EAMT: uint16le,
     _EDID: zString,
     _EFID: uint32le,
     _EITM: uint32le,
+    
     _ETYP: uint32le,
     _FCHT: zString,
     _FPRT: zString,
     _FULL: lString,
-    _GNAM: zString,
     _ICON: zString,
     _ICO2: zString,
-    _INAM: uint32le,
+    
     _INTV: uint32le,
     _KNAM: uint32le,
+    _LLCT: uint8,
+    _LVLD: uint8,
+    _LVLF: uint8,
     _MCHT: zString, 
     _MICO: zString,
     _MIC2: zString,
@@ -562,19 +612,15 @@ var subRecordFields: FieldArray = [
     _MOD4: zString,
     _MOD5: zString,
     _MPRT: zString,
-    _NAME: uint32le,
-    _NAM0: uint32le,
-    _NAM2: uint32le,
-    _NAM3: uint32le,
-    _NAM4: zString,
+    
     _NVER: uint32le,
     _QUAL: uint32le,
     _RAGA: uint32le,
-    _RDAT: uint32le,
-    _RNAM: uint32le,
-    _SNDD: uint32le,
     
-    _WNAM: uint32le,
+    _SLCP: uint8,
+    
+    _SOUL: uint8,
+    
     _XAPD: uint8,
     _XEZN: uint32le,
     _XHOR: uint32le,
@@ -587,7 +633,7 @@ var subRecordFields: FieldArray = [
     _XRGD: unknown,
     _XRGB: unknown,
     _XSCL: float,
-    _YNAM: uint32le,
+    
     _ZNAM: uint32le,
     // complex subrecords similar across all subrecords
     _AVSK: [
@@ -648,17 +694,7 @@ var subRecordFields: FieldArray = [
       ], {flag:true}], // unimplemented until i find an example
       ['functionIndex', 'uint16le'],
       ['unknown3', 'uint16le'],
-      ['functionIndex', {_576: [
-        ['param1', 'uint16le'],
-        ['param2', 'char', {size:2}],
-        ['param3', 'uint32le'],
-        ['runOnType', 'uint32le'],
-        ['reference', 'uint32le'],
-        ['unknown4', 'int32le'],
-      ]}, [
-        ['param1', 'uint32le'],
-        ['param2', 'uint32le'],
-      ]],
+      ['params', 'uint8', {size:'size', sizeOffset:-12}],
     ],
     _DEST: [
       ['health', 'uint32le'],
@@ -681,13 +717,7 @@ var subRecordFields: FieldArray = [
       ['areaOfEffect', 'uint32le'],
       ['duration', 'uint32le'],
     ],
-    _ENIT: [
-      ['potionValue', 'uint32le'],
-      ['flags', 'uint32le'],
-      ['addiction', 'uint32le'],
-      ['addictionChance', 'uint32le'],
-      ['useSound', 'uint32le'],
-    ],
+    
     _HEDR: [
       ['version', 'float'],
       ['numRecords', 'int32le'],
@@ -695,6 +725,11 @@ var subRecordFields: FieldArray = [
     ],
     _KSIZ: [['keywordCount', 'uint32le', {persist:true}]],
     _KWDA: [['keywords', 'uint32le', {size:'keywordCount'}]],
+    _LVLO: [
+      ['level', 'uint32le'],
+      ['spellId', 'uint32le'],
+      ['count', 'uint32le'],
+    ],
     _MODT: modt, _DMDT: modt, _MO2T: modt, _MO3T: modt, _MO4T: modt, _MO5T: modt,
     _MODS: mods, _DMDS: mods, _MO2S: mods, _MO3S: mods, _MO4S: mods, _MO5S: mods,
     _NVMI: [
@@ -759,9 +794,12 @@ var subRecordFields: FieldArray = [
       ['y2', 'int16le'],
       ['z2', 'int16le'],
     ],
+    _OFST: [
+      ['value', 'uint8', {size:'ofstSize'}]
+    ],
     _PTDO: [
-      ['type', 'uint32le'],
-      ['type', {
+      ['ptdoType', 'uint32le'],
+      ['ptdoType', {
         _0: [['formId', 'uint32le']],
         _1: [['topic', 'char', {size:4}]],
       }],
@@ -794,6 +832,79 @@ var subRecordFields: FieldArray = [
           }],
         ], {size:'propertyCount'}],
       ], {size:'scriptCount'}],
+      ['recordType', {
+        _PERK: [
+          ['unknown', 'uint8'],
+          ['fileNameSize', 'uint16le'],
+          ['fileName', 'char', {size:'fileNameSize'}],
+          ['fragmentCount', 'uint16le'],
+          ['fragments', [
+            ['index', 'uint16le'],
+            ['unknown1', 'uint16le'],
+            ...fragment,
+          ], {size:'fragmentCount'}],
+        ],
+        _QUST: [
+          ['unknown', 'int8'],
+          ['fragmentCount', 'uint16le'],
+          ['fileNameSize', 'uint16le'],
+          ['fileName', 'char', {size:'fileNameSize'}],
+          ['fragments', [
+            ['index', 'uint16le'],
+            ['unknown1', 'int16le'],
+            ['logEntry', 'int32le'],
+            ...fragment,
+          ], {size:'fragmentCount'}],
+          ['aliasCount', 'uint16le'],
+          ['aliases', [
+            ['object', 'uint32le'],
+            ['version', 'int16le'],
+            ['objFormat', 'int16le'],
+            ['scriptCount', 'uint16le'],
+            ['scripts', [
+              ['scriptNameSize', 'uint16le'],
+              ['scriptName', 'char', {size:'scriptNameSize'}],
+              ['status', 'uint8'],
+              ['propertyCount', 'uint16le'],
+              ['properties', [
+                ['propertyNameSize', 'uint16le'],
+                ['propertyName', 'char', {size:'propertyNameSize'}],
+                ['propertyType', 'uint8'],
+                ['status', 'uint8'],
+                ['propertyType', {
+                  _1: [
+                    ['objFormat', {_1:[['formId','uint32le']]}], // prefix if objFormat is 1 (v1)
+                    ['alias', 'int16le'], // doc says this is unsigned in v2 but i think that's an error
+                    ['unused', 'uint16le'],
+                    ['objFormat', {_2:[['formId','uint32le']]}], // suffix in objFormat is 2 (v2)
+                  ],
+                  _2: wString,
+                  _3: uint32le,
+                  _4: float,
+                  _5: int8,
+                }],
+              ], {size: 'propertyCount'}],
+            ], {size:'scriptCount'}],
+          ], {size:'aliasCount'}],
+        ],
+        _SCEN: [
+          ['unknown', 'int8'],
+          ['flags', 'uint8'],
+          ['fileNameSize', 'uint16le'],
+          ['fileName', 'char', {size:'fileNameSize'}],
+          ['flags', {
+            _1: [['fragments', fragment, {size:1}]],
+            _2: [['fragments', fragment, {size:1}]],
+            _3: [['fragments', fragment, {size:2}]],
+          }],
+          ['phaseCount', 'uint32le'],
+          ['phases', [
+            ['unknown1', 'int8'],
+            ['phase', 'uint32le'],
+            ...fragment,
+          ], {size:'phaseCount'}],
+        ],
+      }],
     ],
     _WLST: [
       ['weather', 'uint32le'],
@@ -809,24 +920,23 @@ var subRecordFields: FieldArray = [
       ['flags', 'uint32le'],
     ],
     _XLKR: [
-      ['formIdKYWD', 'uint32le'],
-      ['formIdSTAT', 'uint32le'],
+      ['formIds', 'uint32le', {size:'size', sizeDivideBy: 4}],
     ],
     // subrecords that are different depending record type
-    _BNAM: [
-      ['recordType', {
-        _ANIO: zString,
-        _ASPC: uint32le,
-      }],
-    ],
-    _CNAM: [
-      ['recordType', {
-        _AACT: rgb,
-        _AVIF: uint32le,
-        _BOOK: lString,
-        _TES4: zString,
-      }],
-    ],
+    _ANAM: [['recordType', {
+      _FOOO: zString,
+      _WATR: uint8,
+    }, unknown]],
+    _BNAM: [['recordType', {
+      _ANIO: zString,
+      _ASPC: uint32le,
+    }, unknown]],
+    _CNAM: [['recordType', {
+      _AACT: rgb,
+      _AVIF: uint32le,
+      _BOOK: lString,
+      _TES4: zString,
+    }, unknown]],
     _DATA: [
       ['recordType', {
         _ACHR: [
@@ -848,7 +958,7 @@ var subRecordFields: FieldArray = [
         _ARMO: goldAndWeight,
         _BOOK: [
           ['flags', 'uint8'],
-          ['type', 'uint8'],
+          ['bookType', 'uint8'],
           ['unknown', 'uint16le'],
           ['teachFlags', 'uint32le'],
           ...goldAndWeight,
@@ -864,7 +974,7 @@ var subRecordFields: FieldArray = [
           ['maxTime', 'float'],
           ['minTime', 'float'],
           ['betweenPercent', 'float'],
-          ['nearTargetDistance', 'float'],
+          ['nearTargetDistance', 'float', {omitIfZero:true}],
         ],
         _CELL: [
           ['entries', uint8, {size:-1}], // 1 or 2 bytes
@@ -884,10 +994,53 @@ var subRecordFields: FieldArray = [
           ['flags', 'uint8'],
         ],
         _EYES: uint8,
-        _PERK: uint8,
+        _GRAS: [
+          ['density', 'uint8'],
+          ['minSlope', 'uint8'],
+          ['maxSlope', 'uint8'],
+          ['unknown1', 'uint8'],
+          ['distanceFromWater', 'uint16le'],
+          ['unknown2', 'uint16le'],
+          ['howApplied', 'uint32le'],
+          ['positionRange', 'float'],
+          ['heightRange', 'float'],
+          ['colorRange', 'float'],
+          ['wavePeriod', 'float'],
+          ['flags', 'uint32le'],
+        ],
+        _PERK: unknown,
+        _REVB: [
+          ['decayTime', 'uint16le'],
+          ['HFReference', 'uint16le'],
+          ['roomFilter', 'int8'],
+          ['roomHFFilter', 'int8'],
+          ['reflections', 'int8'],
+          ['reverbAmp', 'int8'],
+          ['decayHFRatio', 'uint8'],
+          ['scaledReflectDelay', 'uint8'],
+          ['reverbDelay', 'uint8'],
+          ['diffusionPercent', 'uint8'],
+          ['densityPercent', 'uint8'],
+          ['unknown', 'uint8'],
+        ],
+        _SLGM: goldAndWeight,
+        _SPGD: [
+          ['gravityVelocity', 'float'],
+          ['rotationVelocity', 'float'],
+          ['sizeX', 'float'],
+          ['sizeY', 'float'],
+          ['centerOffsetMin', 'float'],
+          ['centerOffsetMax', 'float'],
+          ['initialRotationRange', 'float'],
+          ['subtextureCountX', 'uint32le'],
+          ['subtextureCountY', 'uint32le'],
+          ['shaderType', 'uint32le'],
+          ['boxSize', 'uint32le', {omitIfZero:true}],
+          ['particleDensity', 'float', {omitIfZero:true}],
+        ],
         _WATR: uint16le,
         _WRLD: uint8,
-      }, uint32le],
+      }, unknown],
     ],
     _DNAM: [['recordType', {
       _ADDN: [
@@ -908,39 +1061,105 @@ var subRecordFields: FieldArray = [
           ['value', 'uint32le'],
         ], {size:-1}],
       ],
+      _MATO: unknown,
       _VTYP: uint8,
-    }, uint32le]],
+    }, unknown]],
+    _ENAM: [['recordType', {
+      _FOOO: [['value', 'char', {size:4}]], // look for this
+    }, unknown]],
+    _ENIT: [['recordType', {
+      _ALCH: [
+        ['potionValue', 'uint32le'],
+        ['flags', 'uint32le'],
+        ['addiction', 'uint32le'],
+        ['addictionChance', 'uint32le'],
+        ['useSound', 'uint32le'],
+      ],
+      _INGR: goldAndWeight,
+    }, unknown]],
     _FNAM: [['recordType', {
       _DOOR: uint8,
       _WATR: uint8,
       _CLMT: zString,
-    }, uint16le]],
+      _SNCT: uint32le,
+    }, unknown]],
+    _GNAM: [['recordType', {
+      _FOOO: zString, // look for this
+    }, unknown]],
     _HNAM: [['recordType', {
+      _FOOO: float,
       _LTEX: uint16le,
-    }, float]],
+    }, unknown]],
+    _INAM: [['recordType', {
+      _FOOO: uint16le,
+      _MOVT: [
+        ['directionScale', 'float'],
+        ['movementSpeed', 'float'],
+        ['rotationSpeed', 'float'],
+      ],
+    }, unknown]],
     _MNAM: [['recordType', {
+      _COLL: zString,
       _WATR: uint8,
-    }, uint32le]],
+    }, unknown]],
     _MODL: [['recordType', {
       _APPA: zString,
+      _BPTD: zString,
       _CAMS: zString,
       _CLMT: zString,
-    }, uint32le]],
+      _GRAS: zString,
+      _MATO: zString,
+      _SLGM: zString,
+      _TACT: zString,
+    }, unknown]],
+    _NAME: [['recordType', {
+      _FOOO: uint32le,
+      _RACE: zString,
+    }, unknown]],
+    _NAM0: [['recordType', {
+      _FOOO: uint32le,
+      _WATR: [['value', 'float', {size:3}]],
+    }, unknown]],
     _NAM1: [['recordType', {
       _FOOO: uint32le,
       _BPTD: zString,
-    }]],
+    }, unknown]],
+    _NAM2: [['recordType', {
+      _FOOO: uint32le,
+      _WTHR: [['value', 'uint32le', {size:4}]],
+    }, unknown]],
+    _NAM3: [['recordType', {
+      _FOOO: uint32le,
+      _WTHR: [['value', 'uint32le', {size:4}]],
+    }, unknown]],
+    _NAM4: [['recordType', {
+      _FOOO: zString,
+      _WRLD: float,
+    }, unknown]],
     _ONAM: [['recordType', {
       _AMMO: sString,
       _ARMA: uint32le,
-    }]],
+    }, unknown]],
     _PNAM: [['recordType', {
       _ACTI: rgb,
-      _AVIF: uint32le,
-    }]],
+      _EQUP: [
+        ['formIds', [
+          ['formId', 'uint32le'],
+        ], {size:-1}]
+      ],
+    }, unknown]],
+    _RDAT: [['recordType', {
+      _FOOO: uint32le,
+    }, unknown]],
+    _RNAM: [['recordType', {
+      _FOOO: uint32le,
+    }, unknown]],
     _SNAM: [['recordType', {
       _LTEX: uint8,
-    }, uint32le]],
+    }, unknown]],
+    _SNDD: [['recordType', {
+      _FOOO: uint32le,
+    }, unknown]],
     _TNAM: [['recordType', {
       _CLMT: [
         ['sunriseBegin', 'uint8'],
@@ -950,13 +1169,23 @@ var subRecordFields: FieldArray = [
         ['volatility', 'uint8'],
         ['moons', 'uint8'],
       ],
-    }, uint32le]],
+    }, unknown]],
+    _UNAM: [['recordType', {
+      _FOOO: uint16le,
+      _WRLD: zString,
+    }, unknown]],
     _VNAM: [['recordType', {
-      _ACTI: uint32le,
       _AVIF: float,
-    }]],
+      _SNCT: uint16le,
+    }, unknown]],
+    _WNAM: [['recordType', {
+      _FOOO: uint16le,
+    }, unknown]],
     _XNAM: [['recordType', {
       _CELL: uint8,
-    }, uint32le]],
-  }],
+    }, unknown]],
+    _YNAM: [['recordType', {
+      _FOOO: uint32le,
+    }, unknown]],
+  }, unknown],
 ];
