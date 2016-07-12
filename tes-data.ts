@@ -79,6 +79,7 @@ function handlePathOrFd<T>(file: string | number, continuation: FileContinuation
   var onOpen = (err: NodeJS.ErrnoException, fd: number) => {
     if (err) {
       callback(err, null);
+      return;
     }
 
     var withClose: Callback<T> = (err, result) => {
@@ -130,11 +131,23 @@ export function visit(file: string|number, options: VisitOptions) {
     origOffset = 0;
   }
 
-  getRecordOffsets(file, origOffset, (err, pairs) => {
+  var callback: (err: NodeJS.ErrnoException, pairs: [number, string][]) => void;
+  callback = (err, pairs) => {
+    if (err) {
+      console.log(err);
+      return;
+    }
+
     for (var pair of pairs) {
       if (options.visitOffset) {
         options.visitOffset(pair[0], pair[1]);
       }
     }
-  })
+
+    for (pair of pairs.slice(1)) {
+      getRecordOffsets(file, pair[0], callback);
+    }
+  }
+
+  getRecordOffsets(file, origOffset, callback);
 }

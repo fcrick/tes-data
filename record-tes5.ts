@@ -38,7 +38,10 @@ export function getRecord(buffer: Buffer): Record {
   while (offset < buffer.length) {
     var subRecord = <Record>{};
 
-    readFields(subRecord, buffer, offset, subRecordFields, context);
+    // cheating a little here to simplify repeating records
+    var endOffset = offset + buffer.readUInt16LE(offset + 4) + 6;
+
+    readFields(subRecord, buffer.slice(offset, endOffset), 0, subRecordFields, context);
 
     offset += subRecord.size + 6;
     record.subRecords.push(subRecord);
@@ -94,7 +97,11 @@ function writeField(write: (arr: Uint8Array) => void, record: Record, field: Fie
     }
   }, (name, fields) => {
     // nested
-
+    if (record[name]) {
+      for (var entry of record[name]) {
+        writeFields(write, entry, fields, context);
+      }
+    }
   }, fields => {
     // condition resolve
     writeFields(write, record, fields, context);
@@ -117,7 +124,13 @@ function numericWriter<T>(
 ) {
   var buffer = new ArrayBuffer(fieldSize[type] * count);
   var array = new arrayType(buffer);
-  array[0] = record[name];
+  if (count === 1) {
+    array[0] = name in record ? record[name] : 0;
+  } else {
+    for (var i of range(count)) {
+      array[i] = record[name][i];
+    }
+  }
   write(new Uint8Array(buffer));
 }
 
@@ -163,7 +176,7 @@ function readField(record: Record, buffer: Buffer, offset: number, field: Field,
 
   // control flow analysis will magically make this awesome someday
   let name = field[0];
-  let type:string;
+  let type: FieldTypes;
   let count = 1;
 
   // really seems like the below logic should be put into a function
@@ -190,12 +203,12 @@ function readField(record: Record, buffer: Buffer, offset: number, field: Field,
   }
 
   if (typeof field[1] === 'string') {
-    type = <string>field[1];
+    type = <FieldTypes>field[1];
   }
   else if (Array.isArray(field[1])) {
     if (count) {
       record[name] = [];
-      for (var i = 0; i < count && offset < buffer.length; ++i) {
+      for (var i = 0; (i < count || count === -1) && offset < buffer.length; ++i) {
         var newRecord = <Record>{};
         record[name].push(newRecord);
         offset = readFields(newRecord, buffer, offset, <FieldArray>field[1], context);
@@ -204,9 +217,17 @@ function readField(record: Record, buffer: Buffer, offset: number, field: Field,
   }
   else if (typeof field[1] === 'object') {
     var valueMap = <{[type:string]:FieldArray}>field[1];
-    var fields = valueMap['_'+record[name]];
+    var value = record[name];
+    if (typeof value === 'undefined') {
+      value = 0;
+    }
+    var fields = valueMap['_'+value];
     if (!fields) {
-      fields = valueMap['_'+context[name]];
+      var value = name in context ? context[name] : null;
+      if (typeof value === 'undefined') {
+        value = 0;
+      }
+      fields = valueMap['_'+value];
       if (!fields) {
         fields = <FieldArray>field[2];
       }
@@ -220,7 +241,7 @@ function readField(record: Record, buffer: Buffer, offset: number, field: Field,
     var value = null;
 
     if (count !== 0) {
-      value = reader(buffer, offset, count);
+      value = reader(buffer, type, offset, count);
     }
 
     if (options && options.persist) {
@@ -295,9 +316,19 @@ function handleField(
   }
   else if (typeof field[1] === 'object') {
     var valueMap = <{[type:string]:FieldArray}>field[1];
-    var fields = valueMap['_'+record[name]];
+    var value = record[name];
+    if (typeof value === 'undefined') {
+      value = 0;
+    }
+
+    var fields = valueMap['_'+value];
     if (!fields) {
-      fields = valueMap['_'+context[name]];
+      var value = name in context ? context[name] : null;
+      if (typeof value === 'undefined') {
+        value = 0;
+      }
+      
+      fields = valueMap['_'+value];
       if (!fields) {
         fields = <FieldArray>field[2];
       }
@@ -314,7 +345,7 @@ function nullIfEqual<T>(value: T, test: T) {
 }
 
 interface FieldReader {
-  (buffer:Buffer, offset:number, count: number): any;
+  (buffer:Buffer, type: FieldTypes, offset:number, count: number): any;
 }
 
 let range = function*(max: number) {
@@ -322,8 +353,22 @@ let range = function*(max: number) {
     yield i
 }
 
+function numericReader(
+  bufferReader: (offset: number) => number,
+  fieldType: FieldTypes,
+  offset: number,
+  count: number
+): number|number[] {
+  if (count === 1) {
+    return nullIfEqual(bufferReader(offset), 0)
+  }
+  else {
+    return [...range(count)].map(i => bufferReader(offset + i * fieldSize[fieldType]));
+  }
+}
+
 var fieldReaders: {[fieldType:string]: FieldReader} = {
-  char: (b,o,c) => {
+  char: (b,t,o,c) => {
     if (c === -1) {
       var all = b.toString('utf8', o, b.length);
       return all.substr(0, all.indexOf('\0'));
@@ -332,21 +377,13 @@ var fieldReaders: {[fieldType:string]: FieldReader} = {
       return nullIfEqual(b.toString('utf8', o, o+c), '');
     }
   },
-  float: (b,o,c) => nullIfEqual(b.readFloatLE(o), 0),
-  int8: (b,o,c) => nullIfEqual(b.readInt8(o), 0),
-  int16le: (b,o,c) => nullIfEqual(b.readInt16LE(o), 0),
-  int32le: (b,o,c) => nullIfEqual(b.readInt32LE(o), 0),
-  uint8: (b,o,c) => nullIfEqual(b.readUInt8(o), 0),
-  uint16le: (b,o,c) => nullIfEqual(b.readUInt16LE(o), 0),
-  uint32le: (b,o,c) => {
-    // TODO all numerics should have this behavior
-    if (c === 1) {
-      return nullIfEqual(b.readUInt32LE(o), 0)
-    }
-    else {
-      return [...range(Math.min(c, Math.floor((b.length-o)/4)))].map(i => b.readUInt32LE(o+i*4));
-    }
-  },
+  float: (b,t,o,c) => numericReader(b.readFloatLE.bind(b), t, o, c),
+  int8: (b,t,o,c) => numericReader(b.readInt8.bind(b), t, o, c),
+  int16le: (b,t,o,c) => numericReader(b.readInt16LE.bind(b), t, o, c),
+  int32le: (b,t,o,c) => numericReader(b.readInt32LE.bind(b), t, o, c),
+  uint8: (b,t,o,c) => numericReader(b.readUInt8.bind(b), t, o, c),
+  uint16le: (b,t,o,c) => numericReader(b.readUInt16LE.bind(b), t, o, c),
+  uint32le: (b,t,o,c) => numericReader(b.readUInt32LE.bind(b), t, o, c),
 };
 
 var fieldSize: {[fieldType: string]: number} = {
@@ -391,13 +428,13 @@ var recordHeader: FieldArray = [
     ['groupType', 'uint32le'],
     ['stamp', 'uint16le'],
     ['unknown1', 'uint16le'],
-    ['version', 'uint16le'],
+    ['version', 'uint16le', {persist:true}],
     ['unknown2', 'uint16le'],
   ]}, [
     ['flags','uint32le'],
     ['id','uint32le',{format:'hex'}],
     ['revision','uint32le'],
-    ['version','uint16le'],
+    ['version','uint16le', {persist:true}],
     ['unknown','uint16le'],
   ]],
 ];
@@ -439,7 +476,6 @@ var wString: FieldArray = [
   ['value', 'char', {size:'valueSize'}],
 ];
 
-// probably should add a null-terminated option instead
 var zString: FieldArray = [
   ['value', 'char', {size:-1}]
 ];
@@ -457,16 +493,26 @@ var goldAndWeight: FieldArray = [
 ];
 
 var modt: FieldArray = [
-  ['count', 'uint32le'],
-  ['unknown4count', 'uint32le'],
-  ['unknown5count', 'uint32le'],
-  ['unknown3', 'uint32le', {size:'count', sizeOffset:-2}],
-  ['unknown4', [
-    ['unknown1', 'uint32le'],
-    ['textureType', 'char', {size:4}],
-    ['unknown2', 'uint32le'],
-  ], {size:'unknown4count'}],
-  ['unknown5', 'uint32le', {size:'unknown5count'}],
+  ['version', {
+    _40: [
+      ['count', 'uint32le'],
+      ['unknown4count', 'uint32le'],
+      ['unknown5count', 'uint32le'],
+      ['unknown3', 'uint32le', {size:'count', sizeOffset:-2}],
+      ['unknown4', [
+        ['unknown1', 'uint32le'],
+        ['textureType', 'char', {size:4}],
+        ['unknown2', 'uint32le'],
+      ], {size:'unknown4count'}],
+      ['unknown5', 'uint32le', {size:'unknown5count'}],
+    ],
+  }, [
+    ['entries', [
+      ['unfdsfknown1', 'uint32le'],
+      ['unknown2', 'char', {size:4}],
+      ['unknown3', 'uint32le'],
+    ], {size:-1}],
+  ]],
 ];
 
 var mods: FieldArray = [
@@ -500,10 +546,9 @@ var subRecordFields: FieldArray = [
     _EITM: uint32le,
     _ETYP: uint32le,
     _FCHT: zString,
-    _FNAM: uint16le,
     _FPRT: zString,
     _FULL: lString,
-    _HNAM: float,
+    _GNAM: zString,
     _ICON: zString,
     _ICO2: zString,
     _INAM: uint32le,
@@ -512,7 +557,6 @@ var subRecordFields: FieldArray = [
     _MCHT: zString, 
     _MICO: zString,
     _MIC2: zString,
-    _MNAM: uint32le,
     _MOD2: zString,
     _MOD3: zString,
     _MOD4: zString,
@@ -523,13 +567,13 @@ var subRecordFields: FieldArray = [
     _NAM2: uint32le,
     _NAM3: uint32le,
     _NAM4: zString,
+    _NVER: uint32le,
     _QUAL: uint32le,
     _RAGA: uint32le,
     _RDAT: uint32le,
     _RNAM: uint32le,
-    _SNAM: uint32le,
     _SNDD: uint32le,
-    _TNAM: uint32le,
+    
     _WNAM: uint32le,
     _XAPD: uint8,
     _XEZN: uint32le,
@@ -538,7 +582,6 @@ var subRecordFields: FieldArray = [
     _XLCN: uint32le,
     _XLRL: uint32le,
     _XLRT: uint32le,
-    _XNAM: uint32le,
     _XOWN: uint32le,
     _XPRD: float,
     _XRGD: unknown,
@@ -654,6 +697,60 @@ var subRecordFields: FieldArray = [
     _KWDA: [['keywords', 'uint32le', {size:'keywordCount'}]],
     _MODT: modt, _DMDT: modt, _MO2T: modt, _MO3T: modt, _MO4T: modt, _MO5T: modt,
     _MODS: mods, _DMDS: mods, _MO2S: mods, _MO3S: mods, _MO4S: mods, _MO5S: mods,
+    _NVMI: [
+      ['navmesh', 'uint32le'],
+      ['unknown1', 'uint32le'],
+      ['x', 'float'],
+      ['y', 'float'],
+      ['z', 'float'],
+      ['mergeFlags', 'uint32le'],
+      ['mergeCount', 'uint32le'],
+      ['mergedTo', 'uint32le', {size:'mergeCount'}],
+      ['preferredCount', 'uint32le'],
+      ['preferredMerges', 'uint32le', {size:'preferredCount'}],
+      ['linkedDoors', 'uint32le'],
+      ['doors', [
+        ['unknown', 'uint32le'],
+        ['door', 'uint32le'],
+      ], {size:'linkedDoors'}],
+      ['isIsland', 'uint8'],
+      ['isIsland', {_0: []}, [
+        ['minX', 'float'],
+        ['minY', 'float'],
+        ['minZ', 'float'],
+        ['maxX', 'float'],
+        ['maxY', 'float'],
+        ['maxZ', 'float'],
+        ['triangleCount', 'uint32le'],
+        ['triangles', [
+          ['indices', 'uint16le', {size:3}],
+        ], {size:'triangleCount'}],
+        ['vertexCount', 'uint32le'],
+        ['vertices', [
+          ['vertex', 'float', {size: 3}],
+        ], {size:'vertexCount'}],
+      ]],
+      ['marker', 'uint32le'],
+      ['worldSpace', 'uint32le'],
+      ['worldSpace', {_60: [
+        ['gridX', 'int16le'],
+        ['gridY', 'int16le'],
+      ]}, [
+        ['cell', 'uint32le'],
+      ]],
+    ],
+    _NVPP: [
+      ['pathCount', 'uint32le'],
+      ['paths', [
+        ['formIdCount', 'uint32le'],
+        ['pathFormId', 'uint32le', {size:'formIdCount'}],
+      ], {size:'pathCount'}],
+      ['indexSize', 'uint32le'],
+      ['indices', [
+        ['node', 'uint32le'],
+        ['nodeIndex', 'uint32le'],
+      ], {size: 'indexSize'}],
+    ],
     _OBND: [
       ['x1', 'int16le'],
       ['y1', 'int16le'],
@@ -697,6 +794,11 @@ var subRecordFields: FieldArray = [
           }],
         ], {size:'propertyCount'}],
       ], {size:'scriptCount'}],
+    ],
+    _WLST: [
+      ['weather', 'uint32le'],
+      ['percent', 'uint32le'],
+      ['global', 'uint32le'],
     ],
     _XAPR: [
       ['formId', 'uint32le'],
@@ -764,6 +866,27 @@ var subRecordFields: FieldArray = [
           ['betweenPercent', 'float'],
           ['nearTargetDistance', 'float'],
         ],
+        _CELL: [
+          ['entries', uint8, {size:-1}], // 1 or 2 bytes
+        ],
+        _CPTH: uint8,
+        _DUAL: [
+          ['projectile', 'uint32le'],
+          ['explosion', 'uint32le'],
+          ['effectShader', 'uint32le'],
+          ['hitEffectArt', 'uint32le'],
+          ['impactDataSet', 'uint32le'],
+          ['flags', 'uint32le'],
+        ],
+        _DEBR: [
+          ['percent', 'uint8'],
+          ...zString,
+          ['flags', 'uint8'],
+        ],
+        _EYES: uint8,
+        _PERK: uint8,
+        _WATR: uint16le,
+        _WRLD: uint8,
       }, uint32le],
     ],
     _DNAM: [['recordType', {
@@ -779,10 +902,29 @@ var subRecordFields: FieldArray = [
         ['unknown2', 'uint8'],
         ['weaponAdjust', 'float'],
       ],
+      _DOBJ: [
+        ['entries', [
+          ['key', 'char', {size:4}],
+          ['value', 'uint32le'],
+        ], {size:-1}],
+      ],
+      _VTYP: uint8,
+    }, uint32le]],
+    _FNAM: [['recordType', {
+      _DOOR: uint8,
+      _WATR: uint8,
+      _CLMT: zString,
+    }, uint16le]],
+    _HNAM: [['recordType', {
+      _LTEX: uint16le,
+    }, float]],
+    _MNAM: [['recordType', {
+      _WATR: uint8,
     }, uint32le]],
     _MODL: [['recordType', {
       _APPA: zString,
       _CAMS: zString,
+      _CLMT: zString,
     }, uint32le]],
     _NAM1: [['recordType', {
       _FOOO: uint32le,
@@ -796,9 +938,25 @@ var subRecordFields: FieldArray = [
       _ACTI: rgb,
       _AVIF: uint32le,
     }]],
+    _SNAM: [['recordType', {
+      _LTEX: uint8,
+    }, uint32le]],
+    _TNAM: [['recordType', {
+      _CLMT: [
+        ['sunriseBegin', 'uint8'],
+        ['sunriseEnd', 'uint8'],
+        ['sunsetBegin', 'uint8'],
+        ['sunsetEnd', 'uint8'],
+        ['volatility', 'uint8'],
+        ['moons', 'uint8'],
+      ],
+    }, uint32le]],
     _VNAM: [['recordType', {
       _ACTI: uint32le,
       _AVIF: float,
     }]],
+    _XNAM: [['recordType', {
+      _CELL: uint8,
+    }, uint32le]],
   }],
 ];
