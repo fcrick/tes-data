@@ -485,6 +485,7 @@ var recordHeader: FieldArray = [
   ]],
 ];
 
+// simple types that are used frequently on their own
 var unknown: FieldArray = [
   ['value', 'uint8', {size:'size'}]
 ];
@@ -527,6 +528,7 @@ var lString: FieldArray = [
   ['localized', { _true: uint32le }, zString],
 ];
 
+// more complicated sets of fields for re-use
 var rgb: FieldArray = [
   ['r', 'uint8'],
   ['g', 'uint8'],
@@ -641,6 +643,7 @@ var locationData: FieldArray = [
   ['rZ', 'float'],
 ];
 
+// large subrecords that appear in multiple records
 var vmad: FieldArray = [
   ...scriptBlock,
   ['recordType', {
@@ -738,6 +741,7 @@ var xesp: FieldArray = [
   ['flags', 'uint32le'],
 ];
 
+// record types
 var achr: FieldArray = [['type', {
   _EDID: zString,
   _VMAD: vmad,
