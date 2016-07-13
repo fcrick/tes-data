@@ -123,6 +123,7 @@ export function getRecordBuffer(file: string|number, origOffset: number, callbac
 export interface VisitOptions {
   origOffset?: number; // alternative scan start location (default 0)
   visitOffset?: (offset: number, type: string) => void;
+  done?: () => void;
 }
 
 export function visit(file: string|number, options: VisitOptions) {
@@ -130,6 +131,8 @@ export function visit(file: string|number, options: VisitOptions) {
   if (typeof origOffset == 'undefined') {
     origOffset = 0;
   }
+
+  var outstanding = 0;
 
   var callback: (err: NodeJS.ErrnoException, pairs: [number, string][]) => void;
   callback = (err, pairs) => {
@@ -144,10 +147,18 @@ export function visit(file: string|number, options: VisitOptions) {
       }
     }
 
-    for (pair of pairs.slice(1)) {
+    pairs.shift();
+    for (pair of pairs) {
+      outstanding += 1;
       getRecordOffsets(file, pair[0], callback);
+    }
+
+    outstanding -= 1;
+    if (outstanding === 0 && options.done) {
+      options.done();
     }
   }
 
+  outstanding += 1;
   getRecordOffsets(file, origOffset, callback);
 }

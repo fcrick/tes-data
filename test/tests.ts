@@ -176,7 +176,7 @@ function checkBuffer(buffer: Buffer, offset: number, type: string) {
     folder += offsetHex.substr(0, 2) + '/';
   }
 
-  if (allCount <= 100 || mismatch) {
+  if ((allCount <= 1000 || mismatch) && record['recordType'] !== 'GRUP') {
     enqueueSave(folder, offsetHex, JSON.stringify(record, null, 2));
   }
 }

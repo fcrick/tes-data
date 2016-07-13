@@ -10,6 +10,26 @@ export interface Record {
   subRecords?: Record[];
 }
 
+export function getSubRecordOffsets(buffer: Buffer) {
+  var offsets: number[] = [];
+
+  // read the header, as we need to know if it's compressed
+  var record = <Record>{};
+  readFields(record, buffer, 0, recordHeader, {});
+
+  // don't support GRUP, WRLD, or compressed
+  if (['GRUP', 'WRLD'].indexOf(record['recordType']) !== -1 || record['flags'] & 0x40000)
+    return offsets;
+
+  var offset = 24;
+  while (offset < buffer.length) {
+    offsets.push(offset);
+    offset += 6 + buffer.readUInt16LE(offset + 4);
+  }
+
+  return offsets;
+}
+
 export function getRecord(buffer: Buffer, context?: Object): Record {
   var record = <Record>{};
 
