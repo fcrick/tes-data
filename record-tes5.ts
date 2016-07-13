@@ -4,7 +4,7 @@ import textEncoding = require('text-encoding');
 var TextEncoder = textEncoding.TextEncoder;
 
 export interface Record {
-  size: number;
+  size?: number;
   recordType?: string;
   type?: string; // subrecord type
   subRecords?: Record[];
@@ -196,46 +196,47 @@ function readFields(record: Record, buffer: Buffer, offset: number, fields: Fiel
 }
 
 function readField(record: Record, buffer: Buffer, offset: number, field: Field, context: Object): number {
-  if (offset >= buffer.length) {
-    return offset;
-  }
+  return handleField<number>(field, record, context, (name, type, count, options) => {
+    // simple
 
-  // control flow analysis will magically make this awesome someday
-  let name = field[0];
-  let type: FieldTypes;
-  let count = 1;
+    // allow us to skip fields that would be omitted if they are zero, if
+    // we're out of buffer.
+    if (options.omitIfZero && offset >= buffer.length) {
+      return offset;
+    }
 
-  // really seems like the below logic should be put into a function
-  // and given callbacks for the different scenarios or something, so
-  // the code understanding the format is limited, and exposed for others.
-  if (field.length === 3 && field[2] && typeof field[2] === 'object' && !Array.isArray(field[2])) {
-    var options = <FieldOptions>field[2];
-    if (typeof options.size === 'string') {
-      count = record[options.size];
-      if (typeof count === 'undefined') {
-        count = context[options.size];
-        if (typeof count === 'undefined') {
-          count = 0;
-        }
+    var reader = fieldReaders[type];
+    if (reader) {
+      var value = null;
+
+      if (count !== 0) {
+        value = reader(buffer, type, offset, count);
       }
-    }
-    else if (typeof options.size === 'number') {
-      count = <number>options.size;
-    }
 
-    if (typeof options.sizeOffset === 'number') {
-      count += options.sizeOffset;
-    }
+      if (options && options.persist) {
+        context[name] = value;
+      }
 
-    if (typeof options.sizeDivideBy === 'number') {
-      count /= options.sizeDivideBy;
-    }
-  }
+      if (value !== null) {
+        if (options && options.format === 'hex') {
+          if (typeof value === 'number') {
+            value = '0x'+value.toString(16);
+          }
+          else {
+            value = value.split('').map(c => c.charCodeAt(0).toString(16)).join('');
+          }
+        }
+        record[name] = value;
+      }
 
-  if (typeof field[1] === 'string') {
-    type = <FieldTypes>field[1];
-  }
-  else if (Array.isArray(field[1])) {
+      if (count === -1) {
+        count = value === null ? 1 : value.length + 1;
+      }
+
+      return offset + count * fieldSize[type];
+    }
+  }, (name, fields, count) => {
+    // nested
     if (count) {
       record[name] = [];
       for (var i = 0; (i < count || count === -1) && offset < buffer.length; ++i) {
@@ -244,60 +245,13 @@ function readField(record: Record, buffer: Buffer, offset: number, field: Field,
         offset = readFields(newRecord, buffer, offset, <FieldArray>field[1], context);
       }
     }
-  }
-  else if (typeof field[1] === 'object') {
-    var valueMap = <{[type:string]:FieldArray}>field[1];
-    var value = record[name];
-    if (typeof value === 'undefined') {
-      value = 0;
-    }
-    var fields = valueMap['_'+value];
-    if (!fields) {
-      var value = name in context ? context[name] : null;
-      if (typeof value === 'undefined') {
-        value = 0;
-      }
-      fields = valueMap['_'+value];
-      if (!fields) {
-        fields = <FieldArray>field[2];
-      }
-    }
-
+    return offset;
+  }, fields => {
+    // condition resolve
     return fields ? readFields(record, buffer, offset, fields, context) : offset;
-  }
-
-  var reader = fieldReaders[type];
-  if (reader) {
-    var value = null;
-
-    if (count !== 0) {
-      value = reader(buffer, type, offset, count);
-    }
-
-    if (options && options.persist) {
-      context[name] = value;
-    }
-
-    if (value !== null) {
-      if (options && options.format === 'hex') {
-        if (typeof value === 'number') {
-          value = '0x'+value.toString(16);
-        }
-        else {
-          value = value.split('').map(c => c.charCodeAt(0).toString(16)).join('');
-        }
-      }
-      record[name] = value;
-    }
-
-    if (count === -1) {
-      count = value === null ? 1 : value.length + 1;
-    }
-
-    return offset + count * fieldSize[type];
-  }
-
-  return offset;
+  }, () => {
+    return offset;
+  });
 }
 
 function getFieldCount(field: Field, record: Record, context: Object): number {
@@ -330,14 +284,14 @@ function getFieldCount(field: Field, record: Record, context: Object): number {
   return count;
 }
 
-function handleField(
+function handleField<T>(
   field: Field,
   record: Record,
   context: Object,
-  handleSimple: (name: string, type: FieldTypes, count: number, options: FieldOptions) => void,
-  handleNesting: (name: string, fields: FieldArray) => void,
-  handleCondition: (fields: FieldArray) => void,
-  handleError: () => void
+  handleSimple: (name: string, type: FieldTypes, count: number, options: FieldOptions) => T,
+  handleNesting: (name: string, fields: FieldArray, count:number) => T,
+  handleCondition: (fields: FieldArray) => T,
+  handleError: () => T
 ) {
   // control flow analysis will magically make this awesome someday
   let name = field[0];
@@ -346,7 +300,7 @@ function handleField(
     return handleSimple(name, <FieldTypes>field[1], getFieldCount(field, record, context), field[2] || {});
   }
   else if (Array.isArray(field[1])) {
-    return handleNesting(name, <FieldArray>field[1] || []);
+    return handleNesting(name, <FieldArray>field[1] || [], getFieldCount(field, record, context));
   }
   else if (typeof field[1] === 'object') {
     var valueMap = <{[type:string]:FieldArray}>field[1];
@@ -371,7 +325,7 @@ function handleField(
     return handleCondition(fields || []);
   }
 
-  handleError();
+  return handleError();
 }
 
 function nullIfEqual<T>(value: T, test: T) {
