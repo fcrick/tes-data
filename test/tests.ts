@@ -139,6 +139,7 @@ function readRecords() {
 }
 
 // var path = 'C:/src/skyrimmods/Brigandage v.4-32706-4/Brigandage.esp';
+// var path = 'C:/src/skyrimmods/Immersive Armors v8-19733-8/Hothtrooper44_ArmorCompilation.esp';
 var path = prefix + paths[0];
 var mismatchCount = 0;
 var allCount = 0;
@@ -155,22 +156,40 @@ function checkBuffer(buffer: Buffer, offset: number, type: string) {
     console.log(allCount);
   }
 
-  if (!record['compressed'] && buffer.compare(newBuffer) !== 0) {
-    var offsetHex = offset.toString(16);
+  if (record['compressed']) {
+    return;
+  }
+
+  var folder = './test/data/';
+  var offsetHex = offset.toString(16);
+
+  if (buffer.compare(newBuffer) !== 0) {
     console.log(`mismatch at ${offsetHex}`);
-    fs.writeFile(`./test/data/${offsetHex}A.bin`, buffer);
-    //console.log(buffer.toString('hex'));
-    fs.writeFile(`./test/data/${offsetHex}B.bin`, newBuffer);
-    //console.log('0x' + newBuffer.toString('hex'));
-    console.log(newBuffer.length.toString(16));
-    fs.writeFile(`./test/data/${offsetHex}.json`, JSON.stringify(record, null, 2));
-    //console.log(JSON.stringify(record));
+
+    fs.writeFile(`${folder}${offsetHex}_A.bin`, buffer);
+    fs.writeFile(`${folder}${offsetHex}_B.bin`, newBuffer);
 
     mismatchCount += 1;
   }
+  else {
+    folder += offsetHex.substr(0, 2) + '/';
+  }
+
+  fs.mkdir(folder, () => fs.writeFile(
+    `${folder}${offsetHex}.json`,
+    JSON.stringify(record, null, 2),
+    () => {}
+  ));
 }
 
+var seen = new Set<number>();
+
 function visitOffset(offset: number, type: string, file: string|number) {
+  if (offset in seen) {
+    return;
+  }
+  seen[offset] = true;
+
   tesData.getRecordBuffer(file, offset, (e, b) => {
     if (e) {
       console.log(e);

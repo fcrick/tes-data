@@ -138,8 +138,8 @@ export function visit(file: string|number, options: VisitOptions) {
       return;
     }
 
-    for (var pair of pairs) {
-      if (options.visitOffset) {
+    if (options.visitOffset) {
+      for (var pair of pairs) {
         options.visitOffset(pair[0], pair[1]);
       }
     }

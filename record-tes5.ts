@@ -572,6 +572,13 @@ var mods: FieldArray = [
   ], {size:'count'}],
 ];
 
+var scriptObject: FieldArray = [
+  ['objFormat', {_1:[['formId','uint32le']]}], // prefix if objFormat is 1 (v1)
+  ['alias', 'int16le'], // doc says this is unsigned in v2 but i think that's an error
+  ['unused', 'uint16le'],
+  ['objFormat', {_2:[['formId','uint32le']]}], // suffix in objFormat is 2 (v2)
+];
+
 var scriptBlock: FieldArray = [
   ['version', 'int16le'],
   ['objFormat', 'int16le', {persist:true}],
@@ -587,16 +594,31 @@ var scriptBlock: FieldArray = [
       ['propertyType', 'uint8'],
       ['status', 'uint8'],
       ['propertyType', {
-        _1: [
-          ['objFormat', {_1:[['formId','uint32le']]}], // prefix if objFormat is 1 (v1)
-          ['alias', 'int16le'], // doc says this is unsigned in v2 but i think that's an error
-          ['unused', 'uint16le'],
-          ['objFormat', {_2:[['formId','uint32le']]}], // suffix in objFormat is 2 (v2)
-        ],
+        _1: scriptObject,
         _2: wString,
         _3: uint32le,
         _4: float,
         _5: int8,
+        _11: [
+          ['arraySize', 'uint32le'],
+          ['arrayObject', scriptObject, {size: 'arraySize'}],
+        ],
+        _12: [
+          ['arraySize', 'uint32le'],
+          ['arrayString', wString, {size: 'arraySize'}],
+        ],
+        _13: [
+          ['arraySize', 'uint32le'],
+          ['arrayInt', 'int32le', {size: 'arraySize'}],
+        ],
+        _14: [
+          ['arraySize', 'uint32le'],
+          ['arrayFloat', 'float', {size: 'arraySize'}],
+        ],
+        _15: [
+          ['arraySize', 'uint32le'],
+          ['arrayBool', 'uint8', {size: 'arraySize'}],
+        ],
       }],
     ], {size:'propertyCount'}],
   ], {size:'scriptCount'}]
@@ -678,7 +700,9 @@ var subRecordFields: FieldArray = [
       ['flags', 'uint8'],
       ['unknown1', 'uint8'],
       ['unknown2', 'uint16le'],
-      ['skill', 'uint32le'],
+      ['version', {_20: [], _21: []}, [
+        ['skill', 'uint32le'],
+      ]],
     ],
     _BOD2: [
       ['bodyPartFlags', 'uint32le'],
@@ -837,65 +861,86 @@ var subRecordFields: FieldArray = [
     _VMAD: [
       ...scriptBlock,
       ['recordType', {
+        _INFO: [
+          ['alwaysTwo', 'int8', {omitIfZero:true}],
+          ['alwaysTwo', {_2: [
+            ['flags', 'uint8'],
+            ['fileNameSize', 'uint16le'],
+            ['fileName', 'char', {size:'fileNameSize'}],
+            ['flags', {
+              _1: [['fragments', fragment, {size:1}]],
+              _2: [['fragments', fragment, {size:1}]],
+              _3: [['fragments', fragment, {size:2}]],
+            }],
+          ]}],
+        ],
         _PACK: [
-          ['unknown', 'int8'],
-          ['flags', 'uint8'],
-          ['fileNameSize', 'uint16le'],
-          ['fileName', 'char', {size:'fileNameSize'}],
-          ['flags', {
-            _1: [['fragments', fragment, {size:1}]],
-            _2: [['fragments', fragment, {size:1}]],
-            _3: [['fragments', fragment, {size:2}]],
-            _4: [['fragments', fragment, {size:1}]],
-            _5: [['fragments', fragment, {size:2}]],
-            _6: [['fragments', fragment, {size:2}]],
-            _7: [['fragments', fragment, {size:3}]],
-          }],
+          ['alwaysTwo', 'int8', {omitIfZero:true}],
+          ['alwaysTwo', {_2: [
+            ['flags', 'uint8'],
+            ['fileNameSize', 'uint16le'],
+            ['fileName', 'char', {size:'fileNameSize'}],
+            ['flags', {
+              _1: [['fragments', fragment, {size:1}]],
+              _2: [['fragments', fragment, {size:1}]],
+              _3: [['fragments', fragment, {size:2}]],
+              _4: [['fragments', fragment, {size:1}]],
+              _5: [['fragments', fragment, {size:2}]],
+              _6: [['fragments', fragment, {size:2}]],
+              _7: [['fragments', fragment, {size:3}]],
+            }],
+          ]}],
         ],
         _PERK: [
-          ['unknown', 'uint8'],
-          ['fileNameSize', 'uint16le'],
-          ['fileName', 'char', {size:'fileNameSize'}],
-          ['fragmentCount', 'uint16le'],
-          ['fragments', [
-            ['index', 'uint16le'],
-            ['unknown1', 'uint16le'],
-            ...fragment,
-          ], {size:'fragmentCount'}],
+          ['alwaysTwo', 'uint8', {omitIfZero:true}],
+          ['alwaysTwo', {_2: [
+            ['fileNameSize', 'uint16le'],
+            ['fileName', 'char', {size:'fileNameSize'}],
+            ['fragmentCount', 'uint16le'],
+            ['fragments', [
+              ['index', 'uint16le'],
+              ['unknown1', 'uint16le'],
+              ...fragment,
+            ], {size:'fragmentCount'}],
+          ]}],
         ],
         _QUST: [
-          ['unknown', 'int8'],
-          ['fragmentCount', 'uint16le'],
-          ['fileNameSize', 'uint16le'],
-          ['fileName', 'char', {size:'fileNameSize'}],
-          ['fragments', [
-            ['index', 'uint16le'],
-            ['unknown1', 'int16le'],
-            ['logEntry', 'int32le'],
-            ...fragment,
-          ], {size:'fragmentCount'}],
-          ['aliasCount', 'uint16le'],
-          ['aliases', [
-            ['object', 'uint32le'],
-            ...scriptBlock,
-          ], {size:'aliasCount'}],
+          ['alwaysTwo', 'int8', {omitIfZero:true}],
+          ['alwaysTwo', {_2: [
+            ['fragmentCount', 'uint16le'],
+            ['fileNameSize', 'uint16le'],
+            ['fileName', 'char', {size:'fileNameSize'}],
+            ['fragments', [
+              ['index', 'uint16le'],
+              ['unknown1', 'int16le'],
+              ['logEntry', 'int32le'],
+              ...fragment,
+            ], {size:'fragmentCount'}],
+            ['aliasCount', 'uint16le'],
+            ['aliases', [
+              ...scriptObject,
+              ...scriptBlock,
+            ], {size:'aliasCount'}],
+          ]}],
         ],
         _SCEN: [
-          ['unknown', 'int8'],
-          ['flags', 'uint8'],
-          ['fileNameSize', 'uint16le'],
-          ['fileName', 'char', {size:'fileNameSize'}],
-          ['flags', {
-            _1: [['fragments', fragment, {size:1}]],
-            _2: [['fragments', fragment, {size:1}]],
-            _3: [['fragments', fragment, {size:2}]],
-          }],
-          ['phaseCount', 'uint16le'],
-          ['phases', [
-            ['unknown1', 'int8'],
-            ['phase', 'uint32le'],
-            ...fragment,
-          ], {size:'phaseCount'}],
+          ['alwaysTwo', 'int8', {omitIfZero:true}],
+          ['alwaysTwo', {_2: [
+            ['flags', 'uint8'],
+            ['fileNameSize', 'uint16le'],
+            ['fileName', 'char', {size:'fileNameSize'}],
+            ['flags', {
+              _1: [['fragments', fragment, {size:1}]],
+              _2: [['fragments', fragment, {size:1}]],
+              _3: [['fragments', fragment, {size:2}]],
+            }],
+            ['phaseCount', 'uint16le'],
+            ['phases', [
+              ['unknown1', 'int8'],
+              ['phase', 'uint32le'],
+              ...fragment,
+            ], {size:'phaseCount'}],
+          ]}],
         ],
       }],
     ],
