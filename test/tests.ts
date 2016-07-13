@@ -160,10 +160,11 @@ function checkBuffer(buffer: Buffer, offset: number, type: string) {
     return;
   }
 
-  var folder = './test/data/';
+  var folder = '../test/data/';
   var offsetHex = offset.toString(16);
+  var mismatch = buffer.compare(newBuffer) !== 0;
 
-  if (buffer.compare(newBuffer) !== 0) {
+  if (mismatch) {
     console.log(`mismatch at ${offsetHex}`);
 
     fs.writeFile(`${folder}${offsetHex}_A.bin`, buffer);
@@ -175,10 +176,31 @@ function checkBuffer(buffer: Buffer, offset: number, type: string) {
     folder += offsetHex.substr(0, 2) + '/';
   }
 
+  if (allCount <= 100 || mismatch) {
+    enqueueSave(folder, offsetHex, JSON.stringify(record, null, 2));
+  }
+}
+
+var queue: [string, string, string][] = [];
+
+function enqueueSave(folder: string, offsetHex: string, record: string) {
+  queue.push([folder, offsetHex, record]);
+  if (queue.length === 1) {
+    doSave(folder, offsetHex, record);
+  }
+}
+
+function doSave(folder: string, offsetHex: string, record: string) {
   fs.mkdir(folder, () => fs.writeFile(
     `${folder}${offsetHex}.json`,
-    JSON.stringify(record, null, 2),
-    () => {}
+    record,
+    () => {
+      queue.shift();
+      if (queue.length > 0) {
+        var next = queue[0];
+        doSave(next[0], next[1], next[2]);
+      }
+    }
   ));
 }
 
