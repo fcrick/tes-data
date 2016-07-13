@@ -641,10 +641,229 @@ var locationData: FieldArray = [
   ['rZ', 'float'],
 ];
 
+var vmad: FieldArray = [
+  ...scriptBlock,
+  ['recordType', {
+    _INFO: [
+      ['alwaysTwo', 'int8', {omitIfZero:true}],
+      ['alwaysTwo', {_2: [
+        ['flags', 'uint8'],
+        ['fileNameSize', 'uint16le'],
+        ['fileName', 'char', {size:'fileNameSize'}],
+        ['flags', {
+          _1: [['fragments', fragment, {size:1}]],
+          _2: [['fragments', fragment, {size:1}]],
+          _3: [['fragments', fragment, {size:2}]],
+        }],
+      ]}],
+    ],
+    _PACK: [
+      ['alwaysTwo', 'int8', {omitIfZero:true}],
+      ['alwaysTwo', {_2: [
+        ['flags', 'uint8'],
+        ['fileNameSize', 'uint16le'],
+        ['fileName', 'char', {size:'fileNameSize'}],
+        ['flags', {
+          _1: [['fragments', fragment, {size:1}]],
+          _2: [['fragments', fragment, {size:1}]],
+          _3: [['fragments', fragment, {size:2}]],
+          _4: [['fragments', fragment, {size:1}]],
+          _5: [['fragments', fragment, {size:2}]],
+          _6: [['fragments', fragment, {size:2}]],
+          _7: [['fragments', fragment, {size:3}]],
+        }],
+      ]}],
+    ],
+    _PERK: [
+      ['alwaysTwo', 'uint8', {omitIfZero:true}],
+      ['alwaysTwo', {_2: [
+        ['fileNameSize', 'uint16le'],
+        ['fileName', 'char', {size:'fileNameSize'}],
+        ['fragmentCount', 'uint16le'],
+        ['fragments', [
+          ['index', 'uint16le'],
+          ['unknown1', 'uint16le'],
+          ...fragment,
+        ], {size:'fragmentCount'}],
+      ]}],
+    ],
+    _QUST: [
+      ['alwaysTwo', 'int8', {omitIfZero:true}],
+      ['alwaysTwo', {_2: [
+        ['fragmentCount', 'uint16le'],
+        ['fileNameSize', 'uint16le'],
+        ['fileName', 'char', {size:'fileNameSize'}],
+        ['fragments', [
+          ['index', 'uint16le'],
+          ['unknown1', 'int16le'],
+          ['logEntry', 'int32le'],
+          ...fragment,
+        ], {size:'fragmentCount'}],
+        ['aliasCount', 'uint16le'],
+        ['aliases', [
+          ...scriptObject,
+          ...scriptBlock,
+        ], {size:'aliasCount'}],
+      ]}],
+    ],
+    _SCEN: [
+      ['alwaysTwo', 'int8', {omitIfZero:true}],
+      ['alwaysTwo', {_2: [
+        ['flags', 'uint8'],
+        ['fileNameSize', 'uint16le'],
+        ['fileName', 'char', {size:'fileNameSize'}],
+        ['flags', {
+          _1: [['fragments', fragment, {size:1}]],
+          _2: [['fragments', fragment, {size:1}]],
+          _3: [['fragments', fragment, {size:2}]],
+        }],
+        ['phaseCount', 'uint16le'],
+        ['phases', [
+          ['unknown1', 'int8'],
+          ['phase', 'uint32le'],
+          ...fragment,
+        ], {size:'phaseCount'}],
+      ]}],
+    ],
+  }],
+];
+
+var xapr: FieldArray = [
+  ['formId', 'uint32le'],
+  ['delay', 'float'],
+];
+
+var xesp: FieldArray = [
+  ['parent', 'uint32le'],
+  ['flags', 'uint32le'],
+];
+
+var achr: FieldArray = [['type', {
+  _EDID: zString,
+  _VMAD: vmad,
+  _NAME: uint32le,
+  _XEZN: uint32le,
+  _XPRD: float,
+  _INAM: uint32le,
+  _PDTO: [
+    ['type', 'uint32le'],
+    ['formId', 'uint32le'],
+  ],
+  _XRGD: unknown,
+  _XRGB: unknown,
+  _XLCM: uint32le,
+  _XADP: uint8,
+  _XAPR: xapr,
+  _XLRT: uint32le,
+  _XHOR: uint32le,
+  _XESP: xesp,
+  _XOWN: uint32le,
+  _XLCN: uint32le,
+  _XLKR: [['formIds', 'uint32le', {size:'size', sizeDivideBy: 4}]],
+  _XLRL: uint32le,
+  _XSCL: float,
+  _DATA: locationData,
+}, unknown]];
+
+var refr: FieldArray = [['type', { 
+  _EDID: zString,
+  _VMAD: vmad,
+  _NAME: uint32le,
+  _XMBO: [['value', 'float', {size:3}]],
+  _XPRM: [
+    ...locationData,
+    ['unknown1', float],
+    ['unknown2', uint32le],
+  ],
+  _XPOD: [
+    ['origin', 'uint32le'],
+    ['dest', 'uint32le'],
+  ],
+  _XRMR: [
+    ['xrmrCount', 'uint8', {persist:true}],
+    ['flags', 'uint8', {size:3}],
+  ],
+  _LNAM: uint32le,
+  _INAM: uint32le,
+  _SCHR: [
+    ['unknown1', 'uint32le'],
+    ['refCount', 'uint32le'],
+    ['compiledSize', 'uint32le'],
+    ['variableCount', 'uint32le'],
+    ['schrType', 'uint32le'],
+  ],
+  _SCTX: sString,
+  _QNAM: uint32le,
+  _SCRO: uint32le,
+  _XLRM: uint32le,
+  _XRDS: float,
+  _XEMI: uint32le,
+  _XLIG: [
+    ['fovOffset', 'float'],
+    ['fadeOffset', 'float'],
+    ['endDistanceCap', 'float'],
+    ['shadowDepthBias', 'float'],
+  ],
+  _XESP: xesp,
+  _XALP: [
+    ['currentAlphaCutoff', 'uint8'],
+    ['defaultAlphaCutoff', 'uint8'],
+  ],
+  _XNDP: [
+    ['navm', 'uint32le'],
+    ['unknown', 'uint32le'],
+  ],
+  _XTEL: [
+    ['destinationDoor', 'uint32le'],
+    ...locationData,
+    ['flags', 'uint32le'],
+  ],
+  _XSCL: float,
+  _XAPD: uint8,
+  _XAPR: xapr,
+  _XLIB: uint32le,
+  _XLOC: [
+    ['level', 'int8'],
+    ['unknown1', 'uint8', {size:3}],
+    ['formId', 'uint32le'],
+    ['flags', 'uint8'],
+    ['unknown2', 'uint8', {size:11}],
+  ],
+  _XLRT: uint32le,
+  _XOWN: uint32le,
+  _XCNT: uint32le,
+  _XCVL: [['value', 'float', {size:3}]],
+  _XCVR: [['value', 'float', {size:3}]],
+  _XEZN: uint32le,
+  _XFVC: float,
+  _FNAM: uint8,
+  _FULL: lString,
+  _TNAM: uint16le,
+  _XHTW: float,
+  _XLCM: uint32le,
+  _XMBR: uint32le,
+  _XPWR: uint32le,
+  _XTRI: uint32le,
+  _XACT: uint32le,
+  _XATR: uint32le,
+  _XWCN: uint32le,
+  _XWCU: [['value', 'float', {size:'size',sizeDivideBy:4}]],
+  _XPRD: float,
+  _PDTO: [
+    ['type', 'uint32le'],
+    ['formId', 'uint32le'],
+  ],
+  _XLRL: uint32le,
+  _DATA: locationData,
+}, unknown]];
+
 var subRecordFields: FieldArray = [
   ['type', 'char', {size:4}],
   ['size', 'uint16le'],
-  ['recordType', {}, [
+  ['recordType', {
+    _ACHR: achr,
+    _REFR: refr,
+  }, [
     ['type', {
       // simple subrecords
       _BAMT: uint32le,
@@ -691,7 +910,7 @@ var subRecordFields: FieldArray = [
       _XLCM: uint32le,
       _XLCN: uint32le,
       _XLRL: uint32le,
-      _XLRT: uint32le,
+      
       _XOWN: uint32le,
       _XPRD: float,
       _XRGD: unknown,
@@ -868,105 +1087,14 @@ var subRecordFields: FieldArray = [
           _1: [['topic', 'char', {size:4}]],
         }],
       ],
-      _VMAD: [
-        ...scriptBlock,
-        ['recordType', {
-          _INFO: [
-            ['alwaysTwo', 'int8', {omitIfZero:true}],
-            ['alwaysTwo', {_2: [
-              ['flags', 'uint8'],
-              ['fileNameSize', 'uint16le'],
-              ['fileName', 'char', {size:'fileNameSize'}],
-              ['flags', {
-                _1: [['fragments', fragment, {size:1}]],
-                _2: [['fragments', fragment, {size:1}]],
-                _3: [['fragments', fragment, {size:2}]],
-              }],
-            ]}],
-          ],
-          _PACK: [
-            ['alwaysTwo', 'int8', {omitIfZero:true}],
-            ['alwaysTwo', {_2: [
-              ['flags', 'uint8'],
-              ['fileNameSize', 'uint16le'],
-              ['fileName', 'char', {size:'fileNameSize'}],
-              ['flags', {
-                _1: [['fragments', fragment, {size:1}]],
-                _2: [['fragments', fragment, {size:1}]],
-                _3: [['fragments', fragment, {size:2}]],
-                _4: [['fragments', fragment, {size:1}]],
-                _5: [['fragments', fragment, {size:2}]],
-                _6: [['fragments', fragment, {size:2}]],
-                _7: [['fragments', fragment, {size:3}]],
-              }],
-            ]}],
-          ],
-          _PERK: [
-            ['alwaysTwo', 'uint8', {omitIfZero:true}],
-            ['alwaysTwo', {_2: [
-              ['fileNameSize', 'uint16le'],
-              ['fileName', 'char', {size:'fileNameSize'}],
-              ['fragmentCount', 'uint16le'],
-              ['fragments', [
-                ['index', 'uint16le'],
-                ['unknown1', 'uint16le'],
-                ...fragment,
-              ], {size:'fragmentCount'}],
-            ]}],
-          ],
-          _QUST: [
-            ['alwaysTwo', 'int8', {omitIfZero:true}],
-            ['alwaysTwo', {_2: [
-              ['fragmentCount', 'uint16le'],
-              ['fileNameSize', 'uint16le'],
-              ['fileName', 'char', {size:'fileNameSize'}],
-              ['fragments', [
-                ['index', 'uint16le'],
-                ['unknown1', 'int16le'],
-                ['logEntry', 'int32le'],
-                ...fragment,
-              ], {size:'fragmentCount'}],
-              ['aliasCount', 'uint16le'],
-              ['aliases', [
-                ...scriptObject,
-                ...scriptBlock,
-              ], {size:'aliasCount'}],
-            ]}],
-          ],
-          _SCEN: [
-            ['alwaysTwo', 'int8', {omitIfZero:true}],
-            ['alwaysTwo', {_2: [
-              ['flags', 'uint8'],
-              ['fileNameSize', 'uint16le'],
-              ['fileName', 'char', {size:'fileNameSize'}],
-              ['flags', {
-                _1: [['fragments', fragment, {size:1}]],
-                _2: [['fragments', fragment, {size:1}]],
-                _3: [['fragments', fragment, {size:2}]],
-              }],
-              ['phaseCount', 'uint16le'],
-              ['phases', [
-                ['unknown1', 'int8'],
-                ['phase', 'uint32le'],
-                ...fragment,
-              ], {size:'phaseCount'}],
-            ]}],
-          ],
-        }],
-      ],
+      _VMAD: vmad,
       _WLST: [
         ['weather', 'uint32le'],
         ['percent', 'uint32le'],
         ['global', 'uint32le'],
       ],
-      _XAPR: [
-        ['formId', 'uint32le'],
-        ['delay', 'float'],
-      ],
-      _XESP: [
-        ['formId', 'uint32le'],
-        ['flags', 'uint32le'],
-      ],
+      _XAPR: xapr,
+      _XESP: xesp,
       _XLKR: [
         ['formIds', 'uint32le', {size:'size', sizeDivideBy: 4}],
       ],
@@ -1050,7 +1178,7 @@ var subRecordFields: FieldArray = [
             ['flags', 'uint32le'],
           ],
           _PERK: unknown,
-          _REFR: locationData,
+          
           _REVB: [
             ['decayTime', 'uint16le'],
             ['HFReference', 'uint16le'],
@@ -1155,7 +1283,6 @@ var subRecordFields: FieldArray = [
         _TACT: zString,
       }, unknown]],
       _NAME: [['recordType', {
-        _REFR: uint32le,
         _RACE: zString,
       }, unknown]],
       _NAM0: [['recordType', {
@@ -1225,13 +1352,6 @@ var subRecordFields: FieldArray = [
       }, unknown]],
       _XNAM: [['recordType', {
         _CELL: uint8,
-      }, unknown]],
-      _XTEL: [['recordType', {
-        _REFR: [
-          ['destinationDoor', 'uint32le'],
-          ...locationData,
-          ['flags', 'uint32le'],
-        ],
       }, unknown]],
       _YNAM: [['recordType', {
         _FOOO: uint32le,
