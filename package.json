@@ -12,6 +12,7 @@
   "homepage": "https://github.com/fcrick/tes-data",
   "license": "Unlicense",
   "devDependencies": {
-    "typescript": "^1.8.10"
+    "typescript": "^1.8.10",
+    "typings": "^1.3.1"
   }
 }
