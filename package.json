@@ -1,5 +1,5 @@
 {
-  "name": "tes-data",
+  "name": "@fcrick/tes-data",
   "author": "Francis Crick",
   "version": "0.0.0",
   "description": "Reads and writes Skyrim and Fallout's esm and esp files",
