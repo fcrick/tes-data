@@ -15,6 +15,7 @@
     "LICENSE.md"
   ],
   "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
   "bug": {
     "url": "https://github.com/fcrick/tes-data/issues"
   },
