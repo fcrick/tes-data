@@ -6,6 +6,9 @@
   "keywords": [
     "skyrim"
   ],
+  "scripts": {
+    "prepublish": "typings install"
+  },
   "bug": {
     "url": "https://github.com/fcrick/tes-data/issues"
   },
