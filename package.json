@@ -1,6 +1,6 @@
 {
   "name": "tes-data",
-  "author": "Francis Crick <fcrick@gmail.com",
+  "author": "Francis Crick",
   "version": "0.0.0",
   "description": "Reads and writes Skyrim and Fallout's esm and esp files",
   "keywords": [
@@ -16,9 +16,6 @@
   ],
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
-  "bug": {
-    "url": "https://github.com/fcrick/tes-data/issues"
-  },
   "homepage": "https://github.com/fcrick/tes-data",
   "repository": {
     "type": "git",
@@ -26,6 +23,21 @@
   },
   "license": "Unlicense",
   "devDependencies": {
+    "typescript": "^1.8.10",
+    "typings": "^1.3.1"
+  },
+  "bugs": {
+    "url": "https://github.com/fcrick/tes-data/issues"
+  },
+  "dependencies": {
+    "binary-parser": "^1.1.5",
+    "immutable": "^3.8.1",
+    "numeral": "^1.5.3",
+    "pack": "^0.2.8",
+    "streamifier": "^0.1.1",
+    "tape": "^4.6.0",
+    "text-encoding": "^0.6.0",
+    "through": "^2.3.8",
     "typescript": "^1.8.10",
     "typings": "^1.3.1"
   }
