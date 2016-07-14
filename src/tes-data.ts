@@ -1,5 +1,3 @@
-// <reference path="typings/index.d.ts" />
-
 import fs = require('fs');
 
 export interface Callback<T> {

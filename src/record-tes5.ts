@@ -1,4 +1,3 @@
-// <reference path="./tes-data.ts"/>
 
 import textEncoding = require('text-encoding');
 var TextEncoder = textEncoding.TextEncoder;

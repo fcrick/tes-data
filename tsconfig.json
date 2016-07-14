@@ -15,13 +15,14 @@
         "preserveConstEnums": true,
         "suppressImplicitAnyIndexErrors": true,
         "sourceMap": true,
-        "outDir": "bin",
+        "outDir": "dist",
         "watch": true
     },
     "exclude": [
         "node_modules",
         "typings/browser",
-        "typings/browser.d.ts"
+        "typings/browser.d.ts",
+        "dist"
     ],
     "compileOnSave": true,
     "buildOnSave": false,

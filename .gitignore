@@ -48,5 +48,4 @@ Temporary Items
 
 node_modules
 typings
-bin
-test/data
+dist
