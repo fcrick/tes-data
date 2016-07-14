@@ -9,10 +9,20 @@
   "scripts": {
     "prepublish": "typings install"
   },
+  "files": [
+    "dist/",
+    "typings.json",
+    "LICENSE.md"
+  ],
+  "main": "dist/index.js",
   "bug": {
     "url": "https://github.com/fcrick/tes-data/issues"
   },
   "homepage": "https://github.com/fcrick/tes-data",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/fcrick/tes-data.git"
+  },
   "license": "Unlicense",
   "devDependencies": {
     "typescript": "^1.8.10",
