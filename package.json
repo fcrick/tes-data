@@ -3,10 +3,15 @@
   "author": "Francis Crick <fcrick@gmail.com",
   "version": "0.0.0",
   "description": "Reads and writes Skyrim and Fallout's esm and esp files",
-  "keywords": ["skyrim"],
+  "keywords": [
+    "skyrim"
+  ],
   "bug": {
     "url": "https://github.com/fcrick/tes-data/issues"
   },
   "homepage": "https://github.com/fcrick/tes-data",
-  "license": "Unlicense"
+  "license": "Unlicense",
+  "dependencies": {
+    "typescript": "^1.8.10"
+  }
 }
