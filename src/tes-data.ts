@@ -118,52 +118,129 @@ export function getRecordBuffer(file: string|number, origOffset: number, callbac
   handlePathOrFd(file, continuation, callback);
 }
 
+function visitRecordOffsets(
+  fd: number,
+  origOffset: number,
+  visit: (offset: number, type: string, parent: number) => boolean,
+  done: (err: NodeJS.ErrnoException) => void
+) {
+  let isDone = false;
+  let endOffset = 0;
+
+  let onFstat = (err: NodeJS.ErrnoException, stats: fs.Stats) => {
+    if (err) {
+      done(err);
+      return;
+    }
+
+    if (stats.size == 0) {
+      done(null);
+    }
+    else {
+      // if origOffset isn't set, we're reading the whole file at the top level
+      if (!origOffset) {
+        endOffset = stats.size;
+      }
+
+      start();
+    }
+  };
+
+  let start = () => {
+    var buffer = new Buffer(8);
+    fs.read(fd, buffer, 0, 8, origOffset, createRead(origOffset));
+  }
+
+  let createRead = (offset: number) => (err: NodeJS.ErrnoException, bytesRead: number, buffer: Buffer) => {
+    offset = offset || 0;
+
+    if (err) {
+      done(err);
+      isDone = true;
+    }
+
+    if (isDone) {
+      return;
+    }
+
+    var nextOffset = offset + buffer.readUInt32LE(4);
+    var type = buffer.toString('utf8', 0, 4);
+
+    // true return value means user is cancelling
+    if (visit(offset, type, origOffset)) {
+      isDone = true;
+      return;
+    }
+
+    if (type !== 'GRUP') {
+      nextOffset += 24;
+    }
+    else if (!endOffset) {
+      // we just started reading a group, use its size to scope our scan
+      endOffset = nextOffset;
+      nextOffset = offset + 24;
+    }
+
+    if (nextOffset < endOffset) {
+      fs.read(fd, buffer, 0, 8, nextOffset, createRead(nextOffset));
+    }
+    else {
+      done(null);
+    }
+  }
+
+  // only need to fstat if it's the start of the file
+  if (origOffset) {
+    start();
+  }
+  else {
+    fs.fstat(fd, onFstat);
+  }
+}
+
 export interface VisitOptions {
   // alternative scan start location (default 0)
   origOffset?: number;
 
   // callbacks
-  visitOffset?: (offset: number, type: string, parent: number) => void;
-  done?: () => void;
+  visitOffset?: (offset: number, type?: string, parent?: number) => boolean|void;
+  done?: (err?: NodeJS.ErrnoException) => void;
 }
 
-export function visit(file: string|number, options: VisitOptions) {
-  var origOffset = options.origOffset;
-  if (typeof origOffset == 'undefined') {
-    origOffset = 0;
-  }
+export function visit(
+  fd: number,
+  onVisit?: (offset: number, type?: string, parent?: number) => boolean|void,
+  onDone?: (err?: NodeJS.ErrnoException) => void,
+  startOffset?: number
+) {
+  let outstanding = 0;
+  let cancelled = false;
+  startOffset = startOffset || 0;
 
-  var outstanding = 0;
-
-  var callback: (err: NodeJS.ErrnoException, result: [[number, string][], number], first?: boolean) => void;
-  callback = (err, result, first) => {
-    if (err) {
-      console.log(err);
-      return;
+  var callback: (offset: number, type: string, parent: number) => boolean;
+  callback = (offset, type, parent) => {
+    if (offset !== parent || offset === startOffset) {
+      cancelled = cancelled || <boolean>onVisit(offset, type, parent);
     }
 
-    var pairs = result[0];
-    var parent = result[1];
+    if (!cancelled && type === 'GRUP' && offset !== parent) {
+      outstanding += 1;
+      visitRecordOffsets(fd, offset, callback, done);
+    }
 
-    pairs.forEach((pair, index) => {
-      // skip the initial offset unless this is the first call
-      if (options.visitOffset && (first || index)) {
-        options.visitOffset(pair[0], pair[1], parent);
-      }
+    return cancelled;
+  }
 
-      // always skip the initial offset
-      if (index) {
-        outstanding += 1;
-        getRecordOffsets(file, pair[0], callback);
-      }
-    });
-
+  function done(err: NodeJS.ErrnoException) {
     outstanding -= 1;
-    if (outstanding === 0 && options.done) {
-      options.done();
+    if (err || outstanding === 0 && onDone) {
+      onDone(err);
+
+      // only report first error
+      onDone = null;
     }
   }
 
   outstanding += 1;
-  getRecordOffsets(file, origOffset, (err, result) => callback(err, result, true));
+  visitRecordOffsets(fd, startOffset, callback, done);
 }

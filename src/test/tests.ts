@@ -224,7 +224,7 @@ function visitOffset(offset: number, type: string, file: string|number) {
 
 function comparisonTest() {
   fs.open(path, 'r', (err, fd) => {
-    tesData.visit(fd, {visitOffset: (o, t) => visitOffset(o, t, fd)});
+    tesData.visit(fd, (o, t) => visitOffset(o, t, fd));
   });
 }
 

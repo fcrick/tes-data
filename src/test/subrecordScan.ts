@@ -72,7 +72,7 @@ function scan(onOffsets: (buffer: Buffer, offsets: number[]) => void, done: () =
   var seen = new Set<number>();
 
   fs.open(path, 'r', (err, fd) => {
-    tesData.visit(fd, {visitOffset: (offset, type) => {
+    tesData.visit(fd, (offset, type) => {
       if (type === 'GRUP')
         return;
 
@@ -83,7 +83,7 @@ function scan(onOffsets: (buffer: Buffer, offsets: number[]) => void, done: () =
       tesData.getRecordBuffer(fd, offset, (err, buffer) => {
         onOffsets(buffer, recordTES5.getSubRecordOffsets(buffer));
       });
-    }, done: () => done()});
+    }, () => done());
   });
 }
 
