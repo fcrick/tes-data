@@ -12,7 +12,8 @@
   "files": [
     "dist/",
     "typings.json",
-    "LICENSE.md"
+    "LICENSE",
+    "README"
   ],
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
