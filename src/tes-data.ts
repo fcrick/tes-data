@@ -8,7 +8,7 @@ interface FileContinuation<T> {
   (fd: number, callback: Callback<T>): void;
 }
 
-function loadRecordOffsets(fd: number, callback: Callback<[number,string][]>, origOffset: number) {
+function loadRecordOffsets(fd: number, callback: Callback<[[number,string][], number]>, origOffset: number) {
   let offsets: [number,string][] = [];
 
   fs.fstat(fd, (err: NodeJS.ErrnoException, stats: fs.Stats) => {
@@ -18,7 +18,7 @@ function loadRecordOffsets(fd: number, callback: Callback<[number,string][]>, or
     }
 
     if (stats.size == 0) {
-      callback(null, offsets);
+      callback(null, [offsets, origOffset]);
     }
     else {
       // if origOffset isn't set, we're reading the whole file at the top level
@@ -48,7 +48,7 @@ function loadRecordOffsets(fd: number, callback: Callback<[number,string][]>, or
           fs.read(fd, buffer, 0, 8, nextOffset, createRead(nextOffset));
         }
         else {
-          callback(null, offsets);
+          callback(null, [offsets, origOffset]);
         }
       }
 
@@ -104,9 +104,9 @@ function handlePathOrFd<T>(file: string | number, continuation: FileContinuation
   }
 }
 
-export function getRecordOffsets(file: string|number, origOffset: number, callback: Callback<[number, string][]>) {
+export function getRecordOffsets(file: string|number, origOffset: number, callback: Callback<[[number, string][], number]>) {
   // make a callback that embeds the arguments we're passing
-  var continuation: FileContinuation<[number,string][]> = (fd, callback) => loadRecordOffsets(fd, callback, origOffset);
+  var continuation: FileContinuation<[[number,string][],number]> = (fd, callback) => loadRecordOffsets(fd, callback, origOffset);
 
   handlePathOrFd(file, continuation, callback);
 }
@@ -119,8 +119,11 @@ export function getRecordBuffer(file: string|number, origOffset: number, callbac
 }
 
 export interface VisitOptions {
-  origOffset?: number; // alternative scan start location (default 0)
-  visitOffset?: (offset: number, type: string) => void;
+  // alternative scan start location (default 0)
+  origOffset?: number;
+
+  // callbacks
+  visitOffset?: (offset: number, type: string, parent: number) => void;
   done?: () => void;
 }
 
@@ -132,24 +135,28 @@ export function visit(file: string|number, options: VisitOptions) {
 
   var outstanding = 0;
 
-  var callback: (err: NodeJS.ErrnoException, pairs: [number, string][]) => void;
-  callback = (err, pairs) => {
+  var callback: (err: NodeJS.ErrnoException, result: [[number, string][], number], first?: boolean) => void;
+  callback = (err, result, first) => {
     if (err) {
       console.log(err);
       return;
     }
 
-    if (options.visitOffset) {
-      for (var pair of pairs) {
-        options.visitOffset(pair[0], pair[1]);
-      }
-    }
+    var pairs = result[0];
+    var parent = result[1];
 
-    pairs.shift();
-    for (pair of pairs) {
-      outstanding += 1;
-      getRecordOffsets(file, pair[0], callback);
-    }
+    pairs.forEach((pair, index) => {
+      // skip the initial offset unless this is the first call
+      if (options.visitOffset && (first || index)) {
+        options.visitOffset(pair[0], pair[1], parent);
+      }
+
+      // always skip the initial offset
+      if (index) {
+        outstanding += 1;
+        getRecordOffsets(file, pair[0], callback);
+      }
+    });
 
     outstanding -= 1;
     if (outstanding === 0 && options.done) {
@@ -158,5 +165,5 @@ export function visit(file: string|number, options: VisitOptions) {
   }
 
   outstanding += 1;
-  getRecordOffsets(file, origOffset, callback);
+  getRecordOffsets(file, origOffset, (err, result) => callback(err, result, true));
 }

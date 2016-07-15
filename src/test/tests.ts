@@ -16,8 +16,8 @@ function loadOffsets() {
     var logPrefix = filename + ' - ';
 
     console.time(logPrefix + 'find top records');
-    tesData.getRecordOffsets(path, 0, (err: NodeJS.ErrnoException, offsets: [number,string][]) => {
-      //console.log(logPrefix + JSON.stringify(offsets));
+    tesData.getRecordOffsets(path, 0, (err, result) => {
+      //console.log(logPrefix + JSON.stringify(result));
       console.timeEnd(logPrefix + 'find top records');
     });
 
@@ -122,8 +122,9 @@ function readRecords() {
     };
     var handleOffset: (loc:[number, string]) => void;
     handleOffset = loc => tesData.getRecordBuffer(fd, loc[0], (e,b) => printRecord(e, b, loc));
-    var handleOffsets: tesData.Callback<[number,string][]>;
-    handleOffsets = (err, offsets) => {
+    var handleOffsets: tesData.Callback<[[number,string][], number]>;
+    handleOffsets = (err, result) => {
+      var offsets = result[0];
       // ignore the first entry as we should have already processed it
       offsets = offsets.slice(1);
       //console.log(JSON.stringify(offsets));
