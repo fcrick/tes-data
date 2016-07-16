@@ -35,6 +35,21 @@ export var recordHeader: FieldArray = [
   ]],
 ];
 
+var bodt: FieldArray = [
+  ['bodyPartFlags', 'uint32le'],
+  ['flags', 'uint8'],
+  ['unknown1', 'uint8'],
+  ['unknown2', 'uint16le'],
+  ['version', {_20: [], _21: []}, [
+    ['skill', 'uint32le'],
+  ]],
+];
+
+var bod2: FieldArray = [
+  ['bodyPartFlags', 'uint32le'],
+  ['skill', 'uint32le'],
+];
+
 // sets of fields for re-use
 var rgb: FieldArray = [
   ['r', 'uint8'],
@@ -446,6 +461,161 @@ var appa: FieldArray = [['type', {
   _DATA: goldAndWeight,
 }]];
 
+var arma: FieldArray = [['type', {
+  _EDID: zString,
+  _BODT: bodt,
+  _BOD2: bod2,
+  _RNAM: uint32le,
+  _DNAM: [
+    ['male', 'uint8'],
+    ['female', 'uint8'],
+    ['unknown1', 'uint32le'],
+    ['detection', 'uint8'],
+    ['unknown2', 'uint8'],
+    ['weaponAdjust', 'float'],
+  ],
+  _MOD2: zString,
+  _MO2T: modt,
+  _MO2S: mods,
+  _MOD3: zString,
+  _MO3T: modt,
+  _MO3S: mods,
+  _MOD4: zString,
+  _MO4T: modt,
+  _MO4S: mods,
+  _MOD5: zString,
+  _MO5T: modt,
+  _MO5S: mods,
+  _NAM0: uint32le,
+  _NAM1: uint32le,
+  _NAM2: uint32le,
+  _NAM3: uint32le,
+  _MODL: uint32le,
+  _SNDD: uint32le,
+  _ONAM: uint32le,
+}]];
+
+var armo: FieldArray = [['type', {
+  _EDID: zString,
+  _VMAD: vmad,
+  _OBND: obnd,
+  _FULL: lString,
+  _EITM: uint32le,
+  _EAMT: uint16le,
+  _MODT: modt,
+  _MODS: mods,
+  _MOD2: zString,
+  _MO2T: modt,
+  _MO2S: mods,
+  _ICON: zString,
+  _MICO: zString,
+  _MOD4: zString,
+  _MO4T: modt,
+  _MO4S: mods,
+  _ICO2: zString,
+  _MIC2: zString,
+  _BODT: bodt,
+  _BOD2: bod2,
+  _DEST: dest,
+  _DSTD: dstd,
+  _DMDL: zString,
+  _DMDT: modt,
+  _DMDS: mods,
+  _YNAM: uint32le,
+  _ZNAM: uint32le,
+  _BMCT: sString,
+  _ETYP: uint32le,
+  _BIDS: uint32le,
+  _BAMT: uint32le,
+  _RNAM: uint32le,
+  _KSIZ: ksiz,
+  _KWDA: kwda,
+  _DESC: lString,
+  _MODL: uint32le,
+  _DATA: goldAndWeight,
+  _DNAM: uint32le,
+  _TNAM: uint32le,
+}]];
+
+var arto: FieldArray = [['type', {
+  _EDID: zString,
+  _OBND: obnd,
+  _MODL: zString,
+  _MODT: modt,
+  _MODS: mods,
+  _DNAM: uint32le,
+}]];
+
+var aspc: FieldArray = [['type', {
+  _EDID: zString,
+  _OBND: obnd,
+  _SNAM: uint32le,
+  _RDAT: uint32le,
+  _BNAM: uint32le,
+}]];
+
+var astp: FieldArray = [['type', {
+  _EDID: zString,
+  _MPRT: zString,
+  _FPRT: zString,
+  _FCHT: zString,
+  _MCHT: zString,
+  _DATA: uint32le,
+}]];
+
+var avif: FieldArray = [['type', {
+  _EDID: zString,
+  _FULL: lString,
+  _DESC: lString,
+  _ANAM: zString,
+  _CNAM: uint32le,
+  _AVSK: [
+    ['skillUseMult', 'float'],
+    ['skillUseOffset', 'float'],
+    ['skillImproveMult', 'float'],
+    ['skillImproveOffset', 'float'],
+  ],
+  _PNAM: uint32le,
+  _FNAM: uint32le,
+  _XNAM: uint32le,
+  _YNAM: uint32le,
+  _HNAM: float,
+  _VNAM: float,
+  _SNAM: uint32le,
+  _INAM: uint32le, 
+}]];
+
+var book: FieldArray = [['type', {
+  _EDID: zString,
+  _VMAD: vmad,
+  _OBND: obnd,
+  _FULL: lString,
+  _MODL: zString,
+  _MODT: modt,
+  _MODS: mods,
+  _ICON: zString,
+  _MICO: zString,
+  _DESC: lString,
+  _DEST: dest,
+  _DSTD: dstd,
+  _DMDL: zString,
+  _DMDT: modt,
+  _DMDS: mods,
+  _YNAM: uint32le,
+  _ZNAM: uint32le,
+  _KSIZ: ksiz,
+  _KWDA: kwda,
+  _DATA: [
+    ['flags', 'uint8'],
+    ['bookType', 'uint8'],
+    ['unknown', 'uint16le'],
+    ['teachFlags', 'uint32le'],
+    ...goldAndWeight,
+  ],
+  _INAM: uint32le,
+  _CNAM: lString,
+}]];
+
 var refr: FieldArray = [['type', {
   _EDID: zString,
   _VMAD: vmad,
@@ -550,6 +720,13 @@ export var subRecordFields: FieldArray = [
     _AMMO: ammo,
     _ANIO: anio,
     _APPA: appa,
+    _ARMA: arma,
+    _ARMO: armo,
+    _ARTO: arto,
+    _ASPC: aspc,
+    _ASTP: astp,
+    _AVIF: avif,
+    _BOOK: book,
     _REFR: refr,
   }, [
     ['type', {
@@ -780,8 +957,6 @@ export var subRecordFields: FieldArray = [
       }, unknown]],
       _DATA: [
         ['recordType', {
-          _APPA: goldAndWeight,
-          _ARMO: goldAndWeight,
           _BOOK: [
             ['flags', 'uint8'],
             ['bookType', 'uint8'],
@@ -870,10 +1045,6 @@ export var subRecordFields: FieldArray = [
         }, unknown],
       ],
       _DNAM: [['recordType', {
-        _ADDN: [
-          ['particleCap', 'uint16le'],
-          ['flags', 'uint16le'],
-        ],
         _ARMA: [
           ['male', 'uint8'],
           ['female', 'uint8'],
