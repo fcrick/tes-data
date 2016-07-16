@@ -43,10 +43,31 @@ var rgb: FieldArray = [
   ['unused', 'uint8'],
 ];
 
+var dest: FieldArray = [
+  ['health', 'uint32le'],
+  ['count', 'uint8'],
+  ['flag', 'uint8'],
+  ['unknown1', 'uint8'],
+  ['unknown2', 'uint8'],
+];
+
+var dstd: FieldArray = [
+  ['healthPercent', 'uint16le'],
+  ['damageStage', 'uint8'],
+  ['flags', 'uint8'],
+  ['selfDamageRate', 'uint32le'],
+  ['explosionId', 'uint32le'],
+  ['debrisId', 'uint32le'],
+  ['debrisCount', 'uint32le'],
+];
+
 var goldAndWeight: FieldArray = [
   ['goldValue', 'uint32le'],
   ['weight', 'float'],
 ];
+
+var ksiz: FieldArray = [['keywordCount', 'uint32le', {persist:true}]];
+var kwda: FieldArray = [['keywords', 'uint32le', {size:'keywordCount'}]];
 
 var modt: FieldArray = [
   ['version', {
@@ -79,6 +100,15 @@ var mods: FieldArray = [
     ['textureSet', 'uint32le'],
     ['index', 'uint32le'],
   ], {size:'count'}],
+];
+
+var obnd: FieldArray = [
+  ['x1', 'int16le'],
+  ['y1', 'int16le'],
+  ['z1', 'int16le'],
+  ['x2', 'int16le'],
+  ['y2', 'int16le'],
+  ['z2', 'int16le'],
 ];
 
 // large subrecords that appear in multiple records
@@ -249,6 +279,11 @@ var xesp: FieldArray = [
 ];
 
 // record types
+var aact: FieldArray = [['type', {
+  _EDID: zString,
+  _CNAM: rgb,
+}]];
+
 var achr: FieldArray = [['type', {
   _EDID: zString,
   _VMAD: vmad,
@@ -275,6 +310,141 @@ var achr: FieldArray = [['type', {
   _XSCL: float,
   _DATA: locationData,
 }, unknown]];
+
+var acti: FieldArray = [['type', {
+  _EDID: zString,
+  _VMAD: vmad,
+  _OBND: obnd,
+  _FULL: lString,
+  _MODL: zString,
+  _MODT: modt,
+  _MODS: mods,
+  _DEST: dest,
+  _DSTD: dstd,
+  _DMDL: zString,
+  _DMDT: modt,
+  _DMDS: mods,
+  _KSIZ: ksiz,
+  _KWDA: kwda,
+  _PNAM: rgb,
+  _SNAM: uint32le,
+  _VNAM: uint32le,
+  _WNAM: uint32le,
+  _RNAM: lString,
+  _FNAM: uint16le,
+  _KNAM: uint32le,
+}]];
+
+var addn: FieldArray = [['type', {
+  _EDID: zString,
+  _OBND: obnd,
+  _MODL: zString,
+  _MODT: modt,
+  _DATA: uint32le,
+  _SNAM: uint32le,
+  _DNAM: [
+    ['particleCap', 'uint16le'],
+    ['flags', 'uint16le'],
+  ],
+}]];
+
+var alch: FieldArray = [['type', {
+  _EDID: zString,
+  _OBND: obnd,
+  _FULL: lString,
+  _KSIZ: ksiz,
+  _KWDA: kwda,
+  _MODL: zString,
+  _MODT: modt,
+  _MODS: mods,
+  _ICON: zString,
+  _MICO: zString,
+  _YNAM: uint32le,
+  _ZNAM: uint32le,
+  _DATA: float,
+  _ENIT: [
+    ['potionValue', 'uint32le'],
+    ['flags', 'uint32le'],
+    ['addiction', 'uint32le'],
+    ['addictionChance', 'uint32le'],
+    ['useSound', 'uint32le'],
+  ],
+  _EFID: uint32le,
+  _EFIT: [
+    ['magnitude', 'float'],
+    ['areaOfEffect', 'uint32le'],
+    ['duration', 'uint32le'],
+  ],
+  _CTDA: [
+    ['operator', 'uint8'],
+    ['unknown1', 'uint8'],
+    ['unknown2', 'uint16le'],
+    ['operator', {_4: [
+      ['comparisonFormId', 'uint32le'],
+    ]}, [
+      ['comparisonValue', 'float'],
+    ], {flag:true}], // unimplemented until i find an example
+    ['functionIndex', 'uint16le'],
+    ['unknown3', 'uint16le'],
+    ['params', 'uint8', {size:'size', sizeOffset:-12}],
+  ],
+}]];
+
+var ammo: FieldArray = [['type', {
+  _EDID: zString,
+  _OBND: obnd,
+  _FULL: lString,
+  _MODL: zString,
+  _MODT: modt,
+  _ICON: zString,
+  _MICO: zString,
+  _DEST: dest,
+  _DSTD: dstd,
+  _DMDL: zString,
+  _DMDT: modt,
+  _DMDS: mods,
+  _YNAM: uint32le,
+  _ZNAM: uint32le,
+  _DESC: lString,
+  _KSIZ: ksiz,
+  _KWDA: kwda,
+  _DATA: [
+    ['formId', 'uint32le'],
+    ['flags', 'uint32le'],
+    ['damage', 'float'],
+    ['goldValue', 'uint32le'],
+  ],
+  _ONAM: sString,
+}]];
+
+var anio: FieldArray = [['type', {
+  _EDID: zString,
+  _MODL: zString,
+  _MODT: modt,
+  _MODS: mods,
+  _BNAM: zString,
+}]]
+
+var appa: FieldArray = [['type', {
+  _EDID: zString,
+  _VMAD: vmad,
+  _OBND: obnd,
+  _FULL: lString,
+  _MODL: zString,
+  _MODT: modt,
+  _ICON: zString,
+  _MICO: zString,
+  _DEST: dest,
+  _DSTD: dstd,
+  _DMDL: zString,
+  _DMDT: modt,
+  _DMDS: mods,
+  _YNAM: uint32le,
+  _ZNAM: uint32le,
+  _QUAL: uint32le,
+  _DESC: lString,
+  _DATA: goldAndWeight,
+}]];
 
 var refr: FieldArray = [['type', {
   _EDID: zString,
@@ -372,7 +542,14 @@ export var subRecordFields: FieldArray = [
   ['type', 'char', {size:4}],
   ['size', 'uint16le'],
   ['recordType', {
+    _AACT: aact,
     _ACHR: achr,
+    _ACTI: acti,
+    _ADDN: addn,
+    _ALCH: alch,
+    _AMMO: ammo,
+    _ANIO: anio,
+    _APPA: appa,
     _REFR: refr,
   }, [
     ['type', {
@@ -490,22 +667,8 @@ export var subRecordFields: FieldArray = [
         ['unknown3', 'uint16le'],
         ['params', 'uint8', {size:'size', sizeOffset:-12}],
       ],
-      _DEST: [
-        ['health', 'uint32le'],
-        ['count', 'uint8'],
-        ['flag', 'uint8'],
-        ['unknown1', 'uint8'],
-        ['unknown2', 'uint8'],
-      ],
-      _DSTD: [
-        ['healthPercent', 'uint16le'],
-        ['damageStage', 'uint8'],
-        ['flags', 'uint8'],
-        ['selfDamageRate', 'uint32le'],
-        ['explosionId', 'uint32le'],
-        ['debrisId', 'uint32le'],
-        ['debrisCount', 'uint32le'],
-      ],
+      _DEST: dest,
+      _DSTD: dstd,
       _EFIT: [
         ['magnitude', 'float'],
         ['areaOfEffect', 'uint32le'],
@@ -516,8 +679,8 @@ export var subRecordFields: FieldArray = [
         ['numRecords', 'int32le'],
         ['nextObjectId', 'uint32le'],
       ],
-      _KSIZ: [['keywordCount', 'uint32le', {persist:true}]],
-      _KWDA: [['keywords', 'uint32le', {size:'keywordCount'}]],
+      _KSIZ: ksiz,
+      _KWDA: kwda,
       _LVLO: [
         ['level', 'uint32le'],
         ['spellId', 'uint32le'],
@@ -579,14 +742,7 @@ export var subRecordFields: FieldArray = [
           ['nodeIndex', 'uint32le'],
         ], {size: 'indexSize'}],
       ],
-      _OBND: [
-        ['x1', 'int16le'],
-        ['y1', 'int16le'],
-        ['z1', 'int16le'],
-        ['x2', 'int16le'],
-        ['y2', 'int16le'],
-        ['z2', 'int16le'],
-      ],
+      _OBND: obnd,
       _OFST: [
         ['value', 'uint8', {size:'ofstSize'}]
       ],
@@ -618,21 +774,12 @@ export var subRecordFields: FieldArray = [
         _ASPC: uint32le,
       }, unknown]],
       _CNAM: [['recordType', {
-        _AACT: rgb,
         _AVIF: uint32le,
         _BOOK: lString,
         _TES4: zString,
       }, unknown]],
       _DATA: [
         ['recordType', {
-          _ACHR: locationData,
-          _ALCH: float,
-          _AMMO: [
-            ['formId', 'uint32le'],
-            ['flags', 'uint32le'],
-            ['damage', 'float'],
-            ['goldValue', 'uint32le'],
-          ],
           _APPA: goldAndWeight,
           _ARMO: goldAndWeight,
           _BOOK: [
