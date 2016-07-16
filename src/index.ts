@@ -1,4 +1,4 @@
-import * as recordTes5 from './record-tes5';
+import * as recordTes5 from './record-types';
 import * as tesData from './tes-data'
 
 export const getSubRecordOffsets = recordTes5.getSubRecordOffsets;

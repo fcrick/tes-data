@@ -1,6 +1,6 @@
 import fs = require('fs');
 import * as tesData from '../tes-data';
-import * as recordTES5 from '../record-tes5';
+import * as recordTES5 from '../record-types';
 import crypto = require('crypto');
 
 var prefix = 'C:/Program Files (x86)/Steam/steamapps/common/Skyrim/Data/'
