@@ -3,18 +3,11 @@ import * as types from './tes5/types'
 import textEncoding = require('text-encoding');
 var TextEncoder = textEncoding.TextEncoder;
 
-export interface Record {
-  size?: number;
-  recordType?: string;
-  type?: string; // subrecord type
-  subRecords?: Record[];
-}
-
 export function getSubRecordOffsets(buffer: Buffer) {
   var offsets: number[] = [];
 
   // read the header, as we need to know if it's compressed
-  var record = <Record>{};
+  var record = {};
   readFields(record, buffer, 0, recordHeader, {});
 
   // don't support GRUP, WRLD, or compressed
@@ -30,8 +23,8 @@ export function getSubRecordOffsets(buffer: Buffer) {
   return offsets;
 }
 
-export function getRecord(buffer: Buffer, context?: Object): Record {
-  var record = <Record>{};
+export function getRecord(buffer: Buffer, context?: Object): Object {
+  var record = {};
 
   if (typeof context === 'undefined') {
     // context is a way to persist values that are considered
@@ -64,7 +57,7 @@ export function getRecord(buffer: Buffer, context?: Object): Record {
 
   // read subrecords
   while (offset < buffer.length) {
-    var subRecord = <Record>{};
+    var subRecord = {};
 
     // cheating a little here to simplify repeating records
     var subSize = buffer.readUInt16LE(offset + 4);
@@ -79,13 +72,13 @@ export function getRecord(buffer: Buffer, context?: Object): Record {
     readFields(subRecord, buffer.slice(offset, endOffset), 0, subRecordFields, context);
 
     offset = endOffset;
-    record.subRecords.push(subRecord);
+    record['subRecords'].push(subRecord);
   }
 
   return record;
 }
 
-export function writeRecord(record: Record, context?: Object): Buffer {
+export function writeRecord(record: Object, context?: Object): Buffer {
   if (typeof context === 'undefined') {
     // context is a way to persist values that are considered
     // elsewhere in parsing. Fields with the persist flag are added.
@@ -98,8 +91,8 @@ export function writeRecord(record: Record, context?: Object): Buffer {
 
   writeFields(write, record, recordHeader, context);
 
-  if (record.subRecords) {
-    for (var subRecord of record.subRecords) {
+  if (record['subRecords']) {
+    for (var subRecord of record['subRecords']) {
       if (subRecord.type === 'OFST') {
         context['ofstSize'] = subRecord['value'].length;
       }
@@ -120,7 +113,7 @@ export function writeRecord(record: Record, context?: Object): Buffer {
   return Buffer.from(<any>array);
 }
 
-function writeFields(write: (arr: Uint8Array) => void, record: Record, fields: FieldArray, context: Object) {
+function writeFields(write: (arr: Uint8Array) => void, record: Object, fields: FieldArray, context: Object) {
   for (var field of fields) {
     writeField(write, record, field, context);
   }
@@ -128,7 +121,7 @@ function writeFields(write: (arr: Uint8Array) => void, record: Record, fields: F
 
 var textEncoder = new TextEncoder();
 
-function writeField(write: (arr: Uint8Array) => void, record: Record, field: Field, context: Object) {
+function writeField(write: (arr: Uint8Array) => void, record: Object, field: Field, context: Object) {
   handleField(field, record, context, (name, type, count, options) => {
     // simple
     var writer = fieldWriters[type];
@@ -155,13 +148,13 @@ function writeField(write: (arr: Uint8Array) => void, record: Record, field: Fie
 }
 
 interface FieldWriter {
-  (write: (arr: Uint8Array) => void, record: Record, name: string, type: FieldTypes, count: number): void;
+  (write: (arr: Uint8Array) => void, record: Object, name: string, type: FieldTypes, count: number): void;
 }
 
 function numericWriter<T>(
   arrayType: { new (buffer: ArrayBuffer): T},
   write: (arr: Uint8Array) => void,
-  record: Record,
+  record: Object,
   name: string,
   type: FieldTypes,
   count: number
@@ -203,7 +196,7 @@ var fieldWriters: {[fieldType:string]: FieldWriter} = {
   uint32le: (write, record, name, type, count) => numericWriter(Uint32Array, write, record, name, type, count),
 };
 
-function readFields(record: Record, buffer: Buffer, offset: number, fields: FieldArray, context: Object): number {
+function readFields(record: Object, buffer: Buffer, offset: number, fields: FieldArray, context: Object): number {
   if (!fields) {
     return offset;
   }
@@ -215,7 +208,7 @@ function readFields(record: Record, buffer: Buffer, offset: number, fields: Fiel
   return offset;
 }
 
-function readField(record: Record, buffer: Buffer, offset: number, field: Field, context: Object): number {
+function readField(record: Object, buffer: Buffer, offset: number, field: Field, context: Object): number {
   return handleField<number>(field, record, context, (name, type, count, options) => {
     // simple
 
@@ -260,7 +253,7 @@ function readField(record: Record, buffer: Buffer, offset: number, field: Field,
     if (count) {
       record[name] = [];
       for (var i = 0; (i < count || count === -1) && offset < buffer.length; ++i) {
-        var newRecord = <Record>{};
+        var newRecord = {};
         record[name].push(newRecord);
         offset = readFields(newRecord, buffer, offset, <FieldArray>field[1], context);
       }
@@ -274,7 +267,7 @@ function readField(record: Record, buffer: Buffer, offset: number, field: Field,
   });
 }
 
-function getFieldCount(field: Field, record: Record, context: Object): number {
+function getFieldCount(field: Field, record: Object, context: Object): number {
   var count = 1;
 
   if (field.length === 3 && field[2] && typeof field[2] === 'object' && !Array.isArray(field[2])) {
@@ -306,7 +299,7 @@ function getFieldCount(field: Field, record: Record, context: Object): number {
 
 function handleField<T>(
   field: Field,
-  record: Record,
+  record: Object,
   context: Object,
   handleSimple: (name: string, type: FieldTypes, count: number, options: FieldOptions) => T,
   handleNesting: (name: string, fields: FieldArray, count:number) => T,
@@ -426,6 +419,7 @@ export interface FieldOptions {
 }
 
 export type FieldTypes = 'int32le'|'int16le'|'int8'|'uint32le'|'uint16le'|'uint8'|'char'|'float';
+
 export type SimpleField = [string, FieldTypes];
 export type SimpleFieldOpt = [string, FieldTypes, FieldOptions];
 export type ConditionalFieldSet = [string, {[value:string]:FieldArray}];
@@ -502,8 +496,6 @@ export var lString: FieldArray = [
   ['localized', { _true: uint32le }, zString],
 ];
 
-
-
 var subRecordFields: FieldArray = [
   ['type', 'char', {size:4}],
   ['size', 'uint16le'],
@@ -557,7 +549,6 @@ var subRecordFields: FieldArray = [
       _XLCM: uint32le,
       _XLCN: uint32le,
       _XLRL: uint32le,
-      
       _XOWN: uint32le,
       _XPRD: float,
       _XRGD: unknown,
