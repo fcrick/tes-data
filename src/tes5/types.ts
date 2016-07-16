@@ -368,7 +368,7 @@ var refr: FieldArray = [['type', {
   _DATA: locationData,
 }, unknown]];
 
-var subRecordFields: FieldArray = [
+export var subRecordFields: FieldArray = [
   ['type', 'char', {size:4}],
   ['size', 'uint16le'],
   ['recordType', {
