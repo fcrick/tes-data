@@ -2,8 +2,8 @@ import fs = require('fs');
 
 export function getRecordBuffer(
   fd: number,
-  callback: (err: NodeJS.ErrnoException, buffer: Buffer) => void,
-  origOffset: number
+  origOffset: number,
+  callback: (err: NodeJS.ErrnoException, buffer: Buffer) => void
 ) {
   // first we need to check if this is a group or not, as group records have a fixed size
   var buffer = new Buffer(8);

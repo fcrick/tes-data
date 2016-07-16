@@ -32,7 +32,7 @@ function loadBuffers() {
 
   fs.open(path, 'r', (err, fd) => {
     tesData.visit(fd, offset => {
-      tesData.getRecordBuffer(path, offset, (err, buffer) => {
+      tesData.getRecordBuffer(fd, offset, (err, buffer) => {
         console.log(offset + ' is ' + buffer.length + ' bytes');
       })
     });
