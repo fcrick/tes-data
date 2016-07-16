@@ -36,19 +36,19 @@ export var recordHeader: FieldArray = [
 ];
 
 // sets of fields for re-use
-export var rgb: FieldArray = [
+var rgb: FieldArray = [
   ['r', 'uint8'],
   ['g', 'uint8'],
   ['b', 'uint8'],
   ['unused', 'uint8'],
 ];
 
-export var goldAndWeight: FieldArray = [
+var goldAndWeight: FieldArray = [
   ['goldValue', 'uint32le'],
   ['weight', 'float'],
 ];
 
-export var modt: FieldArray = [
+var modt: FieldArray = [
   ['version', {
     _40: [
       ['count', 'uint32le'],
@@ -71,7 +71,7 @@ export var modt: FieldArray = [
   ]],
 ];
 
-export var mods: FieldArray = [
+var mods: FieldArray = [
   ['count', 'uint32le'],
   ['alternateTexture', [
     ['size', 'uint32le'],
@@ -82,14 +82,14 @@ export var mods: FieldArray = [
 ];
 
 // large subrecords that appear in multiple records
-export var scriptObject: FieldArray = [
+var scriptObject: FieldArray = [
   ['objFormat', {_1:[['formId','uint32le']]}], // prefix if objFormat is 1 (v1)
   ['alias', 'int16le'], // doc says this is unsigned in v2 but i think that's an error
   ['unused', 'uint16le'],
   ['objFormat', {_2:[['formId','uint32le']]}], // suffix in objFormat is 2 (v2)
 ];
 
-export var scriptBlock: FieldArray = [
+var scriptBlock: FieldArray = [
   ['version', 'int16le'],
   ['objFormat', 'int16le', {persist:true}],
   ['scriptCount', 'uint16le'],
@@ -134,7 +134,7 @@ export var scriptBlock: FieldArray = [
   ], {size:'scriptCount'}]
 ];
 
-export var fragment: FieldArray = [
+var fragment: FieldArray = [
   ['unknown', 'int8'],
   ['scriptNameSize', 'uint16le'],
   ['scriptName', 'char', {size:'scriptNameSize'}],
@@ -142,7 +142,7 @@ export var fragment: FieldArray = [
   ['fragmentName', 'char', {size:'fragmentNameSize'}],
 ];
 
-export var locationData: FieldArray = [
+var locationData: FieldArray = [
   ['x', 'float'],
   ['y', 'float'],
   ['z', 'float'],
@@ -151,7 +151,7 @@ export var locationData: FieldArray = [
   ['rZ', 'float'],
 ];
 
-export var vmad: FieldArray = [
+var vmad: FieldArray = [
   ...scriptBlock,
   ['recordType', {
     _INFO: [
@@ -238,18 +238,18 @@ export var vmad: FieldArray = [
   }],
 ];
 
-export var xapr: FieldArray = [
+var xapr: FieldArray = [
   ['formId', 'uint32le'],
   ['delay', 'float'],
 ];
 
-export var xesp: FieldArray = [
+var xesp: FieldArray = [
   ['parent', 'uint32le'],
   ['flags', 'uint32le'],
 ];
 
 // record types
-export var achr: FieldArray = [['type', {
+var achr: FieldArray = [['type', {
   _EDID: zString,
   _VMAD: vmad,
   _NAME: uint32le,
@@ -276,7 +276,7 @@ export var achr: FieldArray = [['type', {
   _DATA: locationData,
 }, unknown]];
 
-export var refr: FieldArray = [['type', {
+var refr: FieldArray = [['type', {
   _EDID: zString,
   _VMAD: vmad,
   _NAME: uint32le,
@@ -368,7 +368,7 @@ export var refr: FieldArray = [['type', {
   _DATA: locationData,
 }, unknown]];
 
-export var subRecordFields: FieldArray = [
+var subRecordFields: FieldArray = [
   ['type', 'char', {size:4}],
   ['size', 'uint16le'],
   ['recordType', {
