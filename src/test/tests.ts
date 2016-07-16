@@ -166,13 +166,13 @@ function doSave(folder: string, offsetHex: string, record: string) {
 
 var seen = new Set<number>();
 
-function visitOffset(offset: number, type: string, file: string|number) {
+function visitOffset(offset: number, type: string, fd: number) {
   if (offset in seen) {
     return;
   }
   seen[offset] = true;
 
-  tesData.getRecordBuffer(file, offset, (e, b) => {
+  tesData.getRecordBuffer(fd, offset, (e, b) => {
     if (e) {
       console.log(e);
       return;
@@ -187,8 +187,8 @@ function comparisonTest() {
   });
 }
 
-loadOffsets();
+//loadOffsets();
 //loadBuffers();
 //readRecords();
 
-//comparisonTest();
+comparisonTest();
