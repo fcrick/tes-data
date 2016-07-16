@@ -1,5 +1,3 @@
-import * as types from './tes5/types'
-
 import textEncoding = require('text-encoding');
 var TextEncoder = textEncoding.TextEncoder;
 
@@ -495,6 +493,8 @@ export var zString: FieldArray = [
 export var lString: FieldArray = [
   ['localized', { _true: uint32le }, zString],
 ];
+
+import * as types from './tes5/types'
 
 var subRecordFields: FieldArray = [
   ['type', 'char', {size:4}],
