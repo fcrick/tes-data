@@ -8,56 +8,6 @@ interface FileContinuation<T> {
   (fd: number, callback: Callback<T>): void;
 }
 
-function loadRecordOffsets(fd: number, callback: Callback<[[number,string][], number]>, origOffset: number) {
-  let offsets: [number,string][] = [];
-
-  fs.fstat(fd, (err: NodeJS.ErrnoException, stats: fs.Stats) => {
-    if (err) {
-      callback(err, null);
-      return;
-    }
-
-    if (stats.size == 0) {
-      callback(null, [offsets, origOffset]);
-    }
-    else {
-      // if origOffset isn't set, we're reading the whole file at the top level
-      if (!origOffset) {
-        var endOffset = stats.size;
-      }
-
-      var createRead = (offset: number) => (err: NodeJS.ErrnoException, bytesRead: number, buffer: Buffer) => {
-        if (err) {
-          callback(err, null);
-          return;
-        }
-
-        var nextOffset = offset + buffer.readUInt32LE(4);
-        var type = buffer.toString('utf8', 0, 4);
-        offsets.push([offset, type]);
-        if (type !== 'GRUP') {
-          nextOffset += 24;
-        }
-        else if (!endOffset) {
-          // we just started reading a group, use its size to scope our scan
-          endOffset = nextOffset;
-          nextOffset = offset + 24;
-        }
-
-        if (nextOffset < endOffset) {
-          fs.read(fd, buffer, 0, 8, nextOffset, createRead(nextOffset));
-        }
-        else {
-          callback(null, [offsets, origOffset]);
-        }
-      }
-
-      var buffer = new Buffer(8);
-      fs.read(fd, buffer, 0, 8, origOffset, createRead(origOffset));
-    }
-  });
-}
-
 function loadRecordBuffer(fd: number, callback: Callback<Buffer>, origOffset: number) {
   // first we need to check if this is a group or not, as group records have a fixed size
   var buffer = new Buffer(8);
@@ -102,13 +52,6 @@ function handlePathOrFd<T>(file: string | number, continuation: FileContinuation
   else {
     callback({name:'BadArgument', message:'argument not a string or number'}, null);
   }
-}
-
-export function getRecordOffsets(file: string|number, origOffset: number, callback: Callback<[[number, string][], number]>) {
-  // make a callback that embeds the arguments we're passing
-  var continuation: FileContinuation<[[number,string][],number]> = (fd, callback) => loadRecordOffsets(fd, callback, origOffset);
-
-  handlePathOrFd(file, continuation, callback);
 }
 
 export function getRecordBuffer(file: string|number, origOffset: number, callback: Callback<Buffer>) {
@@ -198,24 +141,17 @@ function visitRecordOffsets(
   }
 }
 
-export interface VisitOptions {
-  // alternative scan start location (default 0)
-  origOffset?: number;
-
-  // callbacks
-  visitOffset?: (offset: number, type?: string, parent?: number) => boolean|void;
-  done?: (err?: NodeJS.ErrnoException) => void;
-}
-
 export function visit(
   fd: number,
   onVisit?: (offset: number, type?: string, parent?: number) => boolean|void,
   onDone?: (err?: NodeJS.ErrnoException) => void,
-  startOffset?: number
+  startOffset?: number,
+  recurse?: boolean
 ) {
   let outstanding = 0;
   let cancelled = false;
   startOffset = startOffset || 0;
+  recurse = recurse || typeof recurse === 'undefined' ? true : false;
 
   var callback: (offset: number, type: string, parent: number) => boolean;
   callback = (offset, type, parent) => {
@@ -223,7 +159,7 @@ export function visit(
       cancelled = cancelled || <boolean>onVisit(offset, type, parent);
     }
 
-    if (!cancelled && type === 'GRUP' && offset !== parent) {
+    if (!cancelled && type === 'GRUP' && offset !== parent && recurse) {
       outstanding += 1;
       visitRecordOffsets(fd, offset, callback, done);
     }
