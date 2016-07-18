@@ -13,7 +13,7 @@
     "dist/",
     "typings.json",
     "LICENSE",
-    "README"
+    "README.md"
   ],
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
