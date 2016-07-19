@@ -110,35 +110,36 @@ function checkBuffer(buffer: Buffer, offset: number, type: string) {
     return;
   }
   allCount += 1;
-  var record = recordTES5.getRecord(buffer, context);
-  var newBuffer = recordTES5.writeRecord(record, context);
-  if (allCount % 10000 === 0) {
-    console.log(allCount);
-  }
+  var record = recordTES5.getRecord(buffer, (err, record) => {
+    if (allCount % 10000 === 0) {
+      console.log(allCount);
+    }
 
-  if (record['compressed']) {
-    return;
-  }
+    if (record['compressed']) {
+      return;
+    }
 
-  var folder = '../test/data/';
-  var offsetHex = offset.toString(16);
-  var mismatch = buffer.compare(newBuffer) !== 0;
+    var newBuffer = recordTES5.writeRecord(record, context);
+    var folder = '../test/data/';
+    var offsetHex = offset.toString(16);
+    var mismatch = buffer.compare(newBuffer) !== 0;
 
-  if (mismatch) {
-    console.log(`mismatch at ${offsetHex}`);
+    if (mismatch) {
+      console.log(`mismatch at ${offsetHex}`);
 
-    fs.writeFile(`${folder}${offsetHex}_A.bin`, buffer);
-    fs.writeFile(`${folder}${offsetHex}_B.bin`, newBuffer);
+      fs.writeFile(`${folder}${offsetHex}_A.bin`, buffer);
+      fs.writeFile(`${folder}${offsetHex}_B.bin`, newBuffer);
 
-    mismatchCount += 1;
-  }
-  else {
-    folder += offsetHex.substr(0, 2) + '/';
-  }
+      mismatchCount += 1;
+    }
+    else {
+      folder += offsetHex.substr(0, 2) + '/';
+    }
 
-  if ((allCount <= 1000 || mismatch) && record['recordType'] !== 'GRUP') {
-    enqueueSave(folder, offsetHex, JSON.stringify(record, null, 2));
-  }
+    if ((allCount <= 1000 || mismatch) && record['recordType'] !== 'GRUP') {
+      enqueueSave(folder, offsetHex, JSON.stringify(record, null, 2));
+    }
+  }, context);
 }
 
 var queue: [string, string, string][] = [];

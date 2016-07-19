@@ -17,6 +17,8 @@ import {
 
 import * as tes5 from './tes5/types'
 
+import zlib = require('zlib');
+
 import textEncoding = require('text-encoding');
 var TextEncoder = textEncoding.TextEncoder;
 
@@ -40,7 +42,11 @@ export function getSubRecordOffsets(buffer: Buffer) {
   return offsets;
 }
 
-export function getRecord(buffer: Buffer, context?: Object): Object {
+export function getRecord(
+  buffer: Buffer,
+  callback: (err: NodeJS.ErrnoException, record: Object) => void,
+  context?: Object
+) {
   var record = {};
 
   if (typeof context === 'undefined') {
@@ -60,17 +66,34 @@ export function getRecord(buffer: Buffer, context?: Object): Object {
     record['subRecords'] = [];
   }
 
-  var compressed = record['recordType'] === 'GRUP' ? false : record['flags'] & 0x40000;
-  if (compressed) {
-    // not yet supported
-    record['compressed'] = true;
-    return record;
-  }
-
   // localization flag check
   if (record['recordType'] === 'TES4' && record['flags'] & 0x80) {
     context['localized'] = true;
   }
+
+  var compressed = record['recordType'] !== 'GRUP' && record['flags'] & 0x40000;
+  if (compressed) {
+    // not yet supported
+    record['compressed'] = true;
+    var dataSize = buffer.readUInt32LE(24);
+    var uncompressed = new Buffer(dataSize);
+    zlib.inflate(
+      buffer.slice(28),
+      (err, buffer) => err ? callback(err, null) : readSubRecords(buffer, record, context, callback)
+    );
+  }
+  else if (buffer.length > offset) {
+    readSubRecords(buffer, record, context, callback);
+  }
+}
+
+function readSubRecords(
+  buffer: Buffer,
+  record: Object,
+  context: Object,
+  callback: (err: NodeJS.ErrnoException, record: Object) => void
+) {
+  var offset = 0;
 
   // read subrecords
   while (offset < buffer.length) {
@@ -92,7 +115,7 @@ export function getRecord(buffer: Buffer, context?: Object): Object {
     record['subRecords'].push(subRecord);
   }
 
-  return record;
+  callback(null, record);
 }
 
 export function writeRecord(record: Object, context?: Object): Buffer {
