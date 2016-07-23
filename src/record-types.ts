@@ -56,8 +56,11 @@ export function getRecord(
     context = {};
   }
 
+  var contextCopy = {};
+  Object.keys(context).forEach(k => contextCopy[k] = context[k]);
+
   // read in the header
-  readFields(record, buffer, 0, tes5.recordHeader, context);
+  readFields(record, buffer, 0, tes5.recordHeader, contextCopy);
 
   // header is always the same size
   var offset = 24;
@@ -68,24 +71,37 @@ export function getRecord(
 
   // localization flag check
   if (record['recordType'] === 'TES4' && record['flags'] & 0x80) {
-    context['localized'] = true;
+    contextCopy['localized'] = true;
   }
+
+  var newCallback = (err: NodeJS.ErrnoException, record: Object) => {
+    Object.keys(contextCopy).forEach(k => context[k] = contextCopy[k]);
+    callback(err, record);
+  };
 
   var compressed = record['recordType'] !== 'GRUP' && record['flags'] & 0x40000;
   if (compressed) {
-    // not yet supported
     record['compressed'] = true;
+    record['compressionLevel'] = compressionLevels[buffer.readUInt8(29) >> 6];
+
     var dataSize = buffer.readUInt32LE(24);
     var uncompressed = new Buffer(dataSize);
     zlib.inflate(
       buffer.slice(28),
-      (err, buffer) => err ? callback(err, null) : readSubRecords(buffer, record, context, callback)
+      (err, buffer) => err ? newCallback(err, null) : readSubRecords(buffer, record, contextCopy, newCallback)
     );
   }
   else if (buffer.length > offset) {
-    readSubRecords(buffer, record, context, callback);
+    readSubRecords(buffer.slice(24), record, contextCopy, newCallback);
   }
 }
+
+var compressionLevels = [
+  zlib.Z_NO_COMPRESSION,
+  zlib.Z_BEST_COMPRESSION,
+  zlib.Z_DEFAULT_COMPRESSION,
+  zlib.Z_BEST_COMPRESSION,
+];
 
 function readSubRecords(
   buffer: Buffer,
@@ -103,13 +119,17 @@ function readSubRecords(
     var subSize = buffer.readUInt16LE(offset + 4);
     var endOffset = offset + subSize + 6;
 
-    // include rest of buffer in this case
-    if (record['recordType'] === 'WRLD' && buffer.toString('utf8', offset, offset + 4) === 'OFST') {
-      endOffset = buffer.length;
-      context['ofstSize'] = endOffset - offset - 6;
+    if (context['xxxxSize']) {
+      var hadXXXX = true;
+      endOffset += context['xxxxSize'];
     }
 
     readFields(subRecord, buffer.slice(offset, endOffset), 0, tes5.subRecordFields, context);
+
+    if (hadXXXX) {
+      delete context['xxxxSize'];
+      hadXXXX = false;
+    }
 
     offset = endOffset;
     record['subRecords'].push(subRecord);
@@ -131,23 +151,53 @@ export function writeRecord(record: Object, context?: Object): Buffer {
 
   writeFields(write, record, tes5.recordHeader, context);
 
+  let headerArray: Uint8Array = null;
+
+  if (record['compressed']) {
+    // store off the header in it's own array before moving on
+    let headerLength = results.reduce((sum, array) => sum + array.length, 0);
+    headerArray = new Uint8Array(headerLength);
+
+    let headerOffset = 0;
+    for (let result of results) {
+      headerArray.set(result, headerOffset);
+      headerOffset += result.length;
+    }
+
+    results = [];
+  }
+
   if (record['subRecords']) {
-    for (var subRecord of record['subRecords']) {
-      if (subRecord.type === 'OFST') {
-        context['ofstSize'] = subRecord['value'].length;
-      }
+    for (let subRecord of record['subRecords']) {
+
+      let hadXXXX = 'xxxxSize' in context;
 
       writeFields(write, subRecord, tes5.subRecordFields, context);
+
+      if (hadXXXX) {
+        delete context['xxxxSize'];
+      }
     }
   }
 
-  var length = results.reduce((sum, array) => sum + array.length, 0);
-  var array = new Uint8Array(length);
-  
-  var offset = 0;
-  for (var result of results) {
+  let length = results.reduce((sum, array) => sum + array.length, 0);
+  let array = new Uint8Array(length);
+
+  let offset = 0;
+  for (let result of results) {
     array.set(result, offset);
     offset += result.length;
+  }
+
+  if (record['compressed']) {
+    var inflatedSize = array.length;
+    var deflated = zlib.deflateSync(Buffer.from(<any>array), {level: record['compressionLevel']});
+    array = new Uint8Array(headerArray.length + deflated.length + 4);
+    array.set(headerArray, 0);
+    var lengthBuffer = new Buffer(4);
+    lengthBuffer.writeUInt32LE(inflatedSize, 0);
+    array.set(lengthBuffer, headerArray.length);
+    array.set(deflated, headerArray.length + 4);
   }
 
   return Buffer.from(<any>array);
@@ -325,8 +375,18 @@ function getFieldCount(field: Field, record: Object, context: Object): number {
       count = <number>options.size;
     }
 
-    if (typeof options.sizeOffset === 'number') {
-      count += options.sizeOffset;
+    if (typeof options.sizeOffset === 'string') {
+      var offsetCount = record[options.sizeOffset];
+      if (typeof offsetCount === 'undefined') {
+        offsetCount = context[options.sizeOffset];
+        if (typeof offsetCount === 'undefined') {
+          offsetCount = 0;
+        }
+      }
+      count += offsetCount;
+    }
+    else if (typeof options.sizeOffset === 'number') {
+      count += <number>options.sizeOffset;
     }
 
     if (typeof options.sizeDivideBy === 'number') {

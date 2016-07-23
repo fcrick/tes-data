@@ -1,6 +1,6 @@
 export interface FieldOptions {
   size?: string|number;
-  sizeOffset?: number;
+  sizeOffset?: string|number;
   sizeDivideBy?: number;
   persist?: boolean;
   format?: 'hex';
@@ -25,7 +25,7 @@ export interface FieldArray extends Array<Field> {}
 
 // simple types that are used frequently on their own
 export var unknown: FieldArray = [
-  ['value', 'uint8', {size:'size'}]
+  ['value', 'uint8', {size:'size', sizeOffset: 'xxxxSize'}]
 ];
 
 export var uint16le: FieldArray = [

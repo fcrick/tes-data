@@ -115,10 +115,6 @@ function checkBuffer(buffer: Buffer, offset: number, type: string) {
       console.log(allCount);
     }
 
-    if (record['compressed']) {
-      return;
-    }
-
     var newBuffer = recordTES5.writeRecord(record, context);
     var folder = '../test/data/';
     var offsetHex = offset.toString(16);

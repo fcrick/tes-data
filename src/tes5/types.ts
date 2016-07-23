@@ -616,6 +616,34 @@ var book: FieldArray = [['type', {
   _CNAM: lString,
 }]];
 
+var dial: FieldArray = [['type', {
+  _EDID: zString,
+  _FULL: lString,
+  _PNAM: float,
+  _BNAM: uint32le,
+  _QNAM: uint32le,
+  _DATA: [
+    ['unknown1', uint8],
+    ['dialogTab', uint8],
+    ['subType', uint8],
+    ['unknown2', uint8],
+  ],
+  _SNAM: [['value', 'char', {size:4}]],
+  _TIFC: uint32le,
+}]];
+
+var kywd: FieldArray = [['type', {
+  _EDID: zString,
+  _CNAM: rgb,
+  _KSIZ: ksiz,
+  _KWDA: kwda,
+}]];
+
+var lcrt: FieldArray = [['type', {
+  _EDID: zString,
+  _CNAM: rgb,
+}]];
+
 var refr: FieldArray = [['type', {
   _EDID: zString,
   _VMAD: vmad,
@@ -708,6 +736,37 @@ var refr: FieldArray = [['type', {
   _DATA: locationData,
 }, unknown]];
 
+var txst: FieldArray = [['type', {
+  _EDID: zString,
+  _OBND: obnd,
+  _TX00: zString,
+  _TX01: zString,
+  _TX02: zString,
+  _TX03: zString,
+  _TX04: zString,
+  _TX05: zString,
+  _TX06: zString,
+  _TX07: zString,
+  _DODT: [
+    ['minWidth', 'float'],
+    ['maxWidth', 'float'],
+    ['minHeight', 'float'],
+    ['maxHeight', 'float'],
+    ['depth', 'float'],
+    ['shininess', 'float'],
+    ['parallaxScale', 'float'],
+    ['parallaxPasses', 'uint8'],
+    ['flags', 'uint8'],
+    ['unknown', 'uint16le'],
+    ...rgb,
+  ],
+  _DNAM: uint16le,
+}]];
+
+var xxxx: FieldArray = [
+  ['xxxxSize', 'uint32le', {persist:true}],
+];
+
 export var subRecordFields: FieldArray = [
   ['type', 'char', {size:4}],
   ['size', 'uint16le'],
@@ -727,7 +786,10 @@ export var subRecordFields: FieldArray = [
     _ASTP: astp,
     _AVIF: avif,
     _BOOK: book,
+    _KYWD: kywd,
+    _LCRT: lcrt,
     _REFR: refr,
+    _TXST: txst,
   }, [
     ['type', {
       // simple subrecords
@@ -780,6 +842,7 @@ export var subRecordFields: FieldArray = [
       _XRGD: unknown,
       _XRGB: unknown,
       _XSCL: float,
+      _XXXX: xxxx,
       _ZNAM: uint32le,
       // complex subrecords similar across all subrecords
       _AVSK: [
@@ -920,9 +983,6 @@ export var subRecordFields: FieldArray = [
         ], {size: 'indexSize'}],
       ],
       _OBND: obnd,
-      _OFST: [
-        ['value', 'uint8', {size:'ofstSize'}]
-      ],
       _PTDO: [
         ['ptdoType', 'uint32le'],
         ['ptdoType', {
@@ -995,6 +1055,9 @@ export var subRecordFields: FieldArray = [
             ['flags', 'uint8'],
           ],
           _EYES: uint8,
+          _GMST: [
+            ['value', 'uint32le'], // actually based on EDID prefix, but hey
+          ],
           _GRAS: [
             ['density', 'uint8'],
             ['minSlope', 'uint8'],
