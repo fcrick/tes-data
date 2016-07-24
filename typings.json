@@ -2,5 +2,11 @@
   "globalDependencies": {
     "node": "registry:env/node#6.0.0+20160622202520",
     "text-encoding": "registry:dt/text-encoding#0.0.0+20160325124532"
+  },
+  "devDependencies": {
+    "chai": "registry:npm/chai#3.5.0+20160723033700"
+  },
+  "globalDevDependencies": {
+    "mocha": "registry:dt/mocha#2.2.5+20160720003353"
   }
 }

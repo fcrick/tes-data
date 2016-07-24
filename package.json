@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "prepublish": "typings install",
-    "test": "mocha"
+    "test": "mocha dist/test/*.js"
   },
   "files": [
     "dist/",

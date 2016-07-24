@@ -47,52 +47,57 @@ export function getRecord(
   callback: (err: NodeJS.ErrnoException, record: Object) => void,
   context?: Object
 ) {
-  var record = {};
+  try {
+    var record = {};
 
-  if (typeof context === 'undefined') {
-    // context is a way to persist values that are considered
-    // elsewhere in parsing. Fields with the persist flag are added.
-    // hopefully good enough
-    context = {};
+    if (typeof context === 'undefined') {
+      // context is a way to persist values that are considered
+      // elsewhere in parsing. Fields with the persist flag are added.
+      // hopefully good enough
+      context = {};
+    }
+
+    var contextCopy = {};
+    Object.keys(context).forEach(k => contextCopy[k] = context[k]);
+
+    // read in the header
+    readFields(record, buffer, 0, tes5.recordHeader, contextCopy);
+
+    // header is always the same size
+    var offset = 24;
+
+    if (offset < buffer.length) {
+      record['subRecords'] = [];
+    }
+
+    // localization flag check
+    if (record['recordType'] === 'TES4' && record['flags'] & 0x80) {
+      contextCopy['localized'] = true;
+    }
+
+    var newCallback = (err: NodeJS.ErrnoException, record: Object) => {
+      Object.keys(contextCopy).forEach(k => context[k] = contextCopy[k]);
+      callback(err, record);
+    };
+
+    var compressed = record['recordType'] !== 'GRUP' && record['flags'] & 0x40000;
+    if (compressed) {
+      record['compressed'] = true;
+      record['compressionLevel'] = compressionLevels[buffer.readUInt8(29) >> 6];
+
+      var dataSize = buffer.readUInt32LE(24);
+      var uncompressed = new Buffer(dataSize);
+      zlib.inflate(
+        buffer.slice(28),
+        (err, buffer) => err ? newCallback(err, null) : readSubRecords(buffer, record, contextCopy, newCallback)
+      );
+    }
+    else if (buffer.length > offset) {
+      readSubRecords(buffer.slice(24), record, contextCopy, newCallback);
+    }
   }
-
-  var contextCopy = {};
-  Object.keys(context).forEach(k => contextCopy[k] = context[k]);
-
-  // read in the header
-  readFields(record, buffer, 0, tes5.recordHeader, contextCopy);
-
-  // header is always the same size
-  var offset = 24;
-
-  if (offset < buffer.length) {
-    record['subRecords'] = [];
-  }
-
-  // localization flag check
-  if (record['recordType'] === 'TES4' && record['flags'] & 0x80) {
-    contextCopy['localized'] = true;
-  }
-
-  var newCallback = (err: NodeJS.ErrnoException, record: Object) => {
-    Object.keys(contextCopy).forEach(k => context[k] = contextCopy[k]);
-    callback(err, record);
-  };
-
-  var compressed = record['recordType'] !== 'GRUP' && record['flags'] & 0x40000;
-  if (compressed) {
-    record['compressed'] = true;
-    record['compressionLevel'] = compressionLevels[buffer.readUInt8(29) >> 6];
-
-    var dataSize = buffer.readUInt32LE(24);
-    var uncompressed = new Buffer(dataSize);
-    zlib.inflate(
-      buffer.slice(28),
-      (err, buffer) => err ? newCallback(err, null) : readSubRecords(buffer, record, contextCopy, newCallback)
-    );
-  }
-  else if (buffer.length > offset) {
-    readSubRecords(buffer.slice(24), record, contextCopy, newCallback);
+  catch (err) {
+    callback(err, null);
   }
 }
 
@@ -140,77 +145,81 @@ function readSubRecords(
 
 export function writeRecord(
   record: Object,
-  callback: (err: Error, result: any) => void,
+  callback: (err: Error, result: Buffer) => void,
   context?: Object
 ) {
+  try {
+    if (typeof context === 'undefined') {
+      // context is a way to persist values that are considered
+      // elsewhere in parsing. Fields with the persist flag are added.
+      // hopefully good enough
+      context = {};
+    }
 
-  if (typeof context === 'undefined') {
-    // context is a way to persist values that are considered
-    // elsewhere in parsing. Fields with the persist flag are added.
-    // hopefully good enough
-    context = {};
-  }
+    var results: Uint8Array[] = [];
+    var write = (arr: Uint8Array) => results.push(arr); 
 
-  var results: Uint8Array[] = [];
-  var write = (arr: Uint8Array) => results.push(arr); 
+    writeFields(write, record, tes5.recordHeader, context);
 
-  writeFields(write, record, tes5.recordHeader, context);
+    let headerArray: Uint8Array = null;
 
-  let headerArray: Uint8Array = null;
+    if (record['compressed']) {
+      // store off the header in it's own array before moving on
+      let headerLength = results.reduce((sum, array) => sum + array.length, 0);
+      headerArray = new Uint8Array(headerLength);
 
-  if (record['compressed']) {
-    // store off the header in it's own array before moving on
-    let headerLength = results.reduce((sum, array) => sum + array.length, 0);
-    headerArray = new Uint8Array(headerLength);
+      let headerOffset = 0;
+      for (let result of results) {
+        headerArray.set(result, headerOffset);
+        headerOffset += result.length;
+      }
 
-    let headerOffset = 0;
+      results = [];
+    }
+
+    if (record['subRecords']) {
+      for (let subRecord of record['subRecords']) {
+        let hadXXXX = 'xxxxSize' in context;
+        writeFields(write, subRecord, tes5.subRecordFields, context);
+        if (hadXXXX) {
+          delete context['xxxxSize'];
+        }
+      }
+    }
+
+    let length = results.reduce((sum, array) => sum + array.length, 0);
+    let array = new Uint8Array(length);
+
+    let offset = 0;
     for (let result of results) {
-      headerArray.set(result, headerOffset);
-      headerOffset += result.length;
+      array.set(result, offset);
+      offset += result.length;
     }
 
-    results = [];
-  }
+    if (record['compressed']) {
+      var inflatedSize = array.length;
+      zlib.deflate(Buffer.from(<any>array), {level: record['compressionLevel']}, (err, deflated) => {
+        if (err) {
+          callback(err, null);
+        }
+        else {
+          array = new Uint8Array(headerArray.length + deflated.length + 4);
+          array.set(headerArray, 0);
+          var lengthBuffer = new Buffer(4);
+          lengthBuffer.writeUInt32LE(inflatedSize, 0);
+          array.set(lengthBuffer, headerArray.length);
+          array.set(deflated, headerArray.length + 4);
 
-  if (record['subRecords']) {
-    for (let subRecord of record['subRecords']) {
-      let hadXXXX = 'xxxxSize' in context;
-      writeFields(write, subRecord, tes5.subRecordFields, context);
-      if (hadXXXX) {
-        delete context['xxxxSize'];
-      }
+          callback(null, Buffer.from(<any>array));
+        }
+      });
+    }
+    else {
+      callback(null, Buffer.from(<any>array));
     }
   }
-
-  let length = results.reduce((sum, array) => sum + array.length, 0);
-  let array = new Uint8Array(length);
-
-  let offset = 0;
-  for (let result of results) {
-    array.set(result, offset);
-    offset += result.length;
-  }
-
-  if (record['compressed']) {
-    var inflatedSize = array.length;
-    zlib.deflate(Buffer.from(<any>array), {level: record['compressionLevel']}, (err, deflated) => {
-      if (err) {
-        callback(err, null);
-      }
-      else {
-        array = new Uint8Array(headerArray.length + deflated.length + 4);
-        array.set(headerArray, 0);
-        var lengthBuffer = new Buffer(4);
-        lengthBuffer.writeUInt32LE(inflatedSize, 0);
-        array.set(lengthBuffer, headerArray.length);
-        array.set(deflated, headerArray.length + 4);
-
-        callback(null, Buffer.from(<any>array));
-      }
-    });
-  }
-  else {
-    callback(null, Buffer.from(<any>array));
+  catch (err) {
+    callback(err, null);
   }
 }
 
