@@ -15,6 +15,7 @@ import {
   FieldTypes
 } from './common-types'
 
+import { compressRecordBuffer } from './compression'
 import * as tes5 from './tes5/types'
 
 import zlib = require('zlib');
@@ -102,10 +103,10 @@ export function getRecord(
 }
 
 var compressionLevels = [
-  zlib.Z_NO_COMPRESSION,
-  zlib.Z_BEST_COMPRESSION,
-  zlib.Z_DEFAULT_COMPRESSION,
-  zlib.Z_BEST_COMPRESSION,
+  'none',
+  'fast',
+  'default',
+  'best',
 ];
 
 function readSubRecords(
@@ -161,22 +162,6 @@ export function writeRecord(
 
     writeFields(write, record, tes5.recordHeader, context);
 
-    let headerArray: Uint8Array = null;
-
-    if (record['compressed']) {
-      // store off the header in it's own array before moving on
-      let headerLength = results.reduce((sum, array) => sum + array.length, 0);
-      headerArray = new Uint8Array(headerLength);
-
-      let headerOffset = 0;
-      for (let result of results) {
-        headerArray.set(result, headerOffset);
-        headerOffset += result.length;
-      }
-
-      results = [];
-    }
-
     if (record['subRecords']) {
       for (let subRecord of record['subRecords']) {
         let hadXXXX = 'xxxxSize' in context;
@@ -188,34 +173,26 @@ export function writeRecord(
     }
 
     let length = results.reduce((sum, array) => sum + array.length, 0);
-    let array = new Uint8Array(length);
+    let buffer = new Buffer(length);
 
     let offset = 0;
     for (let result of results) {
-      array.set(result, offset);
+      buffer.set(result, offset);
       offset += result.length;
     }
 
     if (record['compressed']) {
-      var inflatedSize = array.length;
-      zlib.deflate(Buffer.from(<any>array), {level: record['compressionLevel']}, (err, deflated) => {
+      compressRecordBuffer(buffer, (err, deflated) => {
         if (err) {
           callback(err, null);
         }
         else {
-          array = new Uint8Array(headerArray.length + deflated.length + 4);
-          array.set(headerArray, 0);
-          var lengthBuffer = new Buffer(4);
-          lengthBuffer.writeUInt32LE(inflatedSize, 0);
-          array.set(lengthBuffer, headerArray.length);
-          array.set(deflated, headerArray.length + 4);
-
-          callback(null, Buffer.from(<any>array));
+          callback(null, deflated);
         }
-      });
+      }, record['compressionLevel']);
     }
     else {
-      callback(null, Buffer.from(<any>array));
+      callback(null, buffer);
     }
   }
   catch (err) {
