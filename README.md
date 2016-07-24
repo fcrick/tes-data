@@ -1,3 +1,5 @@
+# [![Build Status](https://travis-ci.org/fcrick/tes-data.svg?branch=master)](https://travis-ci.org/fcrick/tes-data)
+
 tes-data is a simple library for reading .esm and .esp files included in The Elder Scrolls and Fallout games. Written in TypeScript and published as a javascript npm module.
 
 ### Capabilities
