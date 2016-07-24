@@ -62,3 +62,12 @@ describe('validate inputs to readRecord', () => {
     });
   });
 });
+
+if (process.env.LARGE_FILES) {
+  describe('this should not run on travis-ci', () => {
+    it('should always fail', done => {
+      assert.isNull(5);
+      done();
+    });
+  });
+}
