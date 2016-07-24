@@ -18,8 +18,6 @@ import {
 import { compressionLevels, deflateRecordBuffer, inflateRecordBuffer } from './compression'
 import * as tes5 from './tes5/types'
 
-import zlib = require('zlib');
-
 import textEncoding = require('text-encoding');
 var TextEncoder = textEncoding.TextEncoder;
 
