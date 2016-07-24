@@ -50,17 +50,17 @@ export function inflateRecordBuffer(
     var level = compressionLevels[buffer.readUInt8(29) >> 6];
     var dataSize = buffer.readUInt32LE(24);
     var inflatedRecordBuffer = new Buffer(24 + dataSize);
-    inflatedRecordBuffer.set(buffer, 24);
+    buffer.copy(inflatedRecordBuffer, 0, 0, 24);
 
     zlib.inflate(
       buffer.slice(28),
-      (err, inflated) => {
+      (err, inflated: Buffer) => {
         if (err) {
           callback(err);
         }
         else {
-          inflatedRecordBuffer.set(inflated, 24);
-          inflatedRecordBuffer.writeUInt32LE(flags & ~0x40000, 8);
+          inflated.copy(inflatedRecordBuffer, 24, 0);
+          inflatedRecordBuffer.writeInt32LE(flags & ~0x40000, 8);
           callback(null, inflatedRecordBuffer, level);
         }
       }

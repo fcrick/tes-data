@@ -115,6 +115,11 @@ function checkBuffer(buffer: Buffer, offset: number, type: string) {
       console.log(allCount);
     }
 
+    if (err) {
+      console.log(err);
+      return;
+    }
+
     recordTES5.writeRecord(record, (err, newBuffer) => {
       var folder = '../test/data/';
       var offsetHex = offset.toString(16);
