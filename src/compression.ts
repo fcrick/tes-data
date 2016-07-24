@@ -45,7 +45,8 @@ export function inflateRecordBuffer(
   buffer: Buffer,
   callback: (err: Error, result?: Buffer, level?: compressionLevel) => void
 ) {
-  if (buffer.toString('utf8', 0,4) !== 'GRUP' && buffer.readUInt32LE(8) & 0x40000) {
+  var flags = buffer.readUInt32LE(8);
+  if (buffer.toString('utf8', 0,4) !== 'GRUP' && flags & 0x40000) {
     var level = compressionLevels[buffer.readUInt8(29) >> 6];
     var dataSize = buffer.readUInt32LE(24);
     var inflatedRecordBuffer = new Buffer(24 + dataSize);
@@ -59,9 +60,13 @@ export function inflateRecordBuffer(
         }
         else {
           inflatedRecordBuffer.set(inflated, 24);
+          inflatedRecordBuffer.writeUInt32LE(flags & ~0x40000, 8);
           callback(null, inflatedRecordBuffer, level);
         }
       }
     );
+  }
+  else {
+    callback(null, buffer);
   }
 }

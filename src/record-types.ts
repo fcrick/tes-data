@@ -81,28 +81,23 @@ export function getRecord(
       callback(err, record);
     };
 
-    var compressed = record['recordType'] !== 'GRUP' && record['flags'] & 0x40000;
-    if (compressed) {
-      record['compressed'] = true;
-      record['compressionLevel'] = compressionLevels[buffer.readUInt8(29) >> 6];
-
-      var dataSize = buffer.readUInt32LE(24);
-      var uncompressed = new Buffer(dataSize);
-      zlib.inflate(
-        buffer.slice(28),
-        (err, buffer) => err ? newCallback(err, null) : readSubRecords(buffer, record, contextCopy, newCallback)
-      );
-    }
-    else if (buffer.length > offset) {
-      readSubRecords(buffer.slice(24), record, contextCopy, newCallback);
-    }
+    inflateRecordBuffer(buffer, (err, inflated, level) => {
+      if (err) {
+        newCallback(err, null);
+      }
+      else {
+        if (level) {
+          record['compressed'] = true;
+          record['compressionLevel'] = level;
+        }
+        readSubRecords(inflated.slice(24), record, contextCopy, newCallback)
+      }
+    });
   }
   catch (err) {
     callback(err, null);
   }
 }
-
-
 
 function readSubRecords(
   buffer: Buffer,
