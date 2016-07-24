@@ -1,5 +1,7 @@
 import * as zlib from 'zlib';
 
+export type compressionLevel = 'none'|'fast'|'default'|'best';
+
 var levelMap = {
   'none': zlib.Z_NO_COMPRESSION,
   'fast': zlib.Z_BEST_SPEED,
@@ -7,10 +9,10 @@ var levelMap = {
   'best': zlib.Z_BEST_COMPRESSION,
 }
 
-export function compressRecordBuffer(
+export function deflateRecordBuffer(
   buffer: Buffer,
   callback: (err: Error, result: Buffer) => void,
-  level?: 'none'|'fast'|'default'|'best'
+  level?: compressionLevel
 ) {
   // header is always 24 bytes
   var header = buffer.slice(0, 24);
@@ -31,3 +33,10 @@ export function compressRecordBuffer(
     }
   });
 }
+
+// export function inflateRecordBuffer(
+//   buffer: Buffer,
+//   callback: (err: Error, result: Buffer, level: compressionLevel) => void
+// ) {
+
+// }

@@ -15,7 +15,7 @@ import {
   FieldTypes
 } from './common-types'
 
-import { compressRecordBuffer } from './compression'
+import { deflateRecordBuffer } from './compression'
 import * as tes5 from './tes5/types'
 
 import zlib = require('zlib');
@@ -182,7 +182,7 @@ export function writeRecord(
     }
 
     if (record['compressed']) {
-      compressRecordBuffer(buffer, (err, deflated) => {
+      deflateRecordBuffer(buffer, (err, deflated) => {
         if (err) {
           callback(err, null);
         }
