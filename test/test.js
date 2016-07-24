@@ -1,12 +1,11 @@
-var assert = require('assert'),
-    vows = require('vows');
+var assert = require('chai').assert;
 
-vows.describe('serious-calculations').addBatch({
-  'When performing serious calculations': {
-    topic: 1 + 1,
-    'result should be valid': function (result) {
-      assert.isNumber(result);
-      assert.equal(result, 2);
-    }
-  }
-}).export(module);
+describe('serious-calculations', () => {
+  describe('another layer', () => {
+    it('should be 2', () => {
+      var two = 2;
+      assert.isNumber(two);
+      assert.equal(two, 2);
+    });
+  });
+});
