@@ -1,6 +1,7 @@
 import { assert } from 'chai'
 import * as tesData from '../src/index';
 import * as crypto from 'crypto'
+import * as fs from 'fs'
 
 var recordJson = '{"recordType":"TES4","size":44,"flags":129,"version":40,"subRecords":[{"type":"HEDR","size":12,"version":0.9399999976158142,"numRecords":920184,"nextObjectId":3986},{"type":"CNAM","size":10,"value":"mcarofano"},{"type":"INTV","size":4,"value":75461}]}';
 var recordBinary = Buffer.from('544553342C00000081000000000000000000000028000000484544520C00D7A3703F780A0E00920F0000434E414D0A006D6361726F66616E6F00494E54560400C5260100', 'hex');
@@ -63,11 +64,73 @@ describe('validate inputs to readRecord', () => {
   });
 });
 
-if (process.env.LARGE_FILES) {
-  describe('this should not run on travis-ci', () => {
-    it('should always fail', done => {
-      assert.isNull(5);
-      done();
+if (process.env.TES5_PATH) {
+  var filename = 'Skyrim.esm';
+  describe('Verify some core stats about Skyrim.esm', () => {
+    it('find all records', function(done) {
+      this.timeout(10000); // 10 second timeout
+
+      var path = process.env.TES5_PATH + filename;
+      fs.open(path, 'r', (err, fd) => {
+
+        var recordCount = 0;
+        var uniqueParents = new Set<number>();
+        var typeCount: {[type:string]: number} = {};
+
+        tesData.visit(fd, (offset, type, parent) => {
+          recordCount++;
+          uniqueParents.add(parent);
+
+          if (!(type in typeCount)) {
+            typeCount[type] = 0;
+          }
+          typeCount[type]++;
+        }, err => {
+          assert.equal(920185, recordCount);
+          assert.equal(49482, uniqueParents.size);
+          assert.equal(120, Object.keys(typeCount).length);
+          fs.close(fd);
+          done();
+        });
+      });
+    });
+  });
+
+  describe('Subrecords checks', () => {
+    it('should have the correct number of subrecords', function(done) {
+      this.timeout(100000); // 10 second timeout
+
+      var subrecordCount = 0;
+
+      var path = process.env.TES5_PATH + filename;
+      fs.open(path, 'r', (err, fd) => {
+
+        var outstanding = 1;
+
+        var checkDone = () => {
+          if (outstanding === 0) {
+            fs.close(fd);
+
+            // actually wrong as it's missing all compressed subrecords
+            assert.equal(3455743, subrecordCount);
+            done();
+          }
+        };
+        
+        tesData.visit(fd, (offset, type, parent) => {
+          outstanding++;
+          tesData.getRecordBuffer(fd, offset, (err, buffer) => {
+            assert.isNull(err);
+            assert.isNotNull(buffer);
+            subrecordCount += tesData.getSubRecordOffsets(buffer).length;
+            --outstanding;
+            checkDone();
+          });
+        }, err => {
+          assert.isNull(err);
+          --outstanding;
+          checkDone();
+        });
     });
   });
 }
