@@ -5,9 +5,9 @@ import * as recordTES5 from '../record-types';
 var prefix = 'C:/Program Files (x86)/Steam/steamapps/common/Skyrim/Data/'
 var paths = [
   'Skyrim.esm',
-  'Update.esm',
-  'Dawnguard.esm',
-  'HearthFires.esm',
+  // 'Update.esm',
+  // 'Dawnguard.esm',
+  // 'HearthFires.esm',
 ];
 
 function loadOffsets() {
@@ -22,7 +22,7 @@ function loadOffsets() {
         //console.log(logPrefix + JSON.stringify(result));
         console.timeEnd(log);
         console.log(count);
-      }, 0, false);
+      }, 0, true);
     });
   });
 }
@@ -132,7 +132,7 @@ function checkBuffer(buffer: Buffer, offset: number, type: string) {
         folder += offsetHex.substr(0, 2) + '/';
       }
 
-      if (mismatch) {
+      if (mismatch || allCount < 1000) {
         enqueueSave(folder, offsetHex, JSON.stringify(record, null, 2));
       }
     }, context);
@@ -185,8 +185,8 @@ function comparisonTest() {
   });
 }
 
-//loadOffsets();
-//loadBuffers();
-//readRecords();
+// loadOffsets();
+// loadBuffers();
+// readRecords();
 
 comparisonTest();
