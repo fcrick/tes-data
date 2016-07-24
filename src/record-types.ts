@@ -15,7 +15,7 @@ import {
   FieldTypes
 } from './common-types'
 
-import { deflateRecordBuffer } from './compression'
+import { compressionLevels, deflateRecordBuffer, inflateRecordBuffer } from './compression'
 import * as tes5 from './tes5/types'
 
 import zlib = require('zlib');
@@ -102,12 +102,7 @@ export function getRecord(
   }
 }
 
-var compressionLevels = [
-  'none',
-  'fast',
-  'default',
-  'best',
-];
+
 
 function readSubRecords(
   buffer: Buffer,

@@ -2,6 +2,13 @@ import * as zlib from 'zlib';
 
 export type compressionLevel = 'none'|'fast'|'default'|'best';
 
+export var compressionLevels: compressionLevel[] = [
+  'none',
+  'fast',
+  'default',
+  'best',
+];
+
 var levelMap = {
   'none': zlib.Z_NO_COMPRESSION,
   'fast': zlib.Z_BEST_SPEED,
@@ -34,9 +41,27 @@ export function deflateRecordBuffer(
   });
 }
 
-// export function inflateRecordBuffer(
-//   buffer: Buffer,
-//   callback: (err: Error, result: Buffer, level: compressionLevel) => void
-// ) {
+export function inflateRecordBuffer(
+  buffer: Buffer,
+  callback: (err: Error, result?: Buffer, level?: compressionLevel) => void
+) {
+  if (buffer.toString('utf8', 0,4) !== 'GRUP' && buffer.readUInt32LE(8) & 0x40000) {
+    var level = compressionLevels[buffer.readUInt8(29) >> 6];
+    var dataSize = buffer.readUInt32LE(24);
+    var inflatedRecordBuffer = new Buffer(24 + dataSize);
+    inflatedRecordBuffer.set(buffer, 24);
 
-// }
+    zlib.inflate(
+      buffer.slice(28),
+      (err, inflated) => {
+        if (err) {
+          callback(err);
+        }
+        else {
+          inflatedRecordBuffer.set(inflated, 24);
+          callback(null, inflatedRecordBuffer, level);
+        }
+      }
+    );
+  }
+}
