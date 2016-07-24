@@ -131,6 +131,7 @@ if (process.env.TES5_PATH) {
           --outstanding;
           checkDone();
         });
+      });
     });
   });
 }
