@@ -138,7 +138,12 @@ function readSubRecords(
   callback(null, record);
 }
 
-export function writeRecord(record: Object, context?: Object): Buffer {
+export function writeRecord(
+  record: Object,
+  callback: (err: Error, result: any) => void,
+  context?: Object
+) {
+
   if (typeof context === 'undefined') {
     // context is a way to persist values that are considered
     // elsewhere in parsing. Fields with the persist flag are added.
@@ -169,11 +174,8 @@ export function writeRecord(record: Object, context?: Object): Buffer {
 
   if (record['subRecords']) {
     for (let subRecord of record['subRecords']) {
-
       let hadXXXX = 'xxxxSize' in context;
-
       writeFields(write, subRecord, tes5.subRecordFields, context);
-
       if (hadXXXX) {
         delete context['xxxxSize'];
       }
@@ -191,16 +193,25 @@ export function writeRecord(record: Object, context?: Object): Buffer {
 
   if (record['compressed']) {
     var inflatedSize = array.length;
-    var deflated = zlib.deflateSync(Buffer.from(<any>array), {level: record['compressionLevel']});
-    array = new Uint8Array(headerArray.length + deflated.length + 4);
-    array.set(headerArray, 0);
-    var lengthBuffer = new Buffer(4);
-    lengthBuffer.writeUInt32LE(inflatedSize, 0);
-    array.set(lengthBuffer, headerArray.length);
-    array.set(deflated, headerArray.length + 4);
-  }
+    zlib.deflate(Buffer.from(<any>array), {level: record['compressionLevel']}, (err, deflated) => {
+      if (err) {
+        callback(err, null);
+      }
+      else {
+        array = new Uint8Array(headerArray.length + deflated.length + 4);
+        array.set(headerArray, 0);
+        var lengthBuffer = new Buffer(4);
+        lengthBuffer.writeUInt32LE(inflatedSize, 0);
+        array.set(lengthBuffer, headerArray.length);
+        array.set(deflated, headerArray.length + 4);
 
-  return Buffer.from(<any>array);
+        callback(null, Buffer.from(<any>array));
+      }
+    });
+  }
+  else {
+    callback(null, Buffer.from(<any>array));
+  }
 }
 
 function writeFields(write: (arr: Uint8Array) => void, record: Object, fields: FieldArray, context: Object) {

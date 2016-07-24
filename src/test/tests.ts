@@ -115,26 +115,27 @@ function checkBuffer(buffer: Buffer, offset: number, type: string) {
       console.log(allCount);
     }
 
-    var newBuffer = recordTES5.writeRecord(record, context);
-    var folder = '../test/data/';
-    var offsetHex = offset.toString(16);
-    var mismatch = buffer.compare(newBuffer) !== 0;
+    recordTES5.writeRecord(record, (err, newBuffer) => {
+      var folder = '../test/data/';
+      var offsetHex = offset.toString(16);
+      var mismatch = buffer.compare(newBuffer) !== 0;
 
-    if (mismatch) {
-      console.log(`mismatch at ${offsetHex}`);
+      if (mismatch) {
+        console.log(`mismatch at ${offsetHex}`);
 
-      fs.writeFile(`${folder}${offsetHex}_A.bin`, buffer);
-      fs.writeFile(`${folder}${offsetHex}_B.bin`, newBuffer);
+        fs.writeFile(`${folder}${offsetHex}_A.bin`, buffer);
+        fs.writeFile(`${folder}${offsetHex}_B.bin`, newBuffer);
 
-      mismatchCount += 1;
-    }
-    else {
-      folder += offsetHex.substr(0, 2) + '/';
-    }
+        mismatchCount += 1;
+      }
+      else {
+        folder += offsetHex.substr(0, 2) + '/';
+      }
 
-    if ((allCount <= 1000 || mismatch) && record['recordType'] !== 'GRUP') {
-      enqueueSave(folder, offsetHex, JSON.stringify(record, null, 2));
-    }
+      if (mismatch) {
+        enqueueSave(folder, offsetHex, JSON.stringify(record, null, 2));
+      }
+    }, context);
   }, context);
 }
 
