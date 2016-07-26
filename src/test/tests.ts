@@ -1,6 +1,7 @@
 import fs = require('fs');
-import * as tesData from '../visit-records';
-import * as recordTES5 from '../records';
+
+import { visit } from '../visit-records';
+import { readRecord, writeRecord } from '../records';
 
 var prefix = 'C:/Program Files (x86)/Steam/steamapps/common/Skyrim/Data/'
 var paths = [
@@ -9,36 +10,6 @@ var paths = [
   // 'Dawnguard.esm',
   // 'HearthFires.esm',
 ];
-
-function loadOffsets() {
-  paths.forEach(filename => {
-    var path = prefix + filename;
-    var log = filename + ' - find top records';
-
-    console.time(log);
-    fs.open(path, 'r', (err, fd) => {
-      var count = 0;
-      tesData.visit(fd, offset => { count++; }, err => {
-        //console.log(logPrefix + JSON.stringify(result));
-        console.timeEnd(log);
-        console.log(count);
-      }, 0, true);
-    });
-  });
-}
-
-function loadBuffers() {
-  var path = prefix + paths[0];
-
-  fs.open(path, 'r', (err, fd) => {
-    tesData.visit(fd, (offset, size) => {
-      var buffer = new Buffer(size);
-      fs.read(fd, buffer, 0, size, offset, (err, bytesRead, buffer) => {
-        console.log(offset + ' is ' + buffer.length + ' bytes');
-      })
-    });
-  });
-}
 
 var counter = 0;
 
@@ -61,7 +32,7 @@ function checkBuffer(buffer: Buffer, offset: number, type: string) {
     return;
   }
   allCount += 1;
-  var record = recordTES5.readRecord(buffer, (err, record) => {
+  var record = readRecord(buffer, (err, record) => {
     if (allCount % 10000 === 0) {
       console.log(allCount);
     }
@@ -71,7 +42,7 @@ function checkBuffer(buffer: Buffer, offset: number, type: string) {
       return;
     }
 
-    recordTES5.writeRecord(record, (err, newBuffer) => {
+    writeRecord(record, (err, newBuffer) => {
       var folder = '../test/data/';
       var offsetHex = offset.toString(16);
       var mismatch = buffer.compare(newBuffer) !== 0;
@@ -139,12 +110,8 @@ function visitOffset(offset: number, size: number, type: string, fd: number) {
 
 function comparisonTest() {
   fs.open(path, 'r', (err, fd) => {
-    tesData.visit(fd, (o, s, t) => visitOffset(o, s, t, fd));
+    visit(fd, (o, s, t) => visitOffset(o, s, t, fd));
   });
 }
-
-// loadOffsets();
-// loadBuffers();
-// readRecords();
 
 comparisonTest();

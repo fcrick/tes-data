@@ -1,7 +1,8 @@
 import fs = require('fs');
-import * as tesData from '../visit-records';
-import * as records from '../records';
 import crypto = require('crypto');
+
+import { visit } from '../visit-records';
+import { readRecord } from '../records';
 
 var path = 'C:/Program Files (x86)/Steam/steamapps/common/Skyrim/Data/Skyrim.esm';
 
@@ -11,7 +12,7 @@ function findCompressedRecords(path: string) {
     var visitDone = false;
     var reads = 0;
 
-    tesData.visit(fd, (offset, size, type, parent) => {
+    visit(fd, (offset, size, type, parent) => {
       var buffer = new Buffer(12);
       reads++;
       fs.read(fd, buffer, 0, 12, offset, (err, bytesRead, buffer) => {
@@ -20,7 +21,7 @@ function findCompressedRecords(path: string) {
         if (type !== 'GRUP' && flags & 0x40000 && count++ < 10) {
           var buffer = new Buffer(size);
           fs.read(fd, buffer, 0, size, offset, (err, bytesRead, buffer) => {
-            records.readRecord(buffer, (err, record) => {
+            readRecord(buffer, (err, record) => {
               console.log(JSON.stringify(record));
             });
           });

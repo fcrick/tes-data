@@ -1,7 +1,8 @@
 import fs = require('fs');
-import * as tesData from '../visit-records';
-import * as recordTES5 from '../records';
 import crypto = require('crypto');
+
+import { visit } from '../visit-records';
+import { getSubrecordOffsets } from '../records';
 
 var prefix = 'C:/Program Files (x86)/Steam/steamapps/common/Skyrim/Data/'
 var paths = [
@@ -72,7 +73,7 @@ function scan(onOffsets: (buffer: Buffer, offsets: number[]) => void, done: () =
   var seen = new Set<number>();
 
   fs.open(path, 'r', (err, fd) => {
-    tesData.visit(fd, (offset, size, type) => {
+    visit(fd, (offset, size, type) => {
       if (type === 'GRUP')
         return;
 
@@ -82,7 +83,7 @@ function scan(onOffsets: (buffer: Buffer, offsets: number[]) => void, done: () =
 
       var buffer = new Buffer(size);
       fs.read(fd, buffer, 0, size, offset, (err, bytesRead, buffer) => {
-        onOffsets(buffer, recordTES5.getSubrecordOffsets(buffer));
+        onOffsets(buffer, getSubrecordOffsets(buffer));
       });
     }, () => done());
   });
