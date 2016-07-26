@@ -77,7 +77,7 @@ if (process.env.TES5_PATH) {
         var uniqueParents = new Set<number>();
         var typeCount: {[type:string]: number} = {};
 
-        tesData.visit(fd, (offset, type, parent) => {
+        tesData.visit(fd, (offset, size, type, parent) => {
           recordCount++;
           uniqueParents.add(parent);
 
@@ -116,7 +116,7 @@ if (process.env.TES5_PATH) {
           }
         };
         
-        tesData.visit(fd, (offset, type, parent) => {
+        tesData.visit(fd, (offset, size, type, parent) => {
           outstanding++;
           tesData.getRecordBuffer(fd, offset, (err, buffer) => {
             assert.isNull(err);

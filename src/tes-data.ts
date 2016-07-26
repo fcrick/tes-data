@@ -20,7 +20,7 @@ export function getRecordBuffer(
 
 export function visit(
   fd: number,
-  onVisit?: (offset: number, type?: string, parent?: number) => boolean|void,
+  onVisit?: (offset: number, size: number, type?: string, parent?: number) => boolean|void,
   onDone?: (err?: NodeJS.ErrnoException) => void,
   startOffset?: number,
   recurse?: boolean
@@ -30,10 +30,10 @@ export function visit(
   startOffset = startOffset || 0;
   recurse = recurse || typeof recurse === 'undefined' ? true : false;
 
-  var callback: (offset: number, type: string, parent: number) => boolean;
-  callback = (offset, type, parent) => {
+  var callback: (offset: number, size: number, type: string, parent: number) => boolean;
+  callback = (offset, size, type, parent) => {
     if (offset !== parent || offset === startOffset) {
-      cancelled = cancelled || <boolean>onVisit(offset, type, parent);
+      cancelled = cancelled || <boolean>onVisit(offset, size, type, parent);
     }
 
     if (!cancelled && type === 'GRUP' && offset !== parent && recurse) {
@@ -61,7 +61,7 @@ export function visit(
 function visitRecordOffsets(
   fd: number,
   origOffset: number,
-  visit: (offset: number, type: string, parent: number) => boolean,
+  visit: (offset: number, size: number, type: string, parent: number) => boolean,
   done: (err: NodeJS.ErrnoException) => void
 ) {
   let isDone = false;
@@ -103,11 +103,12 @@ function visitRecordOffsets(
       return;
     }
 
-    var nextOffset = offset + buffer.readUInt32LE(4);
+    var size = buffer.readUInt32LE(4);
+    var nextOffset = offset + size;
     var type = buffer.toString('utf8', 0, 4);
 
     // true return value means user is cancelling
-    if (visit(offset, type, origOffset)) {
+    if (visit(offset, size, type, origOffset)) {
       isDone = true;
       return;
     }

@@ -11,7 +11,7 @@ function findCompressedRecords(path: string) {
     var visitDone = false;
     var reads = 0;
 
-    tesData.visit(fd, (offset, type, parent) => {
+    tesData.visit(fd, (offset, size, type, parent) => {
       var buffer = new Buffer(12);
       reads++;
       fs.read(fd, buffer, 0, 12, offset, (err, bytesRead, buffer) => {

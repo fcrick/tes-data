@@ -72,7 +72,7 @@ function scan(onOffsets: (buffer: Buffer, offsets: number[]) => void, done: () =
   var seen = new Set<number>();
 
   fs.open(path, 'r', (err, fd) => {
-    tesData.visit(fd, (offset, type) => {
+    tesData.visit(fd, (offset, size, type) => {
       if (type === 'GRUP')
         return;
 

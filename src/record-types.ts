@@ -19,7 +19,7 @@ import { compressionLevels, deflateRecordBuffer, inflateRecordBuffer } from './c
 import * as tes5 from './tes5/types'
 
 import textEncoding = require('text-encoding');
-var TextEncoder = textEncoding.TextEncoder;
+var textEncoder = new textEncoding.TextEncoder();
 
 export function getSubRecordOffsets(buffer: Buffer) {
   var offsets: number[] = [];
@@ -194,8 +194,6 @@ function writeFields(write: (arr: Uint8Array) => void, record: Object, fields: F
   }
 }
 
-var textEncoder = new TextEncoder();
-
 function writeField(write: (arr: Uint8Array) => void, record: Object, field: Field, context: Object) {
   handleField(field, record, context, (name, type, count, options) => {
     // simple
@@ -220,10 +218,6 @@ function writeField(write: (arr: Uint8Array) => void, record: Object, field: Fie
   }, () => {
 
   });
-}
-
-interface FieldWriter {
-  (write: (arr: Uint8Array) => void, record: Object, name: string, type: FieldTypes, count: number): void;
 }
 
 function numericWriter<T>(
@@ -252,6 +246,10 @@ function numericWriter<T>(
     }
   }
   write(new Uint8Array(buffer));
+}
+
+interface FieldWriter {
+  (write: (arr: Uint8Array) => void, record: Object, name: string, type: FieldTypes, count: number): void;
 }
 
 var fieldWriters: {[fieldType:string]: FieldWriter} = {
@@ -426,18 +424,6 @@ function handleField<T>(
   return handleError();
 }
 
-function nullIfEqual<T>(value: T, test: T) {
-  return value === test ? null : value;  
-}
-
-function nullIfZero(value: number) {
-  return value === 0 && !isNegativeZero(value) ? null : value;  
-}
-
-interface FieldReader {
-  (buffer:Buffer, type: FieldTypes, offset:number, count: number): any;
-}
-
 let range = function*(max: number) {
   for (let i = 0; i < max; i += 1)
     yield i
@@ -447,6 +433,10 @@ let range = function*(max: number) {
 function isNegativeZero(n) {
   n = Number( n );
   return (n === 0) && (1 / n === -Infinity);
+}
+
+function nullIfZero(value: number) {
+  return value === 0 && !isNegativeZero(value) ? null : value;  
 }
 
 function numericReader(
@@ -461,6 +451,14 @@ function numericReader(
   else {
     return [...range(count)].map(i => bufferReader(offset + i * fieldSize[fieldType]));
   }
+}
+
+function nullIfEqual<T>(value: T, test: T) {
+  return value === test ? null : value;  
+}
+
+interface FieldReader {
+  (buffer:Buffer, type: FieldTypes, offset:number, count: number): any;
 }
 
 var fieldReaders: {[fieldType:string]: FieldReader} = {

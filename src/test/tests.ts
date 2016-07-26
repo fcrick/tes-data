@@ -186,7 +186,7 @@ function visitOffset(offset: number, type: string, fd: number) {
 
 function comparisonTest() {
   fs.open(path, 'r', (err, fd) => {
-    tesData.visit(fd, (o, t) => visitOffset(o, t, fd));
+    tesData.visit(fd, (o, s, t) => visitOffset(o, t, fd));
   });
 }
 
