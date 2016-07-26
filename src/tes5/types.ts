@@ -9,10 +9,7 @@ import {
   unknown,
   wString,
   zString,
-  Field,
   FieldArray,
-  FieldOptions,
-  FieldTypes
 } from '../common-types'
 
 // http://www.uesp.net/wiki/Tes5Mod:Mod_File_Format
