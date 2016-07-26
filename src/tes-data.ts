@@ -103,15 +103,8 @@ function visitRecordOffsets(
       return;
     }
 
-    var size = buffer.readUInt32LE(4);
-    var nextOffset = offset + size;
+    var nextOffset = offset + buffer.readUInt32LE(4);
     var type = buffer.toString('utf8', 0, 4);
-
-    // true return value means user is cancelling
-    if (visit(offset, size, type, origOffset)) {
-      isDone = true;
-      return;
-    }
 
     if (type !== 'GRUP') {
       nextOffset += 24;
@@ -120,6 +113,15 @@ function visitRecordOffsets(
       // we just started reading a group, use its size to scope our scan
       endOffset = nextOffset;
       nextOffset = offset + 24;
+    }
+
+    // actual size of the record
+    var size = type === 'GRUP' ? 24 : nextOffset - offset;
+
+    // true return value means user is cancelling
+    if (visit(offset, size, type, origOffset)) {
+      isDone = true;
+      return;
     }
 
     if (nextOffset < endOffset) {
