@@ -1,10 +1,10 @@
-import * as recordTes5 from './record-types';
+import * as records from './records';
 import * as visitRecords from './visit-records'
 import * as compression from './compression';
 
-export const getSubrecordOffsets = recordTes5.getSubrecordOffsets;
-export const getRecord = recordTes5.readRecord;
-export const writeRecord = recordTes5.writeRecord;
+export const getSubrecordOffsets = records.getSubrecordOffsets;
+export const getRecord = records.readRecord;
+export const writeRecord = records.writeRecord;
 
 export const visit = visitRecords.visit;
 
