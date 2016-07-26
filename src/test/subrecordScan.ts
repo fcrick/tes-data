@@ -1,5 +1,5 @@
 import fs = require('fs');
-import * as tesData from '../tes-data';
+import * as tesData from '../visit-records';
 import * as recordTES5 from '../record-types';
 import crypto = require('crypto');
 

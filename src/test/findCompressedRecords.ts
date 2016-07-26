@@ -1,5 +1,5 @@
 import fs = require('fs');
-import * as tesData from '../tes-data';
+import * as tesData from '../visit-records';
 import * as recordTES5 from '../record-types';
 import crypto = require('crypto');
 
@@ -20,7 +20,7 @@ function findCompressedRecords(path: string) {
         if (type !== 'GRUP' && flags & 0x40000 && count++ < 10) {
           var buffer = new Buffer(size);
           fs.read(fd, buffer, 0, size, offset, (err, bytesRead, buffer) => {
-            recordTES5.getRecord(buffer, (err, record) => {
+            recordTES5.readRecord(buffer, (err, record) => {
               console.log(JSON.stringify(record));
             });
           });

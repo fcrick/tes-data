@@ -3,7 +3,7 @@ import * as visitRecords from './visit-records'
 import * as compression from './compression';
 
 export const getSubRecordOffsets = recordTes5.getSubRecordOffsets;
-export const getRecord = recordTes5.getRecord;
+export const getRecord = recordTes5.readRecord;
 export const writeRecord = recordTes5.writeRecord;
 
 export const visit = visitRecords.visit;

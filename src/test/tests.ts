@@ -1,5 +1,5 @@
 import fs = require('fs');
-import * as tesData from '../tes-data';
+import * as tesData from '../visit-records';
 import * as recordTES5 from '../record-types';
 
 var prefix = 'C:/Program Files (x86)/Steam/steamapps/common/Skyrim/Data/'
@@ -61,7 +61,7 @@ function checkBuffer(buffer: Buffer, offset: number, type: string) {
     return;
   }
   allCount += 1;
-  var record = recordTES5.getRecord(buffer, (err, record) => {
+  var record = recordTES5.readRecord(buffer, (err, record) => {
     if (allCount % 10000 === 0) {
       console.log(allCount);
     }

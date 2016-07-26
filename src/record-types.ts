@@ -41,7 +41,7 @@ export function getSubRecordOffsets(buffer: Buffer) {
   return offsets;
 }
 
-export function getRecord(
+export function readRecord(
   buffer: Buffer,
   callback: (err: NodeJS.ErrnoException, record: Object) => void,
   context?: Object
