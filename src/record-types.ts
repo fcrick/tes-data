@@ -2,7 +2,7 @@ import { readFields, writeFields } from './fields'
 import { deflateRecordBuffer, inflateRecordBuffer } from './compression'
 import * as tes5 from './tes5/types'
 
-export function getSubRecordOffsets(buffer: Buffer) {
+export function getSubrecordOffsets(buffer: Buffer) {
   var offsets: number[] = [];
 
   // read the header, as we need to know if it's compressed
@@ -48,7 +48,7 @@ export function readRecord(
     var offset = 24;
 
     if (offset < buffer.length) {
-      record['subRecords'] = [];
+      record['subrecords'] = [];
     }
 
     // localization flag check
@@ -70,7 +70,7 @@ export function readRecord(
           record['compressed'] = true;
           record['compressionLevel'] = level;
         }
-        readSubRecords(inflated.slice(24), record, contextCopy, newCallback)
+        readSubrecords(inflated.slice(24), record, contextCopy, newCallback)
       }
     });
   }
@@ -79,7 +79,7 @@ export function readRecord(
   }
 }
 
-function readSubRecords(
+function readSubrecords(
   buffer: Buffer,
   record: Object,
   context: Object,
@@ -89,7 +89,7 @@ function readSubRecords(
 
   // read subrecords
   while (offset < buffer.length) {
-    var subRecord = {};
+    var subrecord = {};
 
     // cheating a little here to simplify repeating records
     var subSize = buffer.readUInt16LE(offset + 4);
@@ -100,7 +100,7 @@ function readSubRecords(
       endOffset += context['xxxxSize'];
     }
 
-    readFields(subRecord, buffer.slice(offset, endOffset), 0, tes5.subRecordFields, context);
+    readFields(subrecord, buffer.slice(offset, endOffset), 0, tes5.subrecordFields, context);
 
     if (hadXXXX) {
       delete context['xxxxSize'];
@@ -108,7 +108,7 @@ function readSubRecords(
     }
 
     offset = endOffset;
-    record['subRecords'].push(subRecord);
+    record['subrecords'].push(subrecord);
   }
 
   callback(null, record);
@@ -132,10 +132,10 @@ export function writeRecord(
 
     writeFields(write, record, tes5.recordHeader, context);
 
-    if (record['subRecords']) {
-      for (let subRecord of record['subRecords']) {
+    if (record['subrecords']) {
+      for (let subrecord of record['subrecords']) {
         let hadXXXX = 'xxxxSize' in context;
-        writeFields(write, subRecord, tes5.subRecordFields, context);
+        writeFields(write, subrecord, tes5.subrecordFields, context);
         if (hadXXXX) {
           delete context['xxxxSize'];
         }

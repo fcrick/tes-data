@@ -71,7 +71,7 @@ output
   "size": 44,
   "flags": 129,
   "version": 40,
-  "subRecords": [
+  "subrecords": [
     {
       "type": "HEDR",
       "size": 12,

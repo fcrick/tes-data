@@ -3,7 +3,7 @@ import * as tesData from '../src/index';
 import * as crypto from 'crypto'
 import * as fs from 'fs'
 
-var recordJson = '{"recordType":"TES4","size":44,"flags":129,"version":40,"subRecords":[{"type":"HEDR","size":12,"version":0.9399999976158142,"numRecords":920184,"nextObjectId":3986},{"type":"CNAM","size":10,"value":"mcarofano"},{"type":"INTV","size":4,"value":75461}]}';
+var recordJson = '{"recordType":"TES4","size":44,"flags":129,"version":40,"subrecords":[{"type":"HEDR","size":12,"version":0.9399999976158142,"numRecords":920184,"nextObjectId":3986},{"type":"CNAM","size":10,"value":"mcarofano"},{"type":"INTV","size":4,"value":75461}]}';
 var recordBinary = Buffer.from('544553342C00000081000000000000000000000028000000484544520C00D7A3703F780A0E00920F0000434E414D0A006D6361726F66616E6F00494E54560400C5260100', 'hex');
 
 describe('getRecord', () => {
@@ -127,7 +127,7 @@ if (process.env.TES5_PATH) {
               assert.isNull(err);
               assert.isNotNull(inflated);
 
-              subrecordCount += tesData.getSubRecordOffsets(inflated).length;
+              subrecordCount += tesData.getSubrecordOffsets(inflated).length;
               --outstanding;
               checkDone();
             });

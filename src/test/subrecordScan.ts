@@ -11,9 +11,9 @@ var paths = [
   'HearthFires.esm',
 ];
 
-var subRecordMap: {[hash:string]: number} = {};
+var subrecordMap: {[hash:string]: number} = {};
 var uniqueCount = 0;
-var totalSubRecords = 0;
+var totalSubrecords = 0;
 var totalRecords = 0;
 var duplicatedBytes = 0;
 var mostFrequentCount = 0;
@@ -35,13 +35,13 @@ function hashOffsets(buffer: Buffer, offsets: number[], minSize: number) {
 
     var digest = crypto.createHash('sha1').update(buffer.slice(offset, endOffset).toString('hex')).digest('hex');
 
-    totalSubRecords += 1;
-    if (totalSubRecords % 100000 === 0) {
-      console.log(`totalSubRecords:${totalSubRecords}`);
+    totalSubrecords += 1;
+    if (totalSubrecords % 100000 === 0) {
+      console.log(`totalSubrecords:${totalSubrecords}`);
     }
 
     var count:number;
-    if (count = ++subRecordMap[digest]) {
+    if (count = ++subrecordMap[digest]) {
       duplicatedBytes += endOffset - offset;
       mostFrequentCount = Math.max(count, mostFrequentCount);
       if (count === mostFrequentCount) {
@@ -50,7 +50,7 @@ function hashOffsets(buffer: Buffer, offsets: number[], minSize: number) {
       }
     }
     else {
-      subRecordMap[digest] = 1;
+      subrecordMap[digest] = 1;
       uniqueCount += 1
     }
   });
@@ -58,7 +58,7 @@ function hashOffsets(buffer: Buffer, offsets: number[], minSize: number) {
 
 function hashOffsetsDone() {
   console.log(`uniqueCount:${uniqueCount}`);
-  console.log(`totalSubRecords:${totalSubRecords}`);
+  console.log(`totalSubrecords:${totalSubrecords}`);
   console.log(`duplicatedBytes:${duplicatedBytes}`);
   console.log(`mostFrequentCount:${mostFrequentCount}`);
   console.log(`mostFrequentAsHex:${mostFrequentAsHex}`);
@@ -82,7 +82,7 @@ function scan(onOffsets: (buffer: Buffer, offsets: number[]) => void, done: () =
 
       var buffer = new Buffer(size);
       fs.read(fd, buffer, 0, size, offset, (err, bytesRead, buffer) => {
-        onOffsets(buffer, recordTES5.getSubRecordOffsets(buffer));
+        onOffsets(buffer, recordTES5.getSubrecordOffsets(buffer));
       });
     }, () => done());
   });

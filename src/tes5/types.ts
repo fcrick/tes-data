@@ -767,7 +767,7 @@ var xxxx: FieldArray = [
   ['xxxxSize', 'uint32le', {persist:true}],
 ];
 
-export var subRecordFields: FieldArray = [
+export var subrecordFields: FieldArray = [
   ['type', 'char', {size:4}],
   ['size', 'uint16le'],
   ['recordType', {
