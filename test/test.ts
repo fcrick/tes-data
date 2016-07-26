@@ -111,7 +111,7 @@ if (process.env.TES5_PATH) {
           if (outstanding === 0) {
             fs.close(fd);
 
-            assert.equal(4119347, subrecordCount);
+            assert.equal(4134046, subrecordCount);
             done();
           }
         };

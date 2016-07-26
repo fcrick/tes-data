@@ -9,8 +9,9 @@ export function getSubRecordOffsets(buffer: Buffer) {
   var record = {};
   readFields(record, buffer, 0, tes5.recordHeader, {});
 
-  // don't support GRUP, WRLD, or compressed
-  if (['GRUP', 'WRLD'].indexOf(record['recordType']) !== -1 || record['flags'] & 0x40000)
+  // don't support GRUP or compressed buffers - compressed records
+  // should be uncompressed before this function is called
+  if ('GRUP' === record['recordType'] || record['flags'] & 0x40000)
     return offsets;
 
   var offset = 24;
