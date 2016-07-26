@@ -32,7 +32,8 @@ function loadBuffers() {
 
   fs.open(path, 'r', (err, fd) => {
     tesData.visit(fd, (offset, size) => {
-      tesData.getRecordBuffer(fd, offset, size, (err, buffer) => {
+      var buffer = new Buffer(size);
+      fs.read(fd, buffer, 0, size, offset, (err, bytesRead, buffer) => {
         console.log(offset + ' is ' + buffer.length + ' bytes');
       })
     });
@@ -47,56 +48,6 @@ var selectMany = (() => {
 
     return (this_: any[], fn) => flatten(this_.map(fn));
 })();
-
-// TODO: get this working again
-// function readRecords() {
-//   var path = prefix + paths[0];
-
-//   fs.open(path, 'r', (err, fd) => {
-//     var printRecord: (err: NodeJS.ErrnoException, buffer: Buffer, loc: [number, string]) => void;
-//     printRecord = (err, buffer, loc) => {
-//       if (loc[1] === 'BPTD' && counter < 100000) {
-//         var record = recordTES5.getRecord(buffer);
-//         var edids = record.subRecords.filter(r => r.type === 'EDID');
-//         var subs = record.subRecords.filter(r => r.type === 'RAGA');
-//         var vmads = record.subRecords.filter(r => r.type === 'VMAD');
-//         var scripts = selectMany(vmads, vmad => vmad['scripts'] || []);
-//         var properties = selectMany(scripts, sc => sc['properties'] || []);
-//         // if (properties.filter(p => [1,2,3,4,5].indexOf(p['propertyType']) === -1).length > 0) {
-//         if (subs.length) {
-//           counter += 1;
-//           // console.log(loc[0]);
-
-//           //if ((edids||[]).filter(edid => edid['value'] === 'FoodMammothMeat').length) {
-//           (edids || []).forEach(sub => console.log(JSON.stringify(sub)));
-//           // subs.forEach(sub => console.log(JSON.stringify(sub)));
-
-//           // recordTES5.getRecord(buffer);
-//           console.log(JSON.stringify(record, null, 2));
-//         }
-//       }
-//       // else if (counter % 10000000 === 0) {
-//       //   console.log(record);
-//       // }
-//     };
-//     var handleOffset: (loc:[number, string]) => void;
-//     handleOffset = loc => tesData.getRecordBuffer(fd, loc[0], (e,b) => printRecord(e, b, loc));
-//     var handleOffsets: tesData.Callback<[[number,string][], number]>;
-//     handleOffsets = (err, result) => {
-//       var offsets = result[0];
-//       // ignore the first entry as we should have already processed it
-//       offsets = offsets.slice(1);
-//       //console.log(JSON.stringify(offsets));
-//       if (offsets) {
-//         offsets.forEach(handleOffset);
-//         offsets.map(o => o[0]).forEach(o => tesData.getRecordOffsets(fd, o, handleOffsets));
-//       }
-//     };
-  
-//     handleOffset([0, 'TES4']);
-//     tesData.getRecordOffsets(fd, 0, handleOffsets);
-//   });
-// }
 
 // var path = 'C:/src/skyrimmods/Brigandage v.4-32706-4/Brigandage.esp';
 // var path = 'C:/src/skyrimmods/Immersive Armors v8-19733-8/Hothtrooper44_ArmorCompilation.esp';
@@ -175,12 +126,14 @@ function visitOffset(offset: number, size: number, type: string, fd: number) {
   }
   seen[offset] = true;
 
-  tesData.getRecordBuffer(fd, offset, size, (e, b) => {
-    if (e) {
-      console.log(e);
-      return;
+  var buffer = new Buffer(size);
+  fs.read(fd, buffer, 0, size, offset, (err, bytesRead, buffer) => {
+    if (err) {
+      console.log(err);
     }
-    checkBuffer(b, offset, type)
+    else {
+      checkBuffer(buffer, offset, type)
+    }
   });
 }
 

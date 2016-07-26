@@ -6,7 +6,6 @@ export const getSubRecordOffsets = recordTes5.getSubRecordOffsets;
 export const getRecord = recordTes5.getRecord;
 export const writeRecord = recordTes5.writeRecord;
 
-export const getRecordBuffer = tesData.getRecordBuffer;
 export const visit = tesData.visit;
 
 export const deflateRecordBuffer = compression.deflateRecordBuffer;

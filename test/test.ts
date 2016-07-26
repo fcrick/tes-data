@@ -98,7 +98,7 @@ if (process.env.TES5_PATH) {
 
   describe('Subrecords checks', () => {
     it('should have the correct number of subrecords', function(done) {
-      this.timeout(100000); // 10 second timeout
+      this.timeout(40000);
 
       var subrecordCount = 0;
 
@@ -118,7 +118,8 @@ if (process.env.TES5_PATH) {
         
         tesData.visit(fd, (offset, size, type, parent) => {
           outstanding++;
-          tesData.getRecordBuffer(fd, offset, size, (err, buffer) => {
+          var buffer = new Buffer(size);
+          fs.read(fd, buffer, 0, size, offset, (err, bytesRead, buffer) => {
             assert.isNull(err);
             assert.isNotNull(buffer);
 

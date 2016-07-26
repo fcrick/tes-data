@@ -1,17 +1,5 @@
 import fs = require('fs');
 
-export function getRecordBuffer(
-  fd: number,
-  offset: number,
-  size: number,
-  callback: (err: NodeJS.ErrnoException, buffer: Buffer) => void
-) {
-  var buffer = new Buffer(size);
-  fs.read(fd, buffer, 0, size, offset, (err, bytesRead, buffer) => {
-    callback(null, buffer);
-  });
-}
-
 export function visit(
   fd: number,
   onVisit?: (offset: number, size: number, type?: string, parent?: number) => boolean|void,
