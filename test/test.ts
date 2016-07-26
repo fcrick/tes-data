@@ -111,8 +111,7 @@ if (process.env.TES5_PATH) {
           if (outstanding === 0) {
             fs.close(fd);
 
-            // actually wrong as it's missing all compressed subrecords
-            assert.equal(3455743, subrecordCount);
+            assert.equal(4119347, subrecordCount);
             done();
           }
         };
@@ -122,9 +121,15 @@ if (process.env.TES5_PATH) {
           tesData.getRecordBuffer(fd, offset, (err, buffer) => {
             assert.isNull(err);
             assert.isNotNull(buffer);
-            subrecordCount += tesData.getSubRecordOffsets(buffer).length;
-            --outstanding;
-            checkDone();
+
+            tesData.inflateRecordBuffer(buffer, (err, inflated) => {
+              assert.isNull(err);
+              assert.isNotNull(inflated);
+
+              subrecordCount += tesData.getSubRecordOffsets(inflated).length;
+              --outstanding;
+              checkDone();
+            });
           });
         }, err => {
           assert.isNull(err);
