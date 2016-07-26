@@ -118,7 +118,7 @@ if (process.env.TES5_PATH) {
         
         tesData.visit(fd, (offset, size, type, parent) => {
           outstanding++;
-          tesData.getRecordBuffer(fd, offset, (err, buffer) => {
+          tesData.getRecordBuffer(fd, offset, size, (err, buffer) => {
             assert.isNull(err);
             assert.isNotNull(buffer);
 

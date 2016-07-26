@@ -2,19 +2,13 @@ import fs = require('fs');
 
 export function getRecordBuffer(
   fd: number,
-  origOffset: number,
+  offset: number,
+  size: number,
   callback: (err: NodeJS.ErrnoException, buffer: Buffer) => void
 ) {
-  // first we need to check if this is a group or not, as group records have a fixed size
-  var buffer = new Buffer(8);
-  fs.read(fd, buffer, 0, 8, origOffset, (err, bytesRead, buffer) => {
-    var type = buffer.toString('utf8', 0, 4);
-    var size = type == 'GRUP' ? 24 : buffer.readUInt32LE(4) + 24
-
-    var buffer = new Buffer(size);
-    fs.read(fd, buffer, 0, size, origOffset, (err, bytesRead, buffer) => {
-      callback(null, buffer);
-    });
+  var buffer = new Buffer(size);
+  fs.read(fd, buffer, 0, size, offset, (err, bytesRead, buffer) => {
+    callback(null, buffer);
   });
 }
 

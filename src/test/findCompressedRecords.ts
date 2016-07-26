@@ -18,7 +18,7 @@ function findCompressedRecords(path: string) {
         var type = buffer.toString('utf8', 0, 4);
         var flags = buffer.readUInt32LE(8);
         if (type !== 'GRUP' && flags & 0x40000 && count++ < 10) {
-          tesData.getRecordBuffer(fd, offset, (err, buffer) => {
+          tesData.getRecordBuffer(fd, offset, size, (err, buffer) => {
             recordTES5.getRecord(buffer, (err, record) => {
               console.log(JSON.stringify(record));
             });

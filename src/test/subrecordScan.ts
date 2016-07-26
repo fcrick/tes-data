@@ -80,7 +80,7 @@ function scan(onOffsets: (buffer: Buffer, offsets: number[]) => void, done: () =
         return;
       seen.add(offset);
 
-      tesData.getRecordBuffer(fd, offset, (err, buffer) => {
+      tesData.getRecordBuffer(fd, offset, size, (err, buffer) => {
         onOffsets(buffer, recordTES5.getSubRecordOffsets(buffer));
       });
     }, () => done());

@@ -31,8 +31,8 @@ function loadBuffers() {
   var path = prefix + paths[0];
 
   fs.open(path, 'r', (err, fd) => {
-    tesData.visit(fd, offset => {
-      tesData.getRecordBuffer(fd, offset, (err, buffer) => {
+    tesData.visit(fd, (offset, size) => {
+      tesData.getRecordBuffer(fd, offset, size, (err, buffer) => {
         console.log(offset + ' is ' + buffer.length + ' bytes');
       })
     });
@@ -169,13 +169,13 @@ function doSave(folder: string, offsetHex: string, record: string) {
 
 var seen = new Set<number>();
 
-function visitOffset(offset: number, type: string, fd: number) {
+function visitOffset(offset: number, size: number, type: string, fd: number) {
   if (offset in seen) {
     return;
   }
   seen[offset] = true;
 
-  tesData.getRecordBuffer(fd, offset, (e, b) => {
+  tesData.getRecordBuffer(fd, offset, size, (e, b) => {
     if (e) {
       console.log(e);
       return;
@@ -186,7 +186,7 @@ function visitOffset(offset: number, type: string, fd: number) {
 
 function comparisonTest() {
   fs.open(path, 'r', (err, fd) => {
-    tesData.visit(fd, (o, s, t) => visitOffset(o, t, fd));
+    tesData.visit(fd, (o, s, t) => visitOffset(o, s, t, fd));
   });
 }
 
