@@ -1,8 +1,8 @@
 import fs = require('fs');
 import crypto = require('crypto');
 
-import { visit } from '../visit-records';
-import { readRecord } from '../records';
+import { visit } from '../src/visit-records';
+import { readRecord } from '../src/records';
 
 var path = 'C:/Program Files (x86)/Steam/steamapps/common/Skyrim/Data/Skyrim.esm';
 

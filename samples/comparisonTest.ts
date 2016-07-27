@@ -1,7 +1,7 @@
 import fs = require('fs');
 
-import { visit } from '../visit-records';
-import { readRecord, writeRecord } from '../records';
+import { visit } from '../src/visit-records';
+import { readRecord, writeRecord } from '../src/records';
 
 var prefix = 'C:/Program Files (x86)/Steam/steamapps/common/Skyrim/Data/'
 var paths = [
