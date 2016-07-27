@@ -28,7 +28,7 @@ export function visit(
 
   function done(err: NodeJS.ErrnoException) {
     outstanding -= 1;
-    if (err || outstanding === 0 && onDone) {
+    if ((err || outstanding === 0) && onDone) {
       onDone(err);
 
       // only report first error
