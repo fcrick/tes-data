@@ -14,7 +14,7 @@ describe('getRecord', () => {
       assert.isNull(err);
       assert.deepEqual(recordBinary, buffer);
 
-      tesData.getRecord(buffer, (err, newRecord) => {
+      tesData.readRecord(buffer, (err, newRecord) => {
         assert.isNull(err);
         assert.deepEqual(newRecord, record);
         done();
@@ -42,21 +42,21 @@ describe('validate inputs to writeRecord', () => {
 
 describe('validate inputs to readRecord', () => {
   it('should error if give null', done => {
-    tesData.getRecord(null, (err, result) => {
+    tesData.readRecord(null, (err, result) => {
       assert.isNotNull(err);
       assert.isNull(result);
       done();
     });
   });
   it('should error if given an empty object', done => {
-    tesData.getRecord(<Buffer>{}, (err, result) => {
+    tesData.readRecord(<Buffer>{}, (err, result) => {
       assert.isNotNull(err);
       assert.isNull(result);
       done();
     });
   });
   it('should give back a valid object on valid input', done => {
-    tesData.getRecord(recordBinary, (err, result) => {
+    tesData.readRecord(recordBinary, (err, result) => {
       assert.isNull(err);
       assert.isNotNull(result);
       done();
