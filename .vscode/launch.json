@@ -5,7 +5,7 @@
             "name": "Run",
             "type": "node",
             "request": "launch",
-            "program": "${workspaceRoot}/src/test/tests.ts",
+            "program": "${workspaceRoot}/samples/rebuildFile.ts",
             "stopOnEntry": false,
             "args": [],
             "cwd": "${workspaceRoot}",
