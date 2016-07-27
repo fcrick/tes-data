@@ -13,9 +13,7 @@ function getAllOfType(path: string, outDir: string, typeToGet: string) {
   var context = {};
 
   var outFile = `${outDir}/${typeToGet}.json`;
-  var outFd = fs.openSync(outFile, 'w');
-
-  fs.writeSync(outFd, '[\n');
+  var outFds: {[type: string]: number} = {};
 
   var remaining = 1;
 
@@ -23,22 +21,26 @@ function getAllOfType(path: string, outDir: string, typeToGet: string) {
     remaining--;
     if (remaining === 0) {
       fs.closeSync(fd);
-      fs.writeSync(outFd, '\n]\n');
-      fs.closeSync(outFd);
+      for (var type in outFds) {
+        fs.writeSync(outFds[type], '\n]\n');
+        fs.closeSync(outFds[type]);
+      }
       console.log('finished!');
     }
   }
 
   tesData.visit(fd, (offset, size, type) => {
-    if (type === typeToGet || type === 'TES4') {
-      remaining++;
-      var buffer = new Buffer(size);
-      fs.read(fd, buffer, 0, size, offset, (err, bytesRead, buffer) => {
-        tesData.readRecord(buffer, (err, record) => {
-          fs.write(outFd, JSON.stringify(record, null, 2) + ',\n', err => onDone(err));
-        }, context);
-      });
+    remaining++;
+    if (!outFds[type]) {
+      var outFile = `${outDir}/${type}.json`;
+      outFds[type] = fs.openSync(outFile, 'w');
     }
+    var buffer = new Buffer(size);
+    fs.read(fd, buffer, 0, size, offset, (err, bytesRead, buffer) => {
+      tesData.readRecord(buffer, (err, record) => {
+        fs.write(outFds[type], JSON.stringify(record, null, 2) + ',\n', err => onDone(err));
+      }, context);
+    });
   }, err => onDone(err));
 }
 
