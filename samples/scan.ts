@@ -1,8 +1,7 @@
 import fs = require('fs');
 import crypto = require('crypto');
 
-import { visit } from '../visit-records';
-import { getSubrecordOffsets } from '../records';
+import { getSubrecordOffsets, visit } from '../src/index';
 
 var prefix = 'C:/Program Files (x86)/Steam/steamapps/common/Skyrim/Data/'
 var paths = [
