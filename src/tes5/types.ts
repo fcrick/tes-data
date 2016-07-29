@@ -985,6 +985,52 @@ var dual: FieldArray = [['type', {
   ],
 }]]
 
+var eczn: FieldArray = [['type', {
+  _EDID: zString,
+  _DATA: [
+    ['owner', 'uint32le'],
+    ['location', 'uint32le'],
+    ['ownerRank', 'int8'],
+    ['minLevel', 'uint8'],
+    ['flags', 'uint8'],
+    ['maxLevel', 'uint8'],
+  ],
+}]];
+
+var efsh: FieldArray = [['type', {
+  _EDID: zString,
+  _ICON: zString,
+  _ICO2: zString,
+  _NAM7: zString,
+  _NAM8: zString,
+  _NAM9: zString,
+  _DATA: [['value', 'uint32le', {size:'size', sizeDivideBy:4}]],
+}]];
+
+var ench: FieldArray = [['type', {
+  _EDID: zString,
+  _OBND: obnd,
+  _FULL: lString,
+  _ENIT: [
+    ['cost', 'uint32le'],
+    ['flags', 'uint32le'],
+    ['castType', 'uint32le'],
+    ['enchAmount', 'uint32le'],
+    ['delivery', 'uint32le'],
+    ['enchantType', 'uint32le'],
+    ['chargeTime', 'float'],
+    ['baseEnchantment', 'uint32le'],
+    ['wornRestrictions', 'uint32le'],
+  ],
+  _EFID: uint32le,
+  _EFIT: [
+    ['magnitude', 'float'],
+    ['areaOfEffect', 'uint32le'],
+    ['duration', 'uint32le'],
+  ],
+  _CTDA: ctda,
+}]];
+
 var kywd: FieldArray = [['type', {
   _EDID: zString,
   _CNAM: rgb,
@@ -1157,6 +1203,9 @@ export var subrecordFields: FieldArray = [
     _DOBJ: dobj,
     _DOOR: door,
     _DUAL: dual,
+    _ECZM: eczn,
+    _EFSH: efsh,
+    _ENCH: ench,
     _KYWD: kywd,
     _LCRT: lcrt,
     _REFR: refr,
