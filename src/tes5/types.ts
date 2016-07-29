@@ -1204,6 +1204,59 @@ var furn: FieldArray = [['type', {
   ],
 }]];
 
+var glob: FieldArray = [['type', {
+  _EDID: zString,
+  _FNAM: uint8,
+  _FLTV: float,
+}]];
+
+var gmst: FieldArray = [['type', {
+  _EDID: zString,
+  _DATA: uint32le, // can be a float
+}]];
+
+var gras: FieldArray = [['type', {
+  _EDID: zString,
+  _OBND: obnd,
+  _MODL: zString,
+  _MODT: modt,
+  _DATA: [
+    ['density', 'uint8'],
+    ['minSlope', 'uint8'],
+    ['maxSlope', 'uint8'],
+    ['unknown1', 'uint8'],
+    ['distanceFromWater', 'uint16le'],
+    ['unknown2', 'uint16le'],
+    ['howApplied', 'uint32le'],
+    ['positionRange', 'float'],
+    ['heightRange', 'float'],
+    ['colorRange', 'float'],
+    ['wavePeriod', 'float'],
+    ['flags', 'uint32le'],
+  ],
+}]]
+
+var hazd: FieldArray = [['type', {
+  _EDID: zString,
+  _OBND: obnd,
+  _FULL: lString,
+  _MODL: zString,
+  _MODT: modt,
+  _MNAM: uint32le,
+  _DATA: [
+    ['limit', 'uint32le'],
+    ['radius', 'float'],
+    ['lifetime', 'float'],
+    ['isRadius', 'float'],
+    ['targetInterval', 'float'],
+    ['flags', 'uint32le'],
+    ['spell', 'uint32le'],
+    ['light', 'uint32le'],
+    ['impactDataSet', 'uint32le'],
+    ['sound', 'uint32le'],
+  ],
+}]];
+
 var kywd: FieldArray = [['type', {
   _EDID: zString,
   _CNAM: rgb,
@@ -1388,6 +1441,10 @@ export var subrecordFields: FieldArray = [
     _FSTP: fstp,
     _FSTS: fsts,
     _FURN: furn,
+    _GLOB: glob,
+    _GMST: gmst,
+    _GRAS: gras,
+    _HAZD: hazd,
     _KYWD: kywd,
     _LCRT: lcrt,
     _REFR: refr,
