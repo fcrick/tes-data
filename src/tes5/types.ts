@@ -1147,6 +1147,63 @@ var flor: FieldArray = [['type', {
   ],
 }]];
 
+var flst: FieldArray = [['type', {
+  _EDID: zString,
+  _LNAM: uint32le,
+}]];
+
+var fstp: FieldArray = [['type', {
+  _EDID: zString,
+  _DATA: uint32le,
+  _ANAM: zString,
+}]];
+
+var fsts: FieldArray = [['type', {
+  _EDID: zString,
+  _XCNT: [
+    ['walking', 'uint32le'],
+    ['running', 'uint32le'],
+    ['sprinting', 'uint32le'],
+    ['sneaking', 'uint32le'],
+    ['swimming', 'uint32le'],
+  ],
+  _DATA: [['footsteps', 'uint32le', {size:'size', sizeDivideBy:4}]],
+}]];
+
+var furn: FieldArray = [['type', {
+  _EDID: zString,
+  _VMAD: vmad,
+  _OBND: obnd,
+  _FULL: lString,
+  _MODL: zString,
+  _MODT: modt,
+  _MODS: mods,
+  _DEST: dest,
+  _DSTD: dstd,
+  _KSIZ: ksiz,
+  _KWDA: kwda,
+  _PNAM: uint32le,
+  _FNAM: uint16le,
+  _KNAM: uint32le,
+  _MNAM: uint32le,
+  _WBDT: [
+    ['workbench', 'uint8'],
+    ['actorValue', 'uint8'],
+  ],
+  _XMRK: zString,
+  _NAM1: uint32le,
+  _ENAM: uint32le,
+  _NAM0: [
+    ['unknown', 'uint16le'],
+    ['flags', 'uint16le'],
+  ],
+  _FNMK: uint32le,
+  _FNPR: [
+    ['markerTypeFlags', 'uint16le'],
+    ['markerEntryFlags', 'uint16le'],
+  ],
+}]];
+
 var kywd: FieldArray = [['type', {
   _EDID: zString,
   _CNAM: rgb,
@@ -1327,6 +1384,10 @@ export var subrecordFields: FieldArray = [
     _EYES: eyes,
     _FACT: fact,
     _FLOR: flor,
+    _FLST: flst,
+    _FSTP: fstp,
+    _FSTS: fsts,
+    _FURN: furn,
     _KYWD: kywd,
     _LCRT: lcrt,
     _REFR: refr,

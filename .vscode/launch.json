@@ -5,7 +5,7 @@
             "name": "Run",
             "type": "node",
             "request": "launch",
-            "program": "${workspaceRoot}/samples/getAllOfType.ts",
+            "program": "${workspaceRoot}/samples/comparisonTest.ts",
             "stopOnEntry": false,
             "args": [],
             "cwd": "${workspaceRoot}",

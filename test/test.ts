@@ -23,6 +23,25 @@ describe('getRecord', () => {
   });
 });
 
+// describe('visit', () => {
+//   it('should error with an invalid file', done => {
+//     var foundError = false;
+//     var path = './test.tmp';
+//     fs.writeFileSync(path, 'blah', {flag:'w'});
+//     var fd = fs.openSync(path, 'r');
+//     tesData.visit(fd, () => {}, err => {
+//       if (err) {
+//         foundError = true;
+//       }
+//     });
+//     setTimeout(() => {
+//       fs.unlinkSync(path);
+//       assert.isTrue(foundError);
+//       done();
+//     }, 100);
+//   });
+// });
+
 describe('validate inputs to writeRecord', () => {
   it('should error if record is not an object', done => {
     tesData.writeRecord(5, (err, result) => {
@@ -68,7 +87,7 @@ if (process.env.TES5_PATH) {
   var filename = 'Skyrim.esm';
   describe('Verify some core stats about Skyrim.esm', () => {
     it('find all records', function(done) {
-      this.timeout(10000); // 10 second timeout
+      this.timeout(15000);
 
       var path = process.env.TES5_PATH + filename;
       fs.open(path, 'r', (err, fd) => {
