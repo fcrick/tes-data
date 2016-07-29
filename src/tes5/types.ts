@@ -55,6 +55,20 @@ var rgb: FieldArray = [
   ['unused', 'uint8'],
 ];
 
+var ctda: FieldArray = [
+  ['operator', 'uint8'],
+  ['unknown1', 'uint8'],
+  ['unknown2', 'uint16le'],
+  ['operator', {_4: [
+    ['comparisonFormId', 'uint32le'],
+  ]}, [
+    ['comparisonValue', 'float'],
+  ], {flag:true}], // unimplemented until i find an example
+  ['functionIndex', 'uint16le'],
+  ['unknown3', 'uint16le'],
+  ['params', 'uint8', {size:'size', sizeOffset:-12}],
+];
+
 var dest: FieldArray = [
   ['health', 'uint32le'],
   ['count', 'uint8'],
@@ -387,19 +401,7 @@ var alch: FieldArray = [['type', {
     ['areaOfEffect', 'uint32le'],
     ['duration', 'uint32le'],
   ],
-  _CTDA: [
-    ['operator', 'uint8'],
-    ['unknown1', 'uint8'],
-    ['unknown2', 'uint16le'],
-    ['operator', {_4: [
-      ['comparisonFormId', 'uint32le'],
-    ]}, [
-      ['comparisonValue', 'float'],
-    ], {flag:true}], // unimplemented until i find an example
-    ['functionIndex', 'uint16le'],
-    ['unknown3', 'uint16le'],
-    ['params', 'uint8', {size:'size', sizeOffset:-12}],
-  ],
+  _CTDA: ctda,
 }]];
 
 var ammo: FieldArray = [['type', {
@@ -792,7 +794,25 @@ var clmt: FieldArray = [['type', {
     ['volatility', 'uint8'],
     ['moons', 'uint8'],
   ],
-}]]
+}]];
+
+var cobj: FieldArray = [['type', {
+  _EDID: zString,
+  _COCT: uint32le,
+  _CNTO: [
+    ['item', 'uint32le'],
+    ['quantity', 'uint32le'],
+  ],
+  _COED: [
+    ['owner', 'uint32le'],
+    ['value', 'uint32le'], // might be signed based on type owner refers to
+    ['condition', 'float'],
+  ],
+  _CTDA: ctda,
+  _CNAM: uint32le,
+  _BNAM: uint32le,
+  _NAM1: uint16le,
+}]];
 
 var dial: FieldArray = [['type', {
   _EDID: zString,
@@ -970,6 +990,7 @@ export var subrecordFields: FieldArray = [
     _CLAS: clas,
     _CLFM: clfm,
     _CLMT: clmt,
+    _COBJ: cobj,
     _DIAL: dial,
     _KYWD: kywd,
     _LCRT: lcrt,
