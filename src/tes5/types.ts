@@ -951,6 +951,40 @@ var dlvw: FieldArray = [['type', {
   _DNAM: uint8,
 }]];
 
+var dobj: FieldArray = [['type', {
+  _DNAM: [['entries', [
+    ['key', 'char', {size:4}],
+    ['value', 'uint32le'],
+  ], {size:-1}]],
+}]];
+
+var door: FieldArray = [['type', {
+  _EDID: zString,
+  _VMAD: vmad,
+  _OBND: obnd,
+  _FULL: lString,
+  _MODL: zString,
+  _MODT: modt,
+  _MODS: mods,
+  _SNAM: uint32le,
+  _ANAM: uint32le,
+  _BNAM: uint32le,
+  _FNAM: uint8,
+}]];
+
+var dual: FieldArray = [['type', {
+  _EDID: zString,
+  _OBND: obnd,
+  _DATA: [
+    ['projectile', 'uint32le'],
+    ['explosion', 'uint32le'],
+    ['effectShader', 'uint32le'],
+    ['hitEffectArt', 'uint32le'],
+    ['impactDataSet', 'uint32le'],
+    ['flags', 'uint32le'],
+  ],
+}]]
+
 var kywd: FieldArray = [['type', {
   _EDID: zString,
   _CNAM: rgb,
@@ -1120,6 +1154,9 @@ export var subrecordFields: FieldArray = [
     _DIAL: dial,
     _DLBR: dlbr,
     _DLVW: dlvw,
+    _DOBJ: dobj,
+    _DOOR: door,
+    _DUAL: dual,
     _KYWD: kywd,
     _LCRT: lcrt,
     _REFR: refr,
@@ -1435,14 +1472,6 @@ export var subrecordFields: FieldArray = [
         }, unknown],
       ],
       _DNAM: [['recordType', {
-        _ARMA: [
-          ['male', 'uint8'],
-          ['female', 'uint8'],
-          ['unknown1', 'uint32le'],
-          ['detection', 'uint8'],
-          ['unknown2', 'uint8'],
-          ['weaponAdjust', 'float'],
-        ],
         _DOBJ: [
           ['entries', [
             ['key', 'char', {size:4}],
