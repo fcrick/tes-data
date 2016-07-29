@@ -849,6 +849,61 @@ var cont: FieldArray = [['type', {
   _QNAM: uint32le,
 }]];
 
+var cpth: FieldArray = [['type', {
+  _EDID: zString,
+  _CTDA: ctda,
+  _CIS1: zString,
+  _ANAM: [
+    ['parent', 'uint32le'],
+    ['next', 'uint32le'],
+  ],
+  _DATA: uint8,
+  _SNAM: uint32le,
+}]];
+
+var csty: FieldArray = [['type', {
+  _EDID: zString,
+  _CSGD: [
+    ['offensiveMult', 'float'],
+    ['defensiveMult', 'float'],
+    ['size', {_8: []}, [
+      ['groupOffensiveMult', 'float'],
+      ['meleeEquipmentMult', 'float'],
+      ['magicEquipmentMult', 'float'],
+      ['rangedEquipmentMult', 'float'],
+      ['shoutEquipmentMult', 'float'],
+      ['unarmedMult', 'float'],
+      ['size', {_32: []}, [
+        ['staffEquipmentMult', 'float'],
+        ['avoidThreatChance', 'float'],
+      ]],
+    ]],
+  ],
+  _CSME: [
+    ['attackStaggeredMult', 'float'],
+    ['powerAttackStaggeredMult', 'float'],
+    ['powerAttackBlockingMult', 'float'],
+    ['bashMult', 'float'],
+    ['bashRecoiledMult', 'float'],
+    ['bashAttackMult', 'float'],
+    ['bashPowerAttackMult', 'float'],
+    ['size', {_28: []}, [
+      ['specialAttackMult', 'float'],
+    ]],
+  ],
+  _CSCR: [
+    ['duelingCircleMult', 'float'],
+    ['duelingFallbackMult', 'float'],
+    ['size', {_8: []}, [
+      ['flankDistance', 'float'],
+      ['flankingStalkTime', 'float'],
+    ]],
+  ],
+  _CSLR: float,
+  _CSFL: [['various', 'float', {size:'size', sizeDivideBy:4}]],
+  _DATA: uint32le,
+}]];
+
 var dial: FieldArray = [['type', {
   _EDID: zString,
   _FULL: lString,
@@ -1028,6 +1083,8 @@ export var subrecordFields: FieldArray = [
     _COBJ: cobj,
     _COLL: coll,
     _CONT: cont,
+    _CPTH: cpth,
+    _CSTY: csty,
     _DIAL: dial,
     _KYWD: kywd,
     _LCRT: lcrt,
