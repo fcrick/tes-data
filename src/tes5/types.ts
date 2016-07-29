@@ -42,6 +42,10 @@ var bodt: FieldArray = [
   ]],
 ];
 
+var edid: FieldArray = [
+  ['editorId', 'char', {size:-1, persist:true}]
+];
+
 var bod2: FieldArray = [
   ['bodyPartFlags', 'uint32le'],
   ['skill', 'uint32le'],
@@ -678,6 +682,71 @@ var cams: FieldArray = [['type', {
   _MNAM: uint32le,
 }]];
 
+var cell: FieldArray = [['type', {
+  _EDID: edid,
+  _FULL: lString,
+  _DATA: unknown, // 1 or 2 uint8's
+  _XCLC: [
+    ['x', 'int32le'],
+    ['y', 'int32le'],
+    ['flags', 'uint32le'],
+  ],
+  _XCLL: [
+    ['ambient', rgb],
+    ['directional', rgb],
+    ['fogNearColor', rgb],
+    ['fogNear', 'float'],
+    ['fogFar', 'float'],
+    ['rotationXY', 'int32le'],
+    ['rotationZ', 'int32le'],
+    ['directionalFade', 'float'],
+    ['fogClipDist', 'float'],
+    ['fogPow', 'float'],
+    ['ambientXPlus', rgb],
+    ['ambientXMinus', rgb],
+    ['ambientYPlus', rgb],
+    ['ambientYMinus', rgb],
+    ['ambientZPlus', rgb],
+    ['ambientZMinus', rgb],
+    // rest omited in NavMeshGenCellDUPLICATE001, annoyingly
+    ['editorId', {_NavMeshGenCellDUPLICATE001: []}, [
+      ['specularColor', rgb],
+      ['fresnelPower', 'float'],
+      ['fogFarColor', rgb],
+      ['fogMax', 'float'],
+      ['lightFadeDistancesStart', 'float'],
+      ['lightFadeDistancesEnd', 'float'],
+      ['flags', 'uint32le'],
+    ]],
+  ],
+  _TVDT: unknown,
+  _MHDT: unknown,
+  _XCGD: unknown,
+  _LTMP: uint32le,
+  _LNAM: uint32le,
+  _XCLW: float,
+  _XNAM: uint8,
+  _XCLR: [['value', 'uint32le', {size:'size',sizeDivideBy:4}]],
+  _XLCN: uint32le,
+  _XWCS: [['xwcuSize', 'uint32le', {persist:true}]],
+  _XWCN: [['xwcuSize', 'uint32le', {persist:true}]],
+  _XWCU: [['currents', [
+    ['x', 'float'],
+    ['y', 'float'],
+    ['z', 'float'],
+    ['unknown', 'float'],
+  ], {size:'xwcuSize'}]],
+  _XCWT: uint32le,
+  _XOWN: uint32le,
+  _XILL: uint32le,
+  _XWEM: zString,
+  _XCCM: uint32le,
+  _XCAS: uint32le,
+  _XEZN: uint32le,
+  _XCMO: uint32le,
+  _XCIM: uint32le,
+}]];
+
 var dial: FieldArray = [['type', {
   _EDID: zString,
   _FULL: lString,
@@ -850,6 +919,7 @@ export var subrecordFields: FieldArray = [
     _BOOK: book,
     _BPTD: bptd,
     _CAMS: cams,
+    _CELL: cell,
     _DIAL: dial,
     _KYWD: kywd,
     _LCRT: lcrt,
