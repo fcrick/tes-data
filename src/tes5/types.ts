@@ -1036,7 +1036,7 @@ var ench: FieldArray = [['type', {
 
 var equp: FieldArray = [['type', {
   _EDID: zString,
-  _PNAM: [['slots', 'uint32le', {size:-1}]],
+  _PNAM: [['slots', 'uint32le', {size:'size',sizeDivideBy:4}]],
   _DATA: uint32le,
 }]];
 
