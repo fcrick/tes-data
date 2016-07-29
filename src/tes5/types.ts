@@ -1416,10 +1416,43 @@ var info: FieldArray = [['type', {
     ['variableCount', 'uint32le'],
     ['scriptType', 'uint32le'],
   ],
+  _SCDA: unknown,
+  _SCTX: sString,
+  _QNAM: uint32le,
+  _SCRO: uint32le,
   _RNAM: lString,
   _ANAM: uint32le,
   _TWAT: uint32le,
   _ONAM: uint32le,
+}]];
+
+var ingr: FieldArray = [['type', {
+  _EDID: zString,
+  _VMAD: vmad,
+  _OBND: obnd,
+  _FULL: lString,
+  _KSIZ: ksiz,
+  _KWDA: kwda,
+  _MODL: zString,
+  _MODT: modt,
+  _ICON: zString,
+  _YNAM: uint32le,
+  _ZNAM: uint32le,
+  _DATA: goldAndWeight,
+  _ENIT: [
+    ['ingredientValue', 'uint32le'],
+    ['flags', 'uint32le'],
+  ],
+  _EFID: uint32le,
+  _EFIT: [
+    ['magnitude', 'float'],
+    ['areaOfEffect', 'uint32le'],
+    ['duration', 'uint32le'],
+  ],
+  _CTDA: ctda,
+  _CITC: uint32le,
+  _CIS1: zString,
+  _CIS2: zString,
 }]];
 
 var kywd: FieldArray = [['type', {
@@ -1616,6 +1649,7 @@ export var subrecordFields: FieldArray = [
     _IMAD: imad,
     _IMGS: imgs,
     _INFO: info,
+    _INGR: ingr,
     _KYWD: kywd,
     _LCRT: lcrt,
     _REFR: refr,
