@@ -47,12 +47,10 @@ var bod2: FieldArray = [
   ['skill', 'uint32le'],
 ];
 
-// sets of fields for re-use
-var rgb: FieldArray = [
-  ['r', 'uint8'],
-  ['g', 'uint8'],
-  ['b', 'uint8'],
-  ['unused', 'uint8'],
+var coed: FieldArray = [
+  ['owner', 'uint32le'],
+  ['value', 'uint32le'], // might be signed based on type owner refers to
+  ['condition', 'float'],
 ];
 
 var ctda: FieldArray = [
@@ -135,6 +133,14 @@ var obnd: FieldArray = [
   ['x2', 'int16le'],
   ['y2', 'int16le'],
   ['z2', 'int16le'],
+];
+
+// sets of fields for re-use
+var rgb: FieldArray = [
+  ['r', 'uint8'],
+  ['g', 'uint8'],
+  ['b', 'uint8'],
+  ['unused', 'uint8'],
 ];
 
 // large subrecords that appear in multiple records
@@ -803,15 +809,44 @@ var cobj: FieldArray = [['type', {
     ['item', 'uint32le'],
     ['quantity', 'uint32le'],
   ],
-  _COED: [
-    ['owner', 'uint32le'],
-    ['value', 'uint32le'], // might be signed based on type owner refers to
-    ['condition', 'float'],
-  ],
+  _COED: coed,
   _CTDA: ctda,
   _CNAM: uint32le,
   _BNAM: uint32le,
   _NAM1: uint16le,
+}]];
+
+var coll: FieldArray = [['type', {
+  _EDID: zString,
+  _DESC: lString,
+  _BNAM: uint32le,
+  _FNAM: rgb,
+  _GNAM: uint32le,
+  _MNAM: zString,
+  _INTV: uint32le,
+  _CNAM: [['interactables', 'uint32le', {size:'size', sizeDivideBy: 4}]],
+}]];
+
+var cont: FieldArray = [['type', {
+  _EDID: zString,
+  _VMAD: vmad,
+  _OBND: obnd,
+  _FULL: lString,
+  _MODL: zString,
+  _MODT: modt,
+  _MODS: mods,
+  _COCT: uint32le,
+  _CNTO: [
+    ['item', 'uint32le'],
+    ['count', 'uint32le'],
+  ],
+  _COED: coed,
+  _DATA: [
+    ['flags', 'uint8'],
+    ['weight', 'float'],
+  ],
+  _SNAM: uint32le,
+  _QNAM: uint32le,
 }]];
 
 var dial: FieldArray = [['type', {
@@ -991,6 +1026,8 @@ export var subrecordFields: FieldArray = [
     _CLFM: clfm,
     _CLMT: clmt,
     _COBJ: cobj,
+    _COLL: coll,
+    _CONT: cont,
     _DIAL: dial,
     _KYWD: kywd,
     _LCRT: lcrt,
