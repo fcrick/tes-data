@@ -1293,6 +1293,40 @@ var idle: FieldArray = [['type', {
   ],
 }]];
 
+var idlm: FieldArray = [['type', {
+  _EDID: zString,
+  _OBND: obnd,
+  _IDLF: uint8,
+  _IDLC: uint8,
+  _IDLT: float,
+  _IDLA: [['value', 'uint32le', {size:'size', sizeDivideBy:4}]],
+}]];
+
+var imad: FieldArray = [['type', {
+  _EDID: zString,
+  _DNAM: [
+    ['flags', 'uint32le'],
+    ['duration', 'float'],
+    ['times', 'uint32le', {size:'size', sizeOffset:-8, sizeDivideBy:4}],
+  ],
+  _TNAM: [['tintColors', [
+    ['timestamp', 'float'],
+    ['red', 'float'],
+    ['green', 'float'],
+    ['blue', 'float'],
+    ['alpha', 'float'],
+  ], {size:'size', sizeDivideBy:20}]],
+  _NAM3: [['fadeColors', [
+    ['timestamp', 'float'],
+    ['red', 'float'],
+    ['green', 'float'],
+    ['blue', 'float'],
+    ['alpha', 'float'],
+  ], {size:'size', sizeDivideBy:20}]],
+}, [
+  ['value', 'float', {size:'size', sizeDivideBy:4}]
+]]];
+
 var kywd: FieldArray = [['type', {
   _EDID: zString,
   _CNAM: rgb,
@@ -1483,6 +1517,8 @@ export var subrecordFields: FieldArray = [
     _HAZD: hazd,
     _HDPT: hdpt,
     _IDLE: idle,
+    _IDLM: idlm,
+    _IMAD: imad,
     _KYWD: kywd,
     _LCRT: lcrt,
     _REFR: refr,
