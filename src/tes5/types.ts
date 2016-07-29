@@ -1020,7 +1020,9 @@ var ench: FieldArray = [['type', {
     ['enchantType', 'uint32le'],
     ['chargeTime', 'float'],
     ['baseEnchantment', 'uint32le'],
-    ['wornRestrictions', 'uint32le'],
+    ['size', {_32:[]}, [
+      ['wornRestrictions', 'uint32le'],
+    ]],
   ],
   _EFID: uint32le,
   _EFIT: [
@@ -1029,6 +1031,7 @@ var ench: FieldArray = [['type', {
     ['duration', 'uint32le'],
   ],
   _CTDA: ctda,
+  _CIS2: zString,
 }]];
 
 var kywd: FieldArray = [['type', {
