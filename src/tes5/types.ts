@@ -1034,6 +1034,83 @@ var ench: FieldArray = [['type', {
   _CIS2: zString,
 }]];
 
+var equp: FieldArray = [['type', {
+  _EDID: zString,
+  _PNAM: [['slots', 'uint32le', {size:-1}]],
+  _DATA: uint32le,
+}]];
+
+var expl: FieldArray = [['type', {
+  _EDID: zString,
+  _OBND: obnd,
+  _FULL: lString,
+  _MODL: zString,
+  _MODT: modt,
+  _EITM: uint32le,
+  _MNAM: uint32le,
+  _DATA: unknown,
+}]];
+
+var eyes: FieldArray = [['type', {
+  _EDID: zString,
+  _FULL: lString,
+  _ICON: zString,
+  _DATA: uint8,
+}]];
+
+var fact: FieldArray = [['type', {
+  _EDID: zString,
+  _FULL: lString,
+  _XNAM: [
+    ['faction', 'uint32le'],
+    ['mod', 'int32le'],
+    ['combat', 'uint32le'],
+  ],
+  _DATA: uint32le,
+  _JAIL: uint32le,
+  _WAIT: uint32le,
+  _STOL: uint32le,
+  _PLCN: uint32le,
+  _CRGR: uint32le,
+  _JOUT: uint32le,
+  _CRVA: [
+    ['arrest', 'uint8'],
+    ['attackOnSight', 'uint8'],
+    ['murder', 'uint16le'],
+    ['assault', 'uint16le'],
+    ['trespass', 'uint16le'],
+    ['pickpocket', 'uint16le'],
+    ['unknown', 'uint16le'],
+    ['size', {_12:[]}, [
+      ['stealMult', 'float'],
+      ['size', {_16:[]}, [
+        ['escape', 'uint16le'],
+        ['werewolf', 'uint16le'],
+      ]],
+    ]],
+  ],
+  _RNAM: uint32le,
+  _MNAM: lString,
+  _FNAM: lString,
+  _VEND: uint32le,
+  _VENC: uint32le,
+  _VENV: [
+    ['startHour', 'uint16le'],
+    ['endHour', 'uint16le'],
+    ['radius', 'uint32le'],
+    ['buysStolenItems', 'uint8'],
+    ['notBuySell', 'uint8'],
+    ['unknown', 'uint16le'],
+  ],
+  _PLVD: [
+    ['valueType', 'uint32le'],
+    ['value', 'uint32le'],
+    ['unknown', 'uint32le'],
+  ],
+  _CTDA: ctda,
+  _CITC: uint32le,
+}]];
+
 var kywd: FieldArray = [['type', {
   _EDID: zString,
   _CNAM: rgb,
@@ -1209,6 +1286,10 @@ export var subrecordFields: FieldArray = [
     _ECZM: eczn,
     _EFSH: efsh,
     _ENCH: ench,
+    _EQUP: equp,
+    _EXPL: expl,
+    _EYES: eyes,
+    _FACT: fact,
     _KYWD: kywd,
     _LCRT: lcrt,
     _REFR: refr,
