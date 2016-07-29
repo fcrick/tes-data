@@ -658,6 +658,26 @@ var bptd: FieldArray = [['type', {
   _RAGA: uint32le,
 }]];
 
+var cams: FieldArray = [['type', {
+  _EDID: zString,
+  _MODL: zString,
+  _MODT: [['value', 'uint8', {size:12}]],
+  _DATA: [
+    ['action', 'uint32le'],
+    ['location', 'uint32le'],
+    ['target', 'uint32le'],
+    ['flags', 'uint32le'],
+    ['playerTimeMult', 'float'],
+    ['targetTimeMult', 'float'],
+    ['globalTimeMult', 'float'],
+    ['maxTime', 'float'],
+    ['minTime', 'float'],
+    ['betweenPercent', 'float'],
+    ['nearTargetDistance', 'float', {omitIfZero:true}],
+  ],
+  _MNAM: uint32le,
+}]];
+
 var dial: FieldArray = [['type', {
   _EDID: zString,
   _FULL: lString,
@@ -665,10 +685,10 @@ var dial: FieldArray = [['type', {
   _BNAM: uint32le,
   _QNAM: uint32le,
   _DATA: [
-    ['unknown1', uint8],
-    ['dialogTab', uint8],
-    ['subType', uint8],
-    ['unknown2', uint8],
+    ['unknown1', 'uint8'],
+    ['dialogTab', 'uint8'],
+    ['subType', 'uint8'],
+    ['unknown2', 'uint8'],
   ],
   _SNAM: [['value', 'char', {size:4}]],
   _TIFC: uint32le,
@@ -693,8 +713,8 @@ var refr: FieldArray = [['type', {
   _XMBO: [['value', 'float', {size:3}]],
   _XPRM: [
     ...locationData,
-    ['unknown1', float],
-    ['unknown2', uint32le],
+    ['unknown1', 'float'],
+    ['unknown2', 'uint32le'],
   ],
   _XPOD: [
     ['origin', 'uint32le'],
@@ -829,6 +849,8 @@ export var subrecordFields: FieldArray = [
     _AVIF: avif,
     _BOOK: book,
     _BPTD: bptd,
+    _CAMS: cams,
+    _DIAL: dial,
     _KYWD: kywd,
     _LCRT: lcrt,
     _REFR: refr,
@@ -1060,13 +1082,6 @@ export var subrecordFields: FieldArray = [
       }, unknown]],
       _DATA: [
         ['recordType', {
-          _BOOK: [
-            ['flags', 'uint8'],
-            ['bookType', 'uint8'],
-            ['unknown', 'uint16le'],
-            ['teachFlags', 'uint32le'],
-            ...goldAndWeight,
-          ],
           _CAMS: [
             ['action', 'uint32le'],
             ['location', 'uint32le'],
