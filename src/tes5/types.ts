@@ -1257,6 +1257,42 @@ var hazd: FieldArray = [['type', {
   ],
 }]];
 
+var hdpt: FieldArray = [['type', {
+  _EDID: zString,
+  _FULL: lString,
+  _MODL: zString,
+  _MODT: modt,
+  _DATA: uint8,
+  _PNAM: uint32le,
+  _HNAM: uint32le,
+  _NAM0: uint32le,
+  _NAM1: zString,
+  _TNAM: uint32le,
+  _RNAM: uint32le,
+  _CNAM: uint32le,
+}]];
+
+var idle: FieldArray = [['type', {
+  _EDID: zString,
+  _CTDA: ctda,
+  _CITC: uint32le,
+  _CIS1: zString,
+  _CIS2: zString,
+  _DNAM: zString,
+  _ENAM: zString,
+  _ANAM: [
+    ['parent', 'uint32le'],
+    ['previous', 'uint32le'],
+  ],
+  _DATA: [
+    ['minLoopingSeconds', 'uint8'],
+    ['maxLoopingSeconds', 'uint8'],
+    ['flags', 'uint8'],
+    ['unknown', 'uint8'],
+    ['replayDelay', 'uint16le'],
+  ],
+}]];
+
 var kywd: FieldArray = [['type', {
   _EDID: zString,
   _CNAM: rgb,
@@ -1445,6 +1481,8 @@ export var subrecordFields: FieldArray = [
     _GMST: gmst,
     _GRAS: gras,
     _HAZD: hazd,
+    _HDPT: hdpt,
+    _IDLE: idle,
     _KYWD: kywd,
     _LCRT: lcrt,
     _REFR: refr,
