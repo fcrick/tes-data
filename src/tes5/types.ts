@@ -934,6 +934,23 @@ var dial: FieldArray = [['type', {
   _TIFC: uint32le,
 }]];
 
+var dlbr: FieldArray = [['type', {
+  _EDID: zString,
+  _QNAM: uint32le,
+  _TNAM: uint32le,
+  _DNAM: uint32le,
+  _SNAM: uint32le,
+}]];
+
+var dlvw: FieldArray = [['type', {
+  _EDID: zString,
+  _QNAM: uint32le,
+  _BNAM: uint32le,
+  _TNAM: uint32le,
+  _ENAM: uint32le,
+  _DNAM: uint8,
+}]];
+
 var kywd: FieldArray = [['type', {
   _EDID: zString,
   _CNAM: rgb,
@@ -1101,6 +1118,8 @@ export var subrecordFields: FieldArray = [
     _CSTY: csty,
     _DEBR: debr,
     _DIAL: dial,
+    _DLBR: dlbr,
+    _DLVW: dlvw,
     _KYWD: kywd,
     _LCRT: lcrt,
     _REFR: refr,
