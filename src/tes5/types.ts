@@ -32,6 +32,15 @@ export var recordHeader: FieldArray = [
   ]],
 ];
 
+// sets of fields referenced by other sets
+var rgb: FieldArray = [
+  ['r', 'uint8'],
+  ['g', 'uint8'],
+  ['b', 'uint8'],
+  ['unused', 'uint8'],
+];
+
+// sets of fields for re-use
 var bodt: FieldArray = [
   ['bodyPartFlags', 'uint32le'],
   ['flags', 'uint8'],
@@ -73,6 +82,20 @@ var dest: FieldArray = [
   ['flag', 'uint8'],
   ['unknown1', 'uint8'],
   ['unknown2', 'uint8'],
+];
+
+var dodt: FieldArray = [
+  ['minWidth', 'float'],
+  ['maxWidth', 'float'],
+  ['minHeight', 'float'],
+  ['maxHeight', 'float'],
+  ['depth', 'float'],
+  ['shininess', 'float'],
+  ['parallaxScale', 'float'],
+  ['parallaxPasses', 'uint8'],
+  ['flags', 'uint8'],
+  ['unknown', 'uint16le'],
+  ...rgb,
 ];
 
 var dstd: FieldArray = [
@@ -135,13 +158,7 @@ var obnd: FieldArray = [
   ['z2', 'int16le'],
 ];
 
-// sets of fields for re-use
-var rgb: FieldArray = [
-  ['r', 'uint8'],
-  ['g', 'uint8'],
-  ['b', 'uint8'],
-  ['unused', 'uint8'],
-];
+
 
 // large subrecords that appear in multiple records
 var scriptObject: FieldArray = [
@@ -1455,6 +1472,48 @@ var ingr: FieldArray = [['type', {
   _CIS2: zString,
 }]];
 
+var ipct: FieldArray = [['type', {
+  _EDID: zString,
+  _MODL: zString,
+  _MODT: modt,
+  _DATA: [
+    ['effectDuration', 'float'],
+    ['flags', 'uint32le'],
+    ['angleThreshold', 'float'],
+    ['placementRadius', 'float'],
+    ['soundLevel', 'uint32le'],
+    ['unknown', 'uint32le'],
+  ],
+  _DODT: dodt,
+  _DNAM: uint32le,
+  _ENAM: uint32le,
+  _SNAM: uint32le,
+  _NAM1: uint32le,
+  _NAM2: uint32le,
+}]];
+
+var ipds: FieldArray = [['type', {
+  _EDID: zString,
+  _PNAM: [
+    ['material', 'uint32le'],
+    ['impact', 'uint32le'],
+  ],
+}]];
+
+var keym: FieldArray = [['type', {
+  _EDID: zString,
+  _VMAD: vmad,
+  _OBND: obnd,
+  _FULL: lString,
+  _MODL: zString,
+  _MODT: modt,
+  _YNAM: uint32le,
+  _ZNAM: uint32le,
+  _KSIZ: ksiz,
+  _KWDA: kwda,
+  _DATA: goldAndWeight,
+}]];
+
 var kywd: FieldArray = [['type', {
   _EDID: zString,
   _CNAM: rgb,
@@ -1570,19 +1629,7 @@ var txst: FieldArray = [['type', {
   _TX05: zString,
   _TX06: zString,
   _TX07: zString,
-  _DODT: [
-    ['minWidth', 'float'],
-    ['maxWidth', 'float'],
-    ['minHeight', 'float'],
-    ['maxHeight', 'float'],
-    ['depth', 'float'],
-    ['shininess', 'float'],
-    ['parallaxScale', 'float'],
-    ['parallaxPasses', 'uint8'],
-    ['flags', 'uint8'],
-    ['unknown', 'uint16le'],
-    ...rgb,
-  ],
+  _DODT: dodt,
   _DNAM: uint16le,
 }]];
 
@@ -1650,6 +1697,9 @@ export var subrecordFields: FieldArray = [
     _IMGS: imgs,
     _INFO: info,
     _INGR: ingr,
+    _IPCT: ipct,
+    _IPDS: ipds,
+    _KEYM: keym,
     _KYWD: kywd,
     _LCRT: lcrt,
     _REFR: refr,
