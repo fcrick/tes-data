@@ -408,6 +408,9 @@ var alch: FieldArray = [['type', {
     ['duration', 'uint32le'],
   ],
   _CTDA: ctda,
+  _CITC: uint32le,
+  _CIS1: zString,
+  _CIS2: zString,
 }]];
 
 var ammo: FieldArray = [['type', {
@@ -811,6 +814,9 @@ var cobj: FieldArray = [['type', {
   ],
   _COED: coed,
   _CTDA: ctda,
+  _CITC: uint32le,
+  _CIS1: zString,
+  _CIS2: zString,
   _CNAM: uint32le,
   _BNAM: uint32le,
   _NAM1: uint16le,
@@ -852,7 +858,9 @@ var cont: FieldArray = [['type', {
 var cpth: FieldArray = [['type', {
   _EDID: zString,
   _CTDA: ctda,
+  _CITC: uint32le,
   _CIS1: zString,
+  _CIS2: zString,
   _ANAM: [
     ['parent', 'uint32le'],
     ['next', 'uint32le'],
@@ -1031,6 +1039,8 @@ var ench: FieldArray = [['type', {
     ['duration', 'uint32le'],
   ],
   _CTDA: ctda,
+  _CITC: uint32le,
+  _CIS1: zString,
   _CIS2: zString,
 }]];
 
@@ -1109,6 +1119,32 @@ var fact: FieldArray = [['type', {
   ],
   _CTDA: ctda,
   _CITC: uint32le,
+  _CIS1: zString,
+  _CIS2: zString,
+}]];
+
+var flor: FieldArray = [['type', {
+  _EDID: zString,
+  _VMAD: vmad,
+  _OBND: obnd,
+  _FULL: lString,
+  _MODL: zString,
+  _MODT: modt,
+  _MODS: mods,
+  _DEST: dest,
+  _KSIZ: ksiz,
+  _KWDA: kwda,
+  _PNAM: uint32le,
+  _RNAM: lString,
+  _FNAM: uint16le,
+  _PFIG: uint32le,
+  _SNAM: uint32le,
+  _PFPC: [
+    ['springPercent', 'uint8'],
+    ['summerPercent', 'uint8'],
+    ['fallPercent', 'uint8'],
+    ['winterPercent', 'uint8'],
+  ],
 }]];
 
 var kywd: FieldArray = [['type', {
@@ -1290,6 +1326,7 @@ export var subrecordFields: FieldArray = [
     _EXPL: expl,
     _EYES: eyes,
     _FACT: fact,
+    _FLOR: flor,
     _KYWD: kywd,
     _LCRT: lcrt,
     _REFR: refr,
