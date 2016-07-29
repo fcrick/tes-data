@@ -42,10 +42,6 @@ var bodt: FieldArray = [
   ]],
 ];
 
-var edid: FieldArray = [
-  ['editorId', 'char', {size:-1, persist:true}]
-];
-
 var bod2: FieldArray = [
   ['bodyPartFlags', 'uint32le'],
   ['skill', 'uint32le'],
@@ -683,9 +679,12 @@ var cams: FieldArray = [['type', {
 }]];
 
 var cell: FieldArray = [['type', {
-  _EDID: edid,
+  _EDID: zString,
   _FULL: lString,
-  _DATA: unknown, // 1 or 2 uint8's
+  _DATA: [['size', {
+    _1: [['flags', 'uint8']],
+    _2: [['flags', 'uint16le']],
+  }]],
   _XCLC: [
     ['x', 'int32le'],
     ['y', 'int32le'],
@@ -708,8 +707,8 @@ var cell: FieldArray = [['type', {
     ['ambientYMinus', rgb],
     ['ambientZPlus', rgb],
     ['ambientZMinus', rgb],
-    // rest omited in NavMeshGenCellDUPLICATE001, annoyingly
-    ['editorId', {_NavMeshGenCellDUPLICATE001: []}, [
+    // if the size is 64, stop here
+    ['size', {_64: []}, [
       ['specularColor', rgb],
       ['fresnelPower', 'float'],
       ['fogFarColor', rgb],
@@ -745,6 +744,25 @@ var cell: FieldArray = [['type', {
   _XEZN: uint32le,
   _XCMO: uint32le,
   _XCIM: uint32le,
+}]];
+
+var clas: FieldArray = [['type', {
+  _EDID: zString,
+  _FULL: lString,
+  _DESC: lString,
+  _ICON: zString,
+  _DATA: [
+    ['unknown', 'uint32le'],
+    ['trainingSkill', 'uint8'],
+    ['trainingLevel', 'uint8'],
+    ['skillWeights', 'uint8', {size:18}],
+    ['bleedoutDefault', 'float'],
+    ['voicePoints', 'uint32le'],
+    ['healthWeight', 'uint8'],
+    ['magickaWeight', 'uint8'],
+    ['staminaWeight', 'uint8'],
+    ['flags', 'uint8'],
+  ],
 }]];
 
 var dial: FieldArray = [['type', {
@@ -920,6 +938,7 @@ export var subrecordFields: FieldArray = [
     _BPTD: bptd,
     _CAMS: cams,
     _CELL: cell,
+    _CLAS: clas,
     _DIAL: dial,
     _KYWD: kywd,
     _LCRT: lcrt,
