@@ -1521,6 +1521,42 @@ var kywd: FieldArray = [['type', {
   _KWDA: kwda,
 }]];
 
+var land: FieldArray = [['type', {
+  _ATXT: [
+    ['texture', 'uint32le'],
+    ['quadrant', 'uint8'],
+    ['unknown', 'uint8'],
+    ['layer', 'uint16le'], 
+  ],
+  _BTXT: [
+    ['texture', 'uint32le'],
+    ['quadrant', 'uint8'],
+    ['unknown', 'uint8', {size:3}],
+  ],
+  _DATA: unknown,
+  _VCLR: [
+    ['colors', [
+      ['r', 'uint8'],
+      ['g', 'uint8'],
+      ['b', 'uint8'],
+    ], {size:1089}],
+  ],
+  _VHGT: [
+    ['offset', 'float'],
+    ['gradients', 'int8', {size:1089}],
+    ['unknown1', 'uint8'],
+    ['unknown2', 'uint16le'],
+  ],
+  _VNML: [
+    ['normals', [
+      ['x', 'int8'],
+      ['y', 'int8'],
+      ['z', 'int8'],
+    ], {size:1089}],
+  ],
+  _VTXT: unknown,
+}]];
+
 var lcrt: FieldArray = [['type', {
   _EDID: zString,
   _CNAM: rgb,
@@ -1701,6 +1737,7 @@ export var subrecordFields: FieldArray = [
     _IPDS: ipds,
     _KEYM: keym,
     _KYWD: kywd,
+    _LAND: land,
     _LCRT: lcrt,
     _REFR: refr,
     _TXST: txst,
