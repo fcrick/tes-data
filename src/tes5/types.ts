@@ -1562,6 +1562,89 @@ var lcrt: FieldArray = [['type', {
   _CNAM: rgb,
 }]];
 
+var lctn: FieldArray = [['type', {
+  _EDID: zString,
+  _ACPR: [
+    ['populations', [
+      ['actor', 'uint32le'],
+      ['cell', 'uint32le'],
+      ['unknown', 'uint32le'],
+    ], {size:'size', sizeDivideBy:12}],
+  ],
+  _LCPR: [
+    ['actor', 'uint32le'],
+    ['loc', 'uint32le'],
+    ['unknown', 'uint32le'],
+  ],
+  _RCPR: [
+    ['actors', 'uint32le', {size:'size', sizeDivideBy:4}],
+  ],
+  _ACUN: [
+    ['actorRefs', [
+      ['npc', 'uint32le'],
+      ['actor', 'uint32le'],
+      ['location', 'uint32le'],
+    ], {size:'size', sizeDivideBy:12}],
+  ],
+  _LCUN: [
+    ['actorRefs', [
+      ['npc', 'uint32le'],
+      ['actor', 'uint32le'],
+      ['location', 'uint32le'],
+    ], {size:'size', sizeDivideBy:12}],
+  ],
+  _ACSR: [
+    ['staticRefs', [
+      ['location', 'uint32le'],
+      ['actor', 'uint32le'],
+      ['cell', 'uint32le'],
+      ['unknown', 'uint32le'],
+    ], {size:'size', sizeDivideBy:16}],
+  ],
+  _LCSR: [
+    ['staticRefs', [
+      ['location', 'uint32le'],
+      ['actor', 'uint32le'],
+      ['cell', 'uint32le'],
+      ['unknown', 'uint32le'],
+    ], {size:'size', sizeDivideBy:16}],
+  ],
+  _ACEC: [
+    ['world', 'uint32le'],
+    ['unknown', 'uint16le', {size:'size', sizeOffset:-4, sizeDivideBy:2}],
+  ],
+  _LCEC: [
+    ['world', 'uint32le'],
+    ['unknown', 'uint16le', {size:'size', sizeOffset:-4, sizeDivideBy:2}],
+  ],
+  _ACEP: [
+    ['enablePoints', [
+      ['actor', 'uint32le'],
+      ['reference', 'uint32le'],
+      ['unknown', 'uint32le'],
+    ], {size:'size', sizeDivideBy: 12}],
+  ],
+  _LCEP: [
+    ['enablePoints', [
+      ['actor', 'uint32le'],
+      ['reference', 'uint32le'],
+      ['unknown', 'uint32le'],
+    ], {size:'size', sizeDivideBy: 12}],
+  ],
+  _ACID: [['value', 'uint32le', {size:'size', sizeDivideBy:4}]],
+  _LCID: [['value', 'uint32le', {size:'size', sizeDivideBy:4}]],
+  _FULL: lString,
+  _KSIZ: ksiz,
+  _KWDA: kwda,
+  _PNAM: uint32le,
+  _NAM1: uint32le,
+  _FNAM: uint32le,
+  _MNAM: uint32le,
+  _RNAM: float,
+  _NAM0: uint32le,
+  _CNAM: rgb,
+}]];
+
 var refr: FieldArray = [['type', {
   _EDID: zString,
   _VMAD: vmad,
@@ -1739,6 +1822,7 @@ export var subrecordFields: FieldArray = [
     _KYWD: kywd,
     _LAND: land,
     _LCRT: lcrt,
+    _LCTN: lctn,
     _REFR: refr,
     _TXST: txst,
   }, [
