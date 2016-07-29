@@ -1327,6 +1327,53 @@ var imad: FieldArray = [['type', {
   ['value', 'float', {size:'size', sizeDivideBy:4}]
 ]]];
 
+var imgs: FieldArray = [['type', {
+  _EDID: zString,
+  _ENAM: [
+    ['eyeAdaptSpeed', 'float'],
+    ['bloomBlurRadius', 'float'],
+    ['bloomThreshold', 'float'],
+    ['bloomScale', 'float'],
+    ['receiveBloomThreshold', 'float'],
+    ['sunlightScale', 'float'],
+    ['skyScale', 'float'],
+    ['saturation', 'float'],
+    ['brightness', 'float'],
+    ['contrast', 'float'],
+    ['unknown', 'float', {size:4}],
+  ],
+  _HNAM: [
+    ['eyeAdaptSpeed', 'float'],
+    ['bloomBlurRadius', 'float'],
+    ['bloomThreshold', 'float'],
+    ['bloomScale', 'float'],
+    ['receiveBloomThreshold', 'float'],
+    ['white', 'float'],
+    ['sunlightScale', 'float'],
+    ['skyScale', 'float'],
+    ['eyeAdaptStrength', 'float'],
+  ],
+  _CNAM: [
+    ['saturation', 'float'],
+    ['brightness', 'float'],
+    ['contrast', 'float'],
+  ],
+  _TNAM: [
+    ['tintAmount', 'float'],
+    ['red', 'float'],
+    ['green', 'float'],
+    ['blue', 'float'],
+  ],
+  _DNAM: [
+    ['strength', 'float'],
+    ['distance', 'float'],
+    ['range', 'float'],
+    ['size', {_12:[]}, [
+      ['unknown', 'float'],
+    ]],
+  ],
+}]];
+
 var kywd: FieldArray = [['type', {
   _EDID: zString,
   _CNAM: rgb,
@@ -1519,6 +1566,7 @@ export var subrecordFields: FieldArray = [
     _IDLE: idle,
     _IDLM: idlm,
     _IMAD: imad,
+    _IMGS: imgs,
     _KYWD: kywd,
     _LCRT: lcrt,
     _REFR: refr,
