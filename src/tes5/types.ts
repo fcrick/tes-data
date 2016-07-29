@@ -1374,6 +1374,54 @@ var imgs: FieldArray = [['type', {
   ],
 }]];
 
+var info: FieldArray = [['type', {
+  _EDID: zString,
+  _VMAD: vmad,
+  _DATA: [
+    ['dialogueTab', 'uint16le'],
+    ['flags', 'uint16le'],
+    ['resetTime', 'float'],
+  ],
+  _ENAM: [
+    ['flags', 'uint16le'],
+    ['resetTime', 'uint16le'],
+  ],
+  _PNAM: uint32le,
+  _CNAM: uint8,
+  _TCLT: uint32le,
+  _DNAM: uint32le,
+  _TRDT: [
+    ['emotionType', 'uint32le'],
+    ['emotionValue', 'uint32le'],
+    ['unknown1', 'int32le'],
+    ['responseId', 'uint8'],
+    ['unknown2', 'uint8', {size:3}],
+    ['soundFile', 'uint32le'],
+    ['useEmoAnim', 'uint8'],
+    ['unknown3', 'uint8', {size:3}],
+  ],
+  _NAM1: lString,
+  _NAM2: zString,
+  _NAM3: zString,
+  _SNAM: uint32le,
+  _LNAM: uint32le,
+  _CTDA: ctda,
+  _CITC: uint32le,
+  _CIS1: zString,
+  _CIS2: zString,
+  _SCHR: [
+    ['unknown', 'uint32le'],
+    ['refCount', 'uint32le'],
+    ['compiledSize', 'uint32le'],
+    ['variableCount', 'uint32le'],
+    ['scriptType', 'uint32le'],
+  ],
+  _RNAM: lString,
+  _ANAM: uint32le,
+  _TWAT: uint32le,
+  _ONAM: uint32le,
+}]];
+
 var kywd: FieldArray = [['type', {
   _EDID: zString,
   _CNAM: rgb,
@@ -1567,6 +1615,7 @@ export var subrecordFields: FieldArray = [
     _IDLM: idlm,
     _IMAD: imad,
     _IMGS: imgs,
+    _INFO: info,
     _KYWD: kywd,
     _LCRT: lcrt,
     _REFR: refr,
