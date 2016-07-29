@@ -48,7 +48,7 @@ function checkBuffer(buffer: Buffer, offset: number, type: string) {
       var mismatch = buffer.compare(newBuffer) !== 0;
 
       if (mismatch) {
-        console.log(`mismatch at ${offsetHex}`);
+        console.log(`mismatch at ${offsetHex} id=${record['id'] || 'grup'} type=${record['recordType']}`);
 
         fs.writeFile(`${folder}${offsetHex}_A.bin`, buffer);
         fs.writeFile(`${folder}${offsetHex}_B.bin`, newBuffer);
