@@ -765,6 +765,35 @@ var clas: FieldArray = [['type', {
   ],
 }]];
 
+var clfm: FieldArray = [['type', {
+  _EDID: zString,
+  _FULL: lString,
+  _CNAM: rgb,
+  _FNAM: uint32le,
+}]];
+
+var clmt: FieldArray = [['type', {
+  _EDID: zString,
+  _WLST: [
+    ['weather', 'uint32le'],
+    ['percentChance', 'uint32le'],
+    ['global', 'uint32le'],
+  ],
+  _FNAM: zString,
+  _GNAM: zString,
+  _MODL: zString,
+  _MODT: modt,
+  _MODS: mods,
+  _TNAM: [
+    ['sunriseBegin', 'uint8'],
+    ['sunriseEnd', 'uint8'],
+    ['sunsetBegin', 'uint8'],
+    ['sunsetEnd', 'uint8'],
+    ['volatility', 'uint8'],
+    ['moons', 'uint8'],
+  ],
+}]]
+
 var dial: FieldArray = [['type', {
   _EDID: zString,
   _FULL: lString,
@@ -939,6 +968,8 @@ export var subrecordFields: FieldArray = [
     _CAMS: cams,
     _CELL: cell,
     _CLAS: clas,
+    _CLFM: clfm,
+    _CLMT: clmt,
     _DIAL: dial,
     _KYWD: kywd,
     _LCRT: lcrt,
