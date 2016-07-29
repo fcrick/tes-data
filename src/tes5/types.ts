@@ -879,6 +879,10 @@ var csty: FieldArray = [['type', {
       ]],
     ]],
   ],
+  _CSMD: [
+    ['unknown1', 'float'],
+    ['unknown2', 'float'],
+  ],
   _CSME: [
     ['attackStaggeredMult', 'float'],
     ['powerAttackStaggeredMult', 'float'],
@@ -902,6 +906,16 @@ var csty: FieldArray = [['type', {
   _CSLR: float,
   _CSFL: [['various', 'float', {size:'size', sizeDivideBy:4}]],
   _DATA: uint32le,
+}]];
+
+var debr: FieldArray = [['type', {
+  _EDID: zString,
+  _DATA: [
+    ['percentage', 'uint8'],
+    ['modelPath', 'char', {size:-1}],
+    ['flags', 'uint8'],
+  ],
+  _MODT: modt,
 }]];
 
 var dial: FieldArray = [['type', {
@@ -1085,6 +1099,7 @@ export var subrecordFields: FieldArray = [
     _CONT: cont,
     _CPTH: cpth,
     _CSTY: csty,
+    _DEBR: debr,
     _DIAL: dial,
     _KYWD: kywd,
     _LCRT: lcrt,
