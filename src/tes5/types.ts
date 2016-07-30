@@ -2332,6 +2332,59 @@ var pack: FieldArray = [['type', {
   _TNAM: int32le,
 }]];
 
+var perk: FieldArray = [['type', {
+  _EDID: zString,
+  _VMAD: vmad,
+  _FULL: lString,
+  _DESC: lString,
+  _ICON: zString,
+  _CTDA: ctda,
+  _CITC: uint32le,
+  _CIS1: zString,
+  _CIS2: zString,
+  // _DATA: [
+  //   ['isTrait', 'uint8'],
+  //   ['level', 'uint8'],
+  //   ['numRanks', 'uint8'],
+  //   ['isPlayable', 'uint8'],
+  //   ['isHidden', 'uint8'],
+  // ],
+  _DATA: unknown, // different based on section which we don't currently track
+  _NNAM: uint32le,
+  // _PRKE: [
+  //   ['type', 'uint8'],
+  //   ['rank', 'uint8'],
+  //   ['priority', 'uint8'],
+  // ],
+  _PRKE: unknown,
+  _PRKC: uint8,
+  _EPFT: uint8,
+  _EPF2: unknown,
+  _EPF3: unknown,
+  _EPFD: unknown,
+  _PRKF: [],
+}]];
+
+var pgre: FieldArray = [['type', {
+  _EDID: zString,
+  _NAME: uint32le,
+  _XIS2: [],
+  _XSCL: float,
+  _XESP: [
+    ['value', 'uint32le'],
+    ['flags', 'uint32le'],
+  ],
+  _XOWN: uint32le,
+  _DATA: [
+    ['x', 'float'],
+    ['y', 'float'],
+    ['z', 'float'],
+    ['rX', 'float'],
+    ['ry', 'float'],
+    ['rZ', 'float'],
+  ],
+}]];
+
 var refr: FieldArray = [['type', {
   _EDID: zString,
   _VMAD: vmad,
@@ -2522,6 +2575,8 @@ export var subrecordFields: FieldArray = [
     _NPC_: npc_,
     _OTFT: otft,
     _PACK: pack,
+    _PERK: perk,
+    _PGRE: pgre,
     _REFR: refr,
     _TXST: txst,
   }, [
