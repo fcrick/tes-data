@@ -1980,7 +1980,6 @@ var must: FieldArray = [['type', {
     ['loopEnds', 'float'],
     ['loopCount', 'uint32le'],
   ],
-  _CITC: uint32le,
   _CTDA: ctda,
   _CITC: uint32le,
   _CIS1: zString,
