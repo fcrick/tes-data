@@ -28,6 +28,10 @@ export var unknown: FieldArray = [
   ['value', 'uint8', {size:'size', sizeOffset: 'xxxxSize'}]
 ];
 
+export var uint8: FieldArray = [
+  ['value', 'uint8']
+];
+
 export var uint16le: FieldArray = [
   ['value', 'uint16le']
 ];
@@ -40,12 +44,17 @@ export var int8: FieldArray = [
   ['value', 'int8']
 ];
 
-export var float: FieldArray = [
-  ['value', 'float']
+export var int16le: FieldArray = [
+  ['value', 'int16le']
 ];
 
-export var uint8: FieldArray = [
-  ['value', 'uint8']
+export var int32le: FieldArray = [
+  ['value', 'int32le']
+];
+
+
+export var float: FieldArray = [
+  ['value', 'float']
 ];
 
 // just 'string' on uesp docs
