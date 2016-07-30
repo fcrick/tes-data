@@ -116,6 +116,35 @@ var goldAndWeight: FieldArray = [
 var ksiz: FieldArray = [['keywordCount', 'uint32le', {persist:true}]];
 var kwda: FieldArray = [['keywords', 'uint32le', {size:'keywordCount'}]];
 
+var lightning: FieldArray = [
+  ['ambient', rgb],
+  ['directional', rgb],
+  ['fogNearColor', rgb],
+  ['fogNear', 'float'],
+  ['fogFar', 'float'],
+  ['rotationXY', 'int32le'],
+  ['rotationZ', 'int32le'],
+  ['directionalFade', 'float'],
+  ['fogClipDist', 'float'],
+  ['fogPow', 'float'],
+  ['ambientXPlus', rgb],
+  ['ambientXMinus', rgb],
+  ['ambientYPlus', rgb],
+  ['ambientYMinus', rgb],
+  ['ambientZPlus', rgb],
+  ['ambientZMinus', rgb],
+  // if the size is 64, stop here
+  ['size', {_64: []}, [
+    ['specularColor', rgb],
+    ['fresnelPower', 'float'],
+    ['fogFarColor', rgb],
+    ['fogMax', 'float'],
+    ['lightFadeDistancesStart', 'float'],
+    ['lightFadeDistancesEnd', 'float'],
+    ['flags', 'uint32le'],
+  ]],
+];
+
 var modt: FieldArray = [
   ['version', {
     _40: [
@@ -718,34 +747,7 @@ var cell: FieldArray = [['type', {
     ['y', 'int32le'],
     ['flags', 'uint32le'],
   ],
-  _XCLL: [
-    ['ambient', rgb],
-    ['directional', rgb],
-    ['fogNearColor', rgb],
-    ['fogNear', 'float'],
-    ['fogFar', 'float'],
-    ['rotationXY', 'int32le'],
-    ['rotationZ', 'int32le'],
-    ['directionalFade', 'float'],
-    ['fogClipDist', 'float'],
-    ['fogPow', 'float'],
-    ['ambientXPlus', rgb],
-    ['ambientXMinus', rgb],
-    ['ambientYPlus', rgb],
-    ['ambientYMinus', rgb],
-    ['ambientZPlus', rgb],
-    ['ambientZMinus', rgb],
-    // if the size is 64, stop here
-    ['size', {_64: []}, [
-      ['specularColor', rgb],
-      ['fresnelPower', 'float'],
-      ['fogFarColor', rgb],
-      ['fogMax', 'float'],
-      ['lightFadeDistancesStart', 'float'],
-      ['lightFadeDistancesEnd', 'float'],
-      ['flags', 'uint32le'],
-    ]],
-  ],
+  _XCLL: lightning,
   _TVDT: unknown,
   _MHDT: unknown,
   _XCGD: unknown,
@@ -1572,9 +1574,11 @@ var lctn: FieldArray = [['type', {
     ], {size:'size', sizeDivideBy:12}],
   ],
   _LCPR: [
-    ['actor', 'uint32le'],
-    ['loc', 'uint32le'],
-    ['unknown', 'uint32le'],
+    ['populations', [
+      ['actor', 'uint32le'],
+      ['cell', 'uint32le'],
+      ['unknown', 'uint32le'],
+    ], {size:'size', sizeDivideBy:12}],
   ],
   _RCPR: [
     ['actors', 'uint32le', {size:'size', sizeDivideBy:4}],
@@ -1643,6 +1647,78 @@ var lctn: FieldArray = [['type', {
   _RNAM: float,
   _NAM0: uint32le,
   _CNAM: rgb,
+}]];
+
+var lgtm: FieldArray = [['type', {
+  _EDID: zString,
+  _DATA: lightning,
+  _DALC: [
+    ['ambientXPlus', rgb],
+    ['ambientXMinus', rgb],
+    ['ambientYPlus', rgb],
+    ['ambientYMinus', rgb],
+    ['ambientZPlus', rgb],
+    ['ambientZMinus', rgb],
+    ['specularColor', rgb],
+    ['fresnelPower', 'float'],
+  ],
+}]];
+
+var ligh: FieldArray = [['type', {
+  _EDID: zString,
+  _VMAD: vmad,
+  _OBND: obnd,
+  _MODL: zString,
+  _MODT: modt,
+  _DEST: dest,
+  _DSTD: dstd,
+  _DMDL: zString,
+  _DMDT: modt,
+  _DMDS: mods,
+  _FULL: lString,
+  _ICON: zString,
+  _MICO: zString,
+  _DATA: [
+    ['time', 'int32le'],
+    ['radius', 'uint32le'],
+    ['color', rgb],
+    ['flags', 'uint32le'],
+    ['falloffExponent', 'float'],
+    ['fov', 'float'],
+    ['nearClip', 'float'],
+    ['frequency', 'float'],
+    ['intensityAmplitude', 'float'],
+    ['movementAmplitude', 'float'],
+    ...goldAndWeight,
+  ],
+  _FNAM: float,
+  _SNAM: uint32le,
+}]];
+
+var lscr: FieldArray = [['type', {
+  _EDID: zString,
+  _DESC: lString,
+  _CTDA: ctda,
+  _CITC: uint32le,
+  _CIS1: zString,
+  _CIS2: zString,
+  _NNAM: uint32le,
+  _SNAM: float,
+  _RNAM: [
+    ['x', 'int16le'],
+    ['y', 'int16le'],
+    ['z', 'int16le'],
+  ],
+  _ONAM: [
+    ['min', 'int16le'],
+    ['max', 'int16le'],
+  ],
+  _XNAM: [
+    ['x', 'float'],
+    ['y', 'float'],
+    ['z', 'float'],
+  ],
+  _MOD2: zString,
 }]];
 
 var refr: FieldArray = [['type', {
@@ -1823,6 +1899,9 @@ export var subrecordFields: FieldArray = [
     _LAND: land,
     _LCRT: lcrt,
     _LCTN: lctn,
+    _LGTM: lgtm,
+    _LIGH: ligh,
+    _LSCR: lscr,
     _REFR: refr,
     _TXST: txst,
   }, [
