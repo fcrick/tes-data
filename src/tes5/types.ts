@@ -1737,6 +1737,35 @@ var ltex: FieldArray = [['type', {
   _GNAM: uint32le,
 }]];
 
+var lvli: FieldArray = [['type', {
+  _EDID: zString,
+  _OBND: obnd,
+  _LVLD: int8,
+  _LVLF: int8,
+  _LVLG: uint32le,
+  _LLCT: int8,
+  _LVLO: [
+    ['level', 'uint32le'],
+    ['item', 'uint32le'],
+    ['count', 'uint32le'],
+  ],
+}]];
+
+var lvln: FieldArray = [['type', {
+  _EDID: zString,
+  _OBND: obnd,
+  _LVLD: uint8,
+  _LVLF: uint8,
+  _LLCT: uint8,
+  _LVLO: [
+    ['level', 'uint32le'],
+    ['item', 'uint32le'],
+    ['count', 'uint32le'],
+  ],
+  _COED: coed,
+  _MODL: zString,
+}]];
+
 var refr: FieldArray = [['type', {
   _EDID: zString,
   _VMAD: vmad,
@@ -1919,6 +1948,8 @@ export var subrecordFields: FieldArray = [
     _LIGH: ligh,
     _LSCR: lscr,
     _LTEX: ltex,
+    _LVLI: lvli,
+    _LVLN: lvln,
     _REFR: refr,
     _TXST: txst,
   }, [
