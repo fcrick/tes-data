@@ -1894,6 +1894,99 @@ var mgef: FieldArray = [['type', {
   _CIS2: zString,
 }]];
 
+var misc: FieldArray = [['type', {
+  _EDID: zString,
+  _VMAD: vmad,
+  _OBND: obnd,
+  _FULL: lString,
+  _MODL: zString,
+  _MODT: modt,
+  _MODS: mods,
+  _ICON: zString,
+  _MICO: zString,
+  _DEST: dest,
+  _DSTD: dstd,
+  _DMDL: zString,
+  _DMDT: modt,
+  _DMDS: mods,
+  _YNAM: uint32le,
+  _ZNAM: uint32le,
+  _KSIZ: ksiz,
+  _KWDA: kwda,
+  _DATA: goldAndWeight,
+}]];
+
+var movt: FieldArray = [['type', {
+  _EDID: zString,
+  _MNAM: zString,
+  _SPED: [
+    ['leftWalk', 'float'],
+    ['leftRun', 'float'],
+    ['rightWalk', 'float'],
+    ['rightRun', 'float'],
+    ['forwardWalk', 'float'],
+    ['forwardRun', 'float'],
+    ['backWalk', 'float'],
+    ['backRun', 'float'],
+    ['rotateInPlaceWalk', 'float'],
+    ['rotateInPlaceRun', 'float'],
+    ['size', {_40:[]}, [
+      ['rotateWhileMovingRun', 'float'],
+    ]],
+  ],
+  _INAM: [
+    ['directionalScale', 'float'],
+    ['movementSpeedScale', 'float'],
+    ['rotationSpeedScale', 'float'],
+  ],
+}]];
+
+var mstt: FieldArray = [['type', {
+  _EDID: zString,
+  _OBND: obnd,
+  _MODL: zString,
+  _MODT: modt,
+  _MODS: mods,
+  _DEST: dest,
+  _DSTD: dstd,
+  _DMDL: zString,
+  _DMDT: modt,
+  _DATA: uint8,
+  _SNAM: uint32le,
+}]];
+
+var musc: FieldArray = [['type', {
+  _EDID: zString,
+  _FNAM: uint32le,
+  _PNAM: [
+    ['priority', 'uint16le'],
+    ['ducking', 'uint16le'],
+  ],
+  _WNAM: float,
+  _TNAM: [['tracks', 'uint32le', {size:'size',sizeDivideBy:4}]],
+}]];
+
+var must: FieldArray = [['type', {
+  _EDID: zString,
+  _CNAM: uint32le,
+  _FLTV: float,
+  _DNAM: float,
+  _ANAM: zString,
+  _BNAM: zString,
+  _FNAM: [['cues', 'float', {size:'size',sizeDivideBy:4}]],
+  _SNAM: [['tracks', 'uint32le', {size:'size',sizeDivideBy:4}]],
+  _LNAM: [
+    ['loopBegins', 'float'],
+    ['loopEnds', 'float'],
+    ['loopCount', 'uint32le'],
+  ],
+  _CITC: uint32le,
+  _CTDA: ctda,
+  _CITC: uint32le,
+  _CIS1: zString,
+  _CIS2: zString,
+}]];
+
 var refr: FieldArray = [['type', {
   _EDID: zString,
   _VMAD: vmad,
@@ -2083,6 +2176,11 @@ export var subrecordFields: FieldArray = [
     _MATT: matt,
     _MESG: mesg,
     _MGEF: mgef,
+    _MISC: misc,
+    _MOVT: movt,
+    _MSTT: mstt,
+    _MUSC: musc,
+    _MUST: must,
     _REFR: refr,
     _TXST: txst,
   }, [
