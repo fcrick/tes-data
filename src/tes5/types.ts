@@ -195,7 +195,13 @@ var obnd: FieldArray = [
   ['z2', 'int16le'],
 ];
 
-
+var schr: FieldArray = [
+  ['unknown1', 'uint32le'],
+  ['refCount', 'uint32le'],
+  ['compiledSize', 'uint32le'],
+  ['variableCount', 'uint32le'],
+  ['schrType', 'uint32le'],
+];
 
 // large subrecords that appear in multiple records
 var scriptObject: FieldArray = [
@@ -2249,6 +2255,83 @@ var npc_: FieldArray = [['type', {
   _TIAS: int16le,
 }]];
 
+var otft: FieldArray = [['type', {
+  _EDID: zString,
+  _INAM: [['value', 'uint32le', {size:'size', sizeDivideBy:4}]],
+}]];
+
+var pack: FieldArray = [['type', {
+  _EDID: zString,
+  _VMAD: vmad,
+  _CTDA: ctda,
+  _CITC: uint32le,
+  _CIS1: zString,
+  _CIS2: zString,
+  _IDLC: uint8,
+  _IDLA: [['idles', 'uint32le', {size:'size', sizeDivideBy:4}]],
+  _IDLF: uint8,
+  _IDLT: float,
+  _QNAM: uint32le,
+  _PKCU: [
+    ['unknown1', 'uint32le'],
+    ['packageTemplate', 'uint32le'],
+    ['unknown2', 'uint32le'],
+  ],
+  _PKDT: [
+    ['flags', 'uint32le'],
+    ['packageType', 'uint8'],
+    ['interruptOverride', 'uint8'],
+    ['preferedSpeed', 'uint8'],
+    ['unknown', 'uint8'],
+    ['interruptFlags', 'uint32le'],
+  ],
+  _PSDT: [
+    ['month', 'uint8'],
+    ['dayOfWeek', 'uint8'],
+    ['date', 'uint8'],
+    ['hour', 'uint8'],
+    ['minute', 'uint8'],
+    ['unknown1', 'uint8'],
+    ['unknown2', 'uint16le'],
+    ['duration', 'uint32le'],
+  ],
+  _ANAM: zString,
+  _CNAM: unknown, // depends on ANAM subrecord
+  _PDTO: [
+    ['topicType', 'uint32le'],
+    ['topicValue', 'uint32le'],
+  ],
+  _PLDT: [
+    ['locationType', 'uint32le'],
+    ['location', 'uint32le'],
+    ['radius', 'uint32le'],
+  ],
+  _PTDA: [
+    ['targetType', 'uint32le'],
+    ['target', 'uint32le'],
+    ['count', 'uint32le'],
+  ],
+  _TPIC: uint32le,
+  _UNAM: uint8,
+  _XNAM: int8,
+  _PRCB: unknown,
+  _PNAM: unknown, // zString _or_ uint32le gah
+  _FNAM: uint32le,
+  _PKC2: uint8,
+  _PFO2: unknown,
+  _PFOR: unknown,
+  _BNAM: zString,
+  _POBA: [],
+  _POEA: [],
+  _POCA: [],
+  _INAM: uint32le,
+  _SCHR: schr,
+  _SCDA: unknown,
+  _SCTX: sString,
+  _SCRO: uint32le,
+  _TNAM: int32le,
+}]];
+
 var refr: FieldArray = [['type', {
   _EDID: zString,
   _VMAD: vmad,
@@ -2269,13 +2352,8 @@ var refr: FieldArray = [['type', {
   ],
   _LNAM: uint32le,
   _INAM: uint32le,
-  _SCHR: [
-    ['unknown1', 'uint32le'],
-    ['refCount', 'uint32le'],
-    ['compiledSize', 'uint32le'],
-    ['variableCount', 'uint32le'],
-    ['schrType', 'uint32le'],
-  ],
+  _SCHR: schr,
+  _SCDA: unknown,
   _SCTX: sString,
   _QNAM: uint32le,
   _SCRO: uint32le,
@@ -2442,6 +2520,8 @@ export var subrecordFields: FieldArray = [
     _NAVI: navi,
     _NAVM: navm,
     _NPC_: npc_,
+    _OTFT: otft,
+    _PACK: pack,
     _REFR: refr,
     _TXST: txst,
   }, [
