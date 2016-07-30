@@ -137,11 +137,13 @@ var lightning: FieldArray = [
   ['size', {_64: []}, [
     ['specularColor', rgb],
     ['fresnelPower', 'float'],
-    ['fogFarColor', rgb],
-    ['fogMax', 'float'],
-    ['lightFadeDistancesStart', 'float'],
-    ['lightFadeDistancesEnd', 'float'],
-    ['flags', 'uint32le'],
+    ['size', {_72: []}, [
+      ['fogFarColor', rgb],
+      ['fogMax', 'float'],
+      ['lightFadeDistancesStart', 'float'],
+      ['lightFadeDistancesEnd', 'float'],
+      ['flags', 'uint32le'],
+    ]],
   ]],
 ];
 
@@ -1659,8 +1661,10 @@ var lgtm: FieldArray = [['type', {
     ['ambientYMinus', rgb],
     ['ambientZPlus', rgb],
     ['ambientZMinus', rgb],
-    ['specularColor', rgb],
-    ['fresnelPower', 'float'],
+    ['size', {_24:[]}, [
+      ['specularColor', rgb],
+      ['fresnelPower', 'float'],
+    ]],
   ],
 }]];
 
@@ -1719,6 +1723,18 @@ var lscr: FieldArray = [['type', {
     ['z', 'float'],
   ],
   _MOD2: zString,
+}]];
+
+var ltex: FieldArray = [['type', {
+  _EDID: zString,
+  _TNAM: uint32le,
+  _MNAM: uint32le,
+  _HNAM: [
+    ['friction', 'uint8'],
+    ['restitution', 'uint8'],
+  ],
+  _SNAM: uint8,
+  _GNAM: uint32le,
 }]];
 
 var refr: FieldArray = [['type', {
@@ -1902,6 +1918,7 @@ export var subrecordFields: FieldArray = [
     _LGTM: lgtm,
     _LIGH: ligh,
     _LSCR: lscr,
+    _LTEX: ltex,
     _REFR: refr,
     _TXST: txst,
   }, [
