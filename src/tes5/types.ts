@@ -1764,6 +1764,40 @@ var lvln: FieldArray = [['type', {
   ],
   _COED: coed,
   _MODL: zString,
+  _MODT: modt,
+}]];
+
+var lvsp: FieldArray = [['type', {
+  _EDID: zString,
+  _OBND: obnd,
+  _LVLD: uint8,
+  _LVLF: uint8,
+  _LLCT: uint8,
+  _LVLO: [
+    ['level', 'uint32le'],
+    ['spell', 'uint32le'],
+    ['count', 'uint32le'],
+  ],
+}]]
+
+var mato: FieldArray = [['type', {
+  _EDID: zString,
+  _MODL: zString,
+  _DNAM: unknown,
+  _DATA: [
+    ['falloffScale', 'float'],
+    ['falloffBias', 'float'],
+    ['NoiseUVScale', 'float'],
+    ['MaterialUVScale', 'float'],
+    ['dirProjVectorX', 'float'],
+    ['dirProjVectorY', 'float'],
+    ['dirProjVectorZ', 'float'],
+    ['normalDampener', 'float'],
+    ['singlePassColorR', 'float'],
+    ['singlePassColorG', 'float'],
+    ['singlePassColorB', 'float'],
+    ['singlePass', 'uint32le'],
+  ],
 }]];
 
 var refr: FieldArray = [['type', {
@@ -1950,6 +1984,8 @@ export var subrecordFields: FieldArray = [
     _LTEX: ltex,
     _LVLI: lvli,
     _LVLN: lvln,
+    _LVSP: lvsp,
+    _MATO: mato,
     _REFR: refr,
     _TXST: txst,
   }, [
