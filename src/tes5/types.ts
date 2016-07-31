@@ -2385,6 +2385,65 @@ var pgre: FieldArray = [['type', {
   ],
 }]];
 
+var phzd: FieldArray = [['type', {
+  _EDID: zString,
+  _VMAD: vmad,
+  _XIS2: [],
+  _XSCL: float,
+  _XESP: [
+    ['value', 'uint32le'],
+    ['flags', 'uint32le'],
+  ],
+  _DATA: [
+    ['x', 'float'],
+    ['y', 'float'],
+    ['z', 'float'],
+    ['rX', 'float'],
+    ['ry', 'float'],
+    ['rZ', 'float'],
+  ],
+  _XLRL: uint32le,
+}]];
+
+var proj: FieldArray = [['type', {
+  _EDID: zString,
+  _OBND: obnd,
+  _FULL: lString,
+  _MODL: zString,
+  _MODT: modt,
+  _DEST: dest,
+  _DSTD: dstd,
+  _NAM1: zString,
+  _NAM2: zString,
+  _DATA: [
+    ['flags', 'uint16le'],
+    ['projectileType', 'uint16le'],
+    ['gravity', 'float'],
+    ['speed', 'float'],
+    ['range', 'float'],
+    ['light', 'uint32le'],
+    ['muzzleFlashLight', 'uint32le'],
+    ['tracerChance', 'float'],
+    ['explosionProximity', 'float'],
+    ['explosionTimer', 'float'],
+    ['explosionType', 'uint32le'],
+    ['soundRecord', 'uint32le'],
+    ['muzzleDuration', 'float'],
+    ['fadeDuration', 'float'],
+    ['impactForce', 'float'],
+    ['countdownSound', 'uint32le'],
+    ['unknown', 'uint32le'],
+    ['defaultWeaponSource', 'uint32le'],
+    ['coneSpread', 'float'],
+    ['collisionRadius', 'float'],
+    ['lifetime', 'float'],
+    ['relaunchInterval', 'float'],
+    ['decalData', 'uint32le'],
+    ['collisionLayer', 'uint32le'],
+  ],
+  _VNAM: uint32le,
+}]];
+
 var refr: FieldArray = [['type', {
   _EDID: zString,
   _VMAD: vmad,
@@ -2577,6 +2636,8 @@ export var subrecordFields: FieldArray = [
     _PACK: pack,
     _PERK: perk,
     _PGRE: pgre,
+    _PHZD: phzd,
+    _PROJ: proj,
     _REFR: refr,
     _TXST: txst,
   }, [
