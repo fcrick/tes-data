@@ -11,6 +11,8 @@ var paths = [
   // 'HearthFires.esm',
 ];
 
+const outputFolder = '../testData/';
+
 var counter = 0;
 
 var selectMany = (() => {
@@ -43,7 +45,7 @@ function checkBuffer(buffer: Buffer, offset: number, type: string) {
     }
 
     writeRecord(record, (err, newBuffer) => {
-      var folder = '../test/data/';
+      var folder = outputFolder;
       var offsetHex = offset.toString(16);
       var mismatch = buffer.compare(newBuffer) !== 0;
 
@@ -109,6 +111,13 @@ function visitOffset(offset: number, size: number, type: string, fd: number) {
 }
 
 function comparisonTest() {
+  try {
+    fs.statSync(outputFolder);
+  }
+  catch (e) {
+    fs.mkdirSync(outputFolder);
+  }
+
   fs.open(path, 'r', (err, fd) => {
     visit(fd, (o, s, t) => visitOffset(o, s, t, fd));
   });
