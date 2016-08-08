@@ -2838,6 +2838,10 @@ var scen: FieldArray = [['type', {
   _CIS1: zString,
   _CIS2: zString,
   _SCHR: schr,
+  _SCDA: unknown,
+  _SCTX: sString,
+  _QNAM: uint32le,
+  _SCRO: uint32le,
   _NEXT: [],
   _WNAM: uint32le,
   _ALID: uint32le,
@@ -2860,8 +2864,7 @@ var scen: FieldArray = [['type', {
     ['setAllEnd', 'uint32le'],
     ['dontSetAll', 'uint32le'],
   ],
-  _QNAM: uint32le,
-  _SCTX: sString,
+  
 }]];
 
 var scrl: FieldArray = [['type', {
@@ -2905,6 +2908,58 @@ var scrl: FieldArray = [['type', {
   _CITC: uint32le,
   _CIS1: zString,
   _CIS2: zString,
+}]];
+
+var shou: FieldArray = [['type', {
+  _EDID: zString,
+  _FULL: lString,
+  _MDOB: uint32le,
+  _DESC: lString,
+  _SNAM: [
+    ['word', 'uint32le'],
+    ['spell', 'uint32le'],
+    ['recoveryTime', 'float'],
+  ],
+}]];
+
+var slgm: FieldArray = [['type', {
+  _EDID: zString,
+  _OBND: obnd,
+  _FULL: lString,
+  _MODL: zString,
+  _MODT: modt,
+  _KSIZ: ksiz,
+  _KWDA: kwda,
+  _SOUL: uint8,
+  _DATA: goldAndWeight,
+  _SLCP: uint8,
+  _NAM0: uint32le,
+  _ZNAM: uint32le,
+}]];
+
+var smbn: FieldArray = [['type', {
+  _EDID: zString,
+  _PNAM: uint32le,
+  _SNAM: uint32le,
+  _CTDA: ctda,
+  _CITC: uint32le,
+  _CIS1: zString,
+  _CIS2: zString,
+  _DNAM: uint32le,
+  _XNAM: uint32le, 
+}]];
+
+var smen: FieldArray = [['type', {
+  _EDID: zString,
+  _PNAM: uint32le,
+  _SNAM: uint32le,
+  _CTDA: ctda,
+  _CITC: uint32le,
+  _CIS1: zString,
+  _CIS2: zString,
+  _DNAM: uint32le,
+  _XNAM: uint32le,
+  _ENAM: uint32le,
 }]];
 
 var txst: FieldArray = [['type', {
@@ -3023,6 +3078,10 @@ export var subrecordFields: FieldArray = [
     _RFCT: rfct,
     _SCEN: scen,
     _SCRL: scrl,
+    _SHOU: shou,
+    _SLGM: slgm,
+    _SMBN: smbn,
+    _SMEN: smen,
     _TXST: txst,
   }, [
     ['type', {
