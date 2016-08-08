@@ -2439,9 +2439,11 @@ var proj: FieldArray = [['type', {
     ['collisionRadius', 'float'],
     ['lifetime', 'float'],
     ['relaunchInterval', 'float'],
-    ['decalData', 'uint32le'],
-    ['size', {_88:[]}, [
-      ['collisionLayer', 'uint32le'],
+    ['size', {_84:[]}, [
+      ['decalData', 'uint32le'],
+      ['size', {_88:[]}, [
+        ['collisionLayer', 'uint32le'],
+      ]],
     ]],
   ],
   _VNAM: uint32le,
