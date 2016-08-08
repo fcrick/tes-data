@@ -128,6 +128,12 @@ var dstd: FieldArray = [
   ['debrisCount', 'uint32le'],
 ];
 
+var efit: FieldArray = [
+  ['magnitude', 'float'],
+  ['areaOfEffect', 'uint32le'],
+  ['duration', 'uint32le'],
+];
+
 var goldAndWeight: FieldArray = [
   ['goldValue', 'uint32le'],
   ['weight', 'float'],
@@ -492,11 +498,7 @@ var alch: FieldArray = [['type', {
     ['useSound', 'uint32le'],
   ],
   _EFID: uint32le,
-  _EFIT: [
-    ['magnitude', 'float'],
-    ['areaOfEffect', 'uint32le'],
-    ['duration', 'uint32le'],
-  ],
+  _EFIT: efit,
   _CTDA: ctda,
   _CITC: uint32le,
   _CIS1: zString,
@@ -1096,11 +1098,7 @@ var ench: FieldArray = [['type', {
     ]],
   ],
   _EFID: uint32le,
-  _EFIT: [
-    ['magnitude', 'float'],
-    ['areaOfEffect', 'uint32le'],
-    ['duration', 'uint32le'],
-  ],
+  _EFIT: efit,
   _CTDA: ctda,
   _CITC: uint32le,
   _CIS1: zString,
@@ -1507,11 +1505,7 @@ var ingr: FieldArray = [['type', {
     ['flags', 'uint32le'],
   ],
   _EFID: uint32le,
-  _EFIT: [
-    ['magnitude', 'float'],
-    ['areaOfEffect', 'uint32le'],
-    ['duration', 'uint32le'],
-  ],
+  _EFIT: efit,
   _CTDA: ctda,
   _CITC: uint32le,
   _CIS1: zString,
@@ -2899,11 +2893,7 @@ var scrl: FieldArray = [['type', {
   _DMDT: modt,
   _DMDS: mods,
   _EFID: uint32le,
-  _EFIT: [
-    ['magnitude', 'float'],
-    ['areaOfEffect', 'uint32le'],
-    ['duration', 'uint32le'],
-  ],
+  _EFIT: efit,
   _CTDA: ctda,
   _CITC: uint32le,
   _CIS1: zString,
@@ -2960,6 +2950,107 @@ var smen: FieldArray = [['type', {
   _DNAM: uint32le,
   _XNAM: uint32le,
   _ENAM: uint32le,
+}]];
+
+var smqn: FieldArray = [['type', {
+  _EDID: zString,
+  _PNAM: uint32le,
+  _SNAM: uint32le,
+  _CTDA: ctda,
+  _CITC: uint32le,
+  _CIS1: zString,
+  _CIS2: zString,
+  _DNAM: uint32le,
+  _XNAM: uint32le,
+  _QNAM: uint32le,
+  _NNAM: uint32le,
+  _RNAM: float,
+}]];
+
+var snct: FieldArray = [['type', {
+  _EDID: zString,
+  _FULL: lString,
+  _FNAM: uint32le,
+  _PNAM: uint32le,
+  _VNAM: uint16le,
+  _UNAM: uint16le,
+}]];
+
+var sndr: FieldArray = [['type', {
+  _EDID: zString,
+  _CNAM: unknown,
+  _GNAM: uint32le,
+  _SNAM: uint32le,
+  _FNAM: uint32le,
+  _ANAM: zString,
+  _ONAM: uint32le,
+  _CTDA: ctda,
+  _CITC: uint32le,
+  _CIS1: zString,
+  _CIS2: zString,
+  _LNAM: [
+    ['flags', 'uint16le'],
+    ['unknown', 'uint8'],
+    ['rumble', 'uint8'],
+  ],
+  _BNAM: [
+    ['freqShiftPercent', 'int8'],
+    ['freqVariancePercent', 'uint8'],
+    ['priority', 'uint8'],
+    ['dbVariance', 'uint8'],
+    ['staticAttenuation', 'uint16le'],
+  ],
+}]];
+
+var sopm: FieldArray = [['type', {
+  _EDID: zString,
+  _NAM1: unknown,
+  _FNAM: uint32le,
+  _MNAM: uint32le,
+  _CNAM: uint32le,
+  _ONAM: unknown, // 24 uints - bounds of some kind, maybe
+  _SNAM: unknown, // 16 uints
+  _ANAM: [
+    ['unknown1', 'uint32le'],
+    ['unknown2', 'float'],
+    ['unknown3', 'float'],
+    ['unknown4', 'uint32le'],
+    ['unknown5', 'uint32le'],
+  ],
+}]];
+
+var soun: FieldArray = [['type', {
+  _EDID: zString,
+  _OBND: obnd,
+  _FNAM: zString, // no longer used according to uesp
+  _SNDD: unknown, // 36 bytes of who knows -- no longer used according to uesp
+  _SDSC: uint32le,
+}]];
+
+var spel: FieldArray = [['type', {
+  _EDID: zString,
+  _OBND: obnd,
+  _FULL: lString,
+  _MDOB: uint32le,
+  _ETYP: uint32le,
+  _DESC: lString,
+  _SPIT: [
+    ['spellCost', 'uint32le'],
+    ['flags', 'uint32le'],
+    ['spellType', 'uint32le'],
+    ['chargeTime', 'float'],
+    ['castType', 'uint32le'],
+    ['delivery', 'uint32le'],
+    ['castDuration', 'float'],
+    ['range', 'float'],
+    ['halfCostPerk', 'uint32le'],
+  ],
+  _EFID: uint32le,
+  _EFIT: efit,
+  _CTDA: ctda,
+  _CITC: uint32le,
+  _CIS1: zString,
+  _CIS2: zString,
 }]];
 
 var txst: FieldArray = [['type', {
@@ -3082,6 +3173,12 @@ export var subrecordFields: FieldArray = [
     _SLGM: slgm,
     _SMBN: smbn,
     _SMEN: smen,
+    _SMQN: smqn,
+    _SNCT: snct,
+    _SNDR: sndr,
+    _SOPM: sopm,
+    _SOUN: soun,
+    _SPEL: spel,
     _TXST: txst,
   }, [
     ['type', {
