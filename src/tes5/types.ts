@@ -2789,6 +2789,79 @@ var regn: FieldArray = [['type', {
   _RDMP: lString,
 }]];
 
+var rela: FieldArray = [['type', {
+  _EDID: zString,
+  _DATA: [
+    ['parentNpc', 'uint32le'],
+    ['childNpc', 'uint32le'],
+    ['rank', 'uint16le'],
+    ['flags', 'uint16le'],
+    ['associatedType', 'uint32le'],
+  ],
+}]];
+
+var revb: FieldArray = [['type', {
+  _EDID: zString,
+  _DATA: [
+    ['decayTime', 'uint16le'],
+    ['hfReference', 'uint16le'],
+    ['roomFilter', 'int8'],
+    ['roomHfFilter', 'int8'],
+    ['reflections', 'int8'],
+    ['reverbAmp', 'int8'],
+    ['decayHfRatio', 'uint8'],
+    ['scaledReflectDelay', 'uint8'],
+    ['reverbDelay', 'uint8'],
+    ['diffusionPercent', 'uint8'],
+    ['densityPercent', 'uint8'],
+    ['unknown', 'uint8'],
+  ],
+}]];
+
+var rfct: FieldArray = [['type', {
+  _EDID: zString,
+  _DATA: [
+    ['effectArt', 'uint32le'],
+    ['shader', 'uint32le'],
+    ['flags', 'uint32le'],
+  ],
+}]];
+
+var scen: FieldArray = [['type', {
+  _EDID: zString,
+  _VMAD: vmad,
+  _FNAM: uint32le,
+  _HNAM: [],
+  _NAM0: zString,
+  _CTDA: ctda,
+  _CITC: uint32le,
+  _CIS1: zString,
+  _CIS2: zString,
+  _SCHR: schr,
+  _NEXT: [],
+  _WNAM: uint32le,
+  _ALID: uint32le,
+  _LNAM: uint32le,
+  _DNAM: uint32le,
+  _ANAM: unknown, // nothing or uint16le depending on context
+  _INAM: uint32le,
+  _SNAM: unknown, // float or uint32le depending on context
+  _ENAM: uint32le,
+  _DATA: uint32le,
+  _HTID: int32le,
+  _DMAX: float,
+  _DMIN: float,
+  _DEMO: uint32le,
+  _DEVA: uint32le,
+  _PNAM: uint32le,
+  _VNAM: [
+    ['setAllNormal', 'uint32le'],
+    ['setAllPause', 'uint32le'],
+    ['setAllEnd', 'uint32le'],
+    ['dontSetAll', 'uint32le'],
+  ],
+}]];
+
 var txst: FieldArray = [['type', {
   _EDID: zString,
   _OBND: obnd,
@@ -2900,6 +2973,10 @@ export var subrecordFields: FieldArray = [
     _RACE: race,
     _REFR: refr,
     _REGN: regn,
+    _RELA: rela,
+    _REVB: revb,
+    _RFCT: rfct,
+    _SCEN: scen,
     _TXST: txst,
   }, [
     ['type', {
