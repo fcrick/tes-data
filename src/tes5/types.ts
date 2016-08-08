@@ -39,7 +39,7 @@ var rgb: FieldArray = [
   ['r', 'uint8'],
   ['g', 'uint8'],
   ['b', 'uint8'],
-  ['unused', 'uint8'],
+  ['radiusPercent', 'uint8'],
 ];
 
 var xxxx: FieldArray = [
@@ -2740,6 +2740,55 @@ var refr: FieldArray = [['type', {
   _DATA: locationData,
 }, unknown]];
 
+var regn: FieldArray = [['type', {
+  _EDID: zString,
+  _RCLR: rgb,
+  _WNAM: uint32le,
+  _RPLI: uint32le,
+  _RPLD: [['value', 'float', {size:'size', sizeDivideBy: 4}]], // layout unknown
+  _RDAT: [
+    ['tab', 'uint32le'],
+    ['flags', 'uint8'],
+    ['priority', 'uint8'],
+    ['unknown', 'uint16le'],
+  ],
+  _RDMO: uint32le,
+  _RDSA: [['soundData', [
+    ['sound', 'uint32le'],
+    ['flags', 'uint32le'],
+    ['chance', 'float'],
+  ], {size:'size', sizeDivideBy: 12}]],
+  _RDWT: [['weatherData', [
+    ['weather', 'uint32le'],
+    ['percentChance', 'uint32le'],
+    ['global', 'uint32le'],
+  ], {size:'size', sizeDivideBy: 12}]],
+  _RDOT: [['soundData', [
+    ['objectId', 'uint32le'],
+    ['parentIndex', 'uint16le'],
+    ['unknown1', 'uint16le'],
+    ['density', 'float'],
+    ['clustering', 'uint8'],
+    ['minSlope', 'uint8'],
+    ['maxSlope', 'uint8'],
+    ['flags', 'uint8'],
+    ['radiusWrtParent', 'uint16le'],
+    ['radius', 'uint16le'],
+    ['minHeight', 'float'],
+    ['maxHeight', 'float'],
+    ['sink', 'float'],
+    ['sinkVariance', 'float'],
+    ['sizeVariance', 'float'],
+    ['angleVarianceX', 'uint16le'],
+    ['angleVarianceY', 'uint16le'],
+    ['angleVarianceZ', 'uint16le'],
+    ['unknown2', 'uint16le'],
+    ...rgb,
+  ], {size:'size', sizeDivideBy: 52}]],
+  _ICON: zString,
+  _RDMP: lString,
+}]];
+
 var txst: FieldArray = [['type', {
   _EDID: zString,
   _OBND: obnd,
@@ -2850,6 +2899,7 @@ export var subrecordFields: FieldArray = [
     _QUST: qust,
     _RACE: race,
     _REFR: refr,
+    _REGN: regn,
     _TXST: txst,
   }, [
     ['type', {
