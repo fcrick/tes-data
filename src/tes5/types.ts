@@ -2860,6 +2860,7 @@ var scen: FieldArray = [['type', {
     ['setAllEnd', 'uint32le'],
     ['dontSetAll', 'uint32le'],
   ],
+  _QNAM: uint32le,
 }]];
 
 var txst: FieldArray = [['type', {
