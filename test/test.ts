@@ -87,7 +87,7 @@ if (process.env.TES5_PATH) {
   var filename = 'Skyrim.esm';
   describe('Verify some core stats about Skyrim.esm', () => {
     it('find all records', function(done) {
-      this.timeout(15000);
+      this.timeout(25000);
 
       var path = process.env.TES5_PATH + filename;
       fs.open(path, 'r', (err, fd) => {
@@ -117,7 +117,7 @@ if (process.env.TES5_PATH) {
 
   describe('Subrecords checks', () => {
     it('should have the correct number of subrecords', function(done) {
-      this.timeout(40000);
+      this.timeout(60000);
 
       var subrecordCount = 0;
 
