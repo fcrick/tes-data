@@ -2861,6 +2861,50 @@ var scen: FieldArray = [['type', {
     ['dontSetAll', 'uint32le'],
   ],
   _QNAM: uint32le,
+  _SCTX: sString,
+}]];
+
+var scrl: FieldArray = [['type', {
+  _EDID: zString,
+  _OBND: obnd,
+  _FULL: lString,
+  _KSIZ: ksiz,
+  _KWDA: kwda,
+  _MDOB: uint32le,
+  _ETYP: uint32le,
+  _DESC: lString,
+  _MODL: zString,
+  _MODT: modt,
+  _MODS: mods,
+  _YNAM: uint32le,
+  _ZNAM: uint32le,
+  _DATA: goldAndWeight,
+  _SPIT: [
+    ['spellCost', 'uint32le'],
+    ['flags', 'uint32le'],
+    ['unknown1', 'uint32le'],
+    ['chargeTime', 'float'],
+    ['unknown2', 'uint32le'],
+    ['targetType', 'uint32le'],
+    ['unknown3', 'uint32le'],
+    ['unknown4', 'uint32le'],
+    ['unknown5', 'uint32le'],
+  ],
+  _DEST: dest,
+  _DSTD: dstd,
+  _DMDL: zString,
+  _DMDT: modt,
+  _DMDS: mods,
+  _EFID: uint32le,
+  _EFIT: [
+    ['magnitude', 'float'],
+    ['areaOfEffect', 'uint32le'],
+    ['duration', 'uint32le'],
+  ],
+  _CTDA: ctda,
+  _CITC: uint32le,
+  _CIS1: zString,
+  _CIS2: zString,
 }]];
 
 var txst: FieldArray = [['type', {
@@ -2978,6 +3022,7 @@ export var subrecordFields: FieldArray = [
     _REVB: revb,
     _RFCT: rfct,
     _SCEN: scen,
+    _SCRL: scrl,
     _TXST: txst,
   }, [
     ['type', {
