@@ -3371,6 +3371,11 @@ var wthr: FieldArray = [['type', {
   _MODT: modt,
   _NAM2: unknown,
   _NAM3: unknown,
+  _DNAM: zString,
+  _CNAM: zString,
+  _BNAM: zString,
+  _ANAM: zString,
+  _ONAM: uint32le,
 }]];
 
 export var subrecordFields: FieldArray = [
