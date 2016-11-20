@@ -42,6 +42,13 @@ var rgb: FieldArray = [
   ['radiusPercent', 'uint8'],
 ];
 
+var dayColors: FieldArray = [
+  ['sunrise', rgb],
+  ['day', rgb],
+  ['sunset', rgb],
+  ['night', rgb],
+];
+
 var xxxx: FieldArray = [
   ['xxxxSize', 'uint32le', {persist:true}],
 ];
@@ -2963,6 +2970,7 @@ var smqn: FieldArray = [['type', {
   _DNAM: uint32le,
   _XNAM: uint32le,
   _QNAM: uint32le,
+  _MNAM: uint32le,
   _NNAM: uint32le,
   _RNAM: float,
 }]];
@@ -3053,6 +3061,84 @@ var spel: FieldArray = [['type', {
   _CIS2: zString,
 }]];
 
+var spgd: FieldArray = [['type', {
+  _EDID: zString,
+  _DATA: [
+    ['gravityVelocity', 'float'],
+    ['rotationVelocity', 'float'],
+    ['sizeX', 'float'],
+    ['sizeY', 'float'],
+    ['centerOffsetMin', 'float'],
+    ['centerOffsetMax', 'float'],
+    ['initialRotationRange', 'float'],
+    ['subtextureCountX', 'uint32le'],
+    ['subtextureCountY', 'uint32le'],
+    ['shaderType', 'uint32le'],
+    ['boxSize', 'uint32le', {omitIfZero:true}],
+    ['particleDensity', 'float', {omitIfZero:true}],
+  ],
+  _ICON: zString,
+}]];
+
+var stat: FieldArray = [['type', {
+  _EDID: zString,
+  _OBND: obnd,
+  _MODL: zString,
+  _MODT: modt,
+  _MODS: mods,
+  _DNAM: [
+    ['maxAngle', 'float'],
+    ['directionalMaterial', uint32le],
+  ],
+  _MNAM: unknown,
+}]];
+
+var tact: FieldArray = [['type', {
+  _EDID: zString,
+  _VMAD: vmad,
+  _OBND: obnd,
+  _FULL: lString,
+  _MODL: zString,
+  _MODT: modt,
+  _MODS: mods,
+  _DEST: dest,
+  _DSTD: dstd,
+  _DMDL: zString,
+  _DMDT: modt,
+  _DMDS: mods,
+  _KSIZ: ksiz,
+  _KWDA: kwda,
+  _PNAM: unknown,
+  _SNAM: uint32le,
+  _FNAM: unknown,
+  _VNAM: uint32le,
+}]];
+
+var tree: FieldArray = [['type', {
+  _EDID: zString,
+  _OBND: obnd,
+  _MODL: zString,
+  _MODT: modt,
+  _PFIG: uint32le,
+  _SNAM: uint32le,
+  _PFPC: unknown,
+  _FULL: lString,
+  _CNAM: [
+    ['trunkFlexibility', 'float'],
+    ['branchFlexibility', 'float'],
+    ['unknown1', 'float'],
+    ['unknown2', 'float'],
+    ['unknown3', 'float'],
+    ['unknown4', 'float'],
+    ['unknown5', 'float'],
+    ['unknown6', 'float'],
+    ['unknown7', 'float'],
+    ['unknown8', 'float'],
+    ['leafAmplitude', 'float'],
+    ['leafFrequency', 'float'],
+  ],
+}]];
+
 var txst: FieldArray = [['type', {
   _EDID: zString,
   _OBND: obnd,
@@ -3066,6 +3152,225 @@ var txst: FieldArray = [['type', {
   _TX07: zString,
   _DODT: dodt,
   _DNAM: uint16le,
+}]];
+
+var vtyp: FieldArray = [['type', {
+  _EDID: zString,
+  _DNAM: uint8,
+}]];
+
+var watr: FieldArray = [['type', {
+  _EDID: zString,
+  _FULL: lString,
+  _ANAM: uint8,
+  _FNAM: uint8,
+  _MNAM: uint8,
+  _XNAM: uint32le,
+  _SNAM: uint32le,
+  _INAM: uint32le,
+  _TNAM: uint32le,
+  _DATA: uint16le,
+  _DNAM: [
+    ['various', 'float', {size:57}], // fill these in some are known
+  ],
+  _GNAM: unknown,
+  _NAM0: [
+    ['linearVelocityX', 'float'],
+    ['linearVelocityY', 'float'],
+    ['linearVelocityZ', 'float'],
+  ],
+  _NAM1: [
+    ['angularVelocityX', 'float'],
+    ['angularVelocityY', 'float'],
+    ['angularVelocityZ', 'float'],
+  ],
+  _NNAM: zString,
+}]];
+
+var weap: FieldArray = [['type', {
+  _EDID: zString,
+  _BAMT: uint32le,
+  _BIDS: uint32le,
+  _CNAM: uint32le,
+  _CRDT: [
+    ['criticalDamage', 'uint16le'],
+    ['unused', 'uint16le'],
+    ['criticalPercentMultiplier', 'float'],
+    ['flags', 'uint32le'],
+    ['criticalSpellEffect', 'uint32le'],
+  ],
+  _DATA: [
+    ['value', 'uint32le'],
+    ['weight', 'float'],
+    ['damage', 'uint16le'],
+  ],
+  _DESC: lString,
+  _DNAM: [
+    ['animType', 'uint8'],
+    ['unknown1', 'uint8'],
+    ['unknown2', 'uint16le'],
+    ['speed', 'float'],
+    ['reach', 'float'],
+    ['flagsA', 'uint16le'],
+    ['unknown3', 'uint16le'],
+    ['sightFieldOfView', 'float'],
+    ['unknown4', 'uint32le'],
+    ['vatsToHit', 'uint8'],
+    ['unknown5', 'int8'],
+    ['projectileCount', 'uint8'],
+    ['actorValue', 'int8'],
+    ['minRange', 'float'],
+    ['maxRange', 'float'],
+    ['unknown6', 'uint32le'],
+    ['flagsB', 'uint32le'],
+    ['unknown7', 'float', {size:2}],
+    ['rumbleLeft', 'float'],
+    ['rumbleRight', 'float'],
+    ['rumbleDuration', 'float'],
+    ['unknown8', 'uint32le', {size:3}],
+    ['skill', 'int32le'],
+    ['unknown9', 'uint32le', {size:2}],
+    ['resist', 'int32le'],
+    ['unknown10', 'uint32le'],
+    ['stagger', 'float'],
+  ],
+  _EAMT: uint16le,
+  _EITM: uint32le,
+  _ETYP: uint32le,
+  _FULL: lString,
+  _INAM: uint32le,
+  _KSIZ: ksiz,
+  _KWDA: kwda,
+  _OBND: obnd,
+  _MODL: zString,
+  _MODT: modt,
+  _MODS: mods,
+  _NAM7: uint32le,
+  _NAM8: uint32le,
+  _NAM9: uint32le,
+  _NNAM: zString,
+  _SNAM: uint32le,
+  _TNAM: uint32le,
+  _UNAM: uint32le,
+  _VMAD: vmad,
+  _VNAM: uint32le,
+  _WNAM: uint32le,
+  _XNAM: uint32le,
+  _YNAM: uint32le,
+  _ZNAM: uint32le,
+}]];
+
+var woop: FieldArray = [['type', {
+  _EDID: zString,
+  _FULL: lString,
+  _TNAM: lString,
+}]];
+
+var wrld: FieldArray = [['type', {
+  _EDID: zString,
+}]];
+
+
+
+var wthr: FieldArray = [['type', {
+  _EDID: zString,
+  _00TX: zString,
+  _10TX: zString,
+  _20TX: zString,
+  _30TX: zString,
+  _40TX: zString,
+  _50TX: zString,
+  _60TX: zString,
+  _70TX: zString,
+  _80TX: zString,
+  _90TX: zString,
+  '_\x3c0TX': zString,
+  '_\x3d0TX': zString,
+  '_\x3e0TX': zString,
+  '_\x3f0TX': zString,
+  '_@0TX': zString,
+  '_:0TX': zString,
+  '_;0TX': zString,
+  _A0TX: zString,
+  _B0TX: zString,
+  _C0TX: zString,
+  _D0TX: zString,
+  _E0TX: zString,
+  _F0TX: zString,
+  _G0TX: zString,
+  _H0TX: zString,
+  _I0TX: zString,
+  _J0TX: zString,
+  _K0TX: zString,
+  _L0TX: zString,
+  _LNAM: uint32le,
+  _MNAM: uint32le,
+  _NNAM: uint32le,
+  _RNAM: [
+    ['cloudSpeedY', 'uint8', {size:32}],
+  ],
+  _QNAM: [
+    ['cloudSpeedY', 'uint8', {size:32}],
+  ],
+  _PNAM: [['cloudTextureColor', dayColors, {size:32}]],
+  _JNAM: [['cloudTextureAlpha', dayColors, {size:32}]],
+  _NAM0: [['textureColors', dayColors, {size:'size', sizeDivideBy:16}]],
+  _FNAM: [
+    ['dayNear', 'float'],
+    ['dayFar', 'float'],
+    ['nightNear', 'float'],
+    ['nightFar', 'float'],
+    ['dayPow', 'float'],
+    ['nightPow', 'float'],
+    ['dayMax', 'float'],
+    ['nightMax', 'float'],
+  ],
+  _DATA: [
+    ['windSpeed', 'uint8'],
+    ['unknown1', 'uint8'],
+    ['unknown2', 'uint8'],
+    ['transDelta', 'uint8'],
+    ['sunGlare', 'uint8'],
+    ['sunDamage', 'uint8'],
+    ['precipitationFadeIn', 'uint8'],
+    ['precipitationFadeOut', 'uint8'],
+    ['thunderFadeIn', 'uint8'],
+    ['thunderFadeOut', 'uint8'],
+    ['thunderFrequency', 'uint8'],
+    ['flags', 'uint8'],
+    ['weatherColor', rgb],
+    ['unknown3', 'uint8'],
+    ['windDirection', 'uint8'],
+    ['windDirectionRange', 'uint8'],
+  ],
+  _NAM1: uint32le,
+  _SNAM: [
+    ['sound', 'uint32le'],
+    ['soundType', 'uint32le'],
+  ],
+  _TNAM: uint32le,
+  _IMSP: [
+    ['sunrise', 'uint32le'],
+    ['day', 'uint32le'],
+    ['sunset', 'uint32le'],
+    ['night', 'uint32le'],
+  ],
+  _DALC: [
+    ['xPlus', rgb],
+    ['xMinus', rgb],
+    ['yPlus', rgb],
+    ['yMinus', rgb],
+    ['zPlus', rgb],
+    ['zMinus', rgb],
+    ['size', {_24:[]},[
+      ['specularColor', rgb],
+      ['fresnelPower', 'float'],
+    ]],
+  ],
+  _MODL: zString,
+  _MODT: modt,
+  _NAM2: unknown,
+  _NAM3: unknown,
 }]];
 
 export var subrecordFields: FieldArray = [
@@ -3179,7 +3484,16 @@ export var subrecordFields: FieldArray = [
     _SOPM: sopm,
     _SOUN: soun,
     _SPEL: spel,
+    _SPGD: spgd,
+    _STAT: stat,
+    _TACT: tact,
+    _TREE: tree,
     _TXST: txst,
+    _VTYP: vtyp,
+    _WATR: watr,
+    _WEAP: weap,
+    _WOOP: woop,
+    _WTHR: wthr,
   }, [
     ['type', {
       // simple subrecords
@@ -3472,20 +3786,6 @@ export var subrecordFields: FieldArray = [
             ['unknown', 'uint8'],
           ],
           _SLGM: goldAndWeight,
-          _SPGD: [
-            ['gravityVelocity', 'float'],
-            ['rotationVelocity', 'float'],
-            ['sizeX', 'float'],
-            ['sizeY', 'float'],
-            ['centerOffsetMin', 'float'],
-            ['centerOffsetMax', 'float'],
-            ['initialRotationRange', 'float'],
-            ['subtextureCountX', 'uint32le'],
-            ['subtextureCountY', 'uint32le'],
-            ['shaderType', 'uint32le'],
-            ['boxSize', 'uint32le', {omitIfZero:true}],
-            ['particleDensity', 'float', {omitIfZero:true}],
-          ],
           _WATR: uint16le,
           _WRLD: uint8,
         }, unknown],

@@ -61,7 +61,7 @@ function checkBuffer(buffer: Buffer, offset: number, type: string) {
         folder += offsetHex.substr(0, 2) + '/';
       }
 
-      if (mismatch || allCount < 1000) {
+      if (mismatch || allCount < 0) {
         enqueueSave(folder, offsetHex, JSON.stringify(record, null, 2));
       }
     }, context);

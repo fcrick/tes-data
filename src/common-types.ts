@@ -52,7 +52,6 @@ export var int32le: FieldArray = [
   ['value', 'int32le']
 ];
 
-
 export var float: FieldArray = [
   ['value', 'float']
 ];

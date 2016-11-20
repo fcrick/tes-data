@@ -2,5 +2,6 @@
 {
     "files.exclude": {
     },
-    "editor.tabSize": 2
-}
+    "editor.tabSize": 2,
+    "typescript.check.workspaceVersion": false
+  }
