@@ -7,7 +7,7 @@
     "skyrim"
   ],
   "scripts": {
-    "prepublish": "typings install && tsc",
+    "prepublish": "tsc",
     "test": "mocha dist/test/*.js"
   },
   "files": [
