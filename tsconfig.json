@@ -8,7 +8,7 @@
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "declaration": true,
-        "noImplicitAny": false,
+        "noImplicitAny": true,
         "noImplicitUseStrict": false,
         "removeComments": true,
         "noLib": false,
@@ -16,7 +16,8 @@
         "suppressImplicitAnyIndexErrors": true,
         "sourceMap": true,
         "outDir": "dist",
-        "watch": false
+        "watch": false,
+        "alwaysStrict": true
     },
     "exclude": [
         "node_modules",
@@ -25,8 +26,5 @@
         "dist"
     ],
     "compileOnSave": true,
-    "buildOnSave": false,
-    "atom": {
-        "rewriteTsconfig": false
-    }
+    "buildOnSave": false
 }

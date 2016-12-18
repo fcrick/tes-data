@@ -2,6 +2,10 @@ import { readFields, writeFields } from './fields'
 import { deflateRecordBuffer, inflateRecordBuffer } from './compression'
 import * as tes5 from './tes5/types'
 
+/**
+ * Finds where all the subrecords of a record begin, returning an array with the offset of each subrecord.
+ * @param {Buffer} buffer An uncompressed buffer of a record that isn't a GRUP record.
+ */
 export function getSubrecordOffsets(buffer: Buffer) {
   var offsets: number[] = [];
 
@@ -18,11 +22,15 @@ export function getSubrecordOffsets(buffer: Buffer) {
   while (offset < buffer.length) {
     offsets.push(offset);
     offset += 6 + buffer.readUInt16LE(offset + 4);
-  }
+  } 
 
   return offsets;
 }
 
+/**
+ * Reads a Skyrim record, firing a callback with the record as an object that can be serialized to json and back.
+ * Supports compressed records.
+ */
 export function readRecord(
   buffer: Buffer,
   callback: (err: NodeJS.ErrnoException, record: Object) => void,
@@ -114,6 +122,10 @@ function readSubrecords(
   callback(null, record);
 }
 
+/**
+ * Creates a binary buffer from a javascript object, reversing readRecord. Writing a read record should always create an
+ * identical binary buffer.
+ */
 export function writeRecord(
   record: Object,
   callback: (err: Error, result: Buffer) => void,

@@ -16,6 +16,10 @@ var levelMap = {
   'best': zlib.Z_BEST_COMPRESSION,
 }
 
+declare module "zlib" {
+    export function deflate(buf: Buffer | string, options: ZlibOptions, callback: (error: Error, result: Buffer) => void): void;
+}
+
 export function deflateRecordBuffer(
   buffer: Buffer,
   callback: (err: Error, result: Buffer) => void,
@@ -26,7 +30,7 @@ export function deflateRecordBuffer(
   var toDeflate = buffer.slice(24); 
 
   var inflatedSize = toDeflate.length;
-  zlib.deflate(toDeflate, {level: levelMap[level] || zlib.Z_DEFAULT_COMPRESSION}, (err, deflated: Buffer) => {
+  zlib.deflate(toDeflate, {level: levelMap[level] || zlib.Z_DEFAULT_COMPRESSION}, (err: Error, deflated: Buffer) => {
     if (err) {
       callback(err, null);
     }

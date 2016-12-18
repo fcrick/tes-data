@@ -54,7 +54,7 @@ function rebuildFile(path: string, outFile: string) {
 function getFileHash(file: string, callback: (hash: string) => void) {
   var shasum = crypto.createHash('md5');
   var s = fs.createReadStream(file);
-  s.on('data', d => shasum.update(d));
+  s.on('data', (d: string) => shasum.update(d));
   s.on('end', () => callback(shasum.digest('hex')));
 }
 

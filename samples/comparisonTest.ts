@@ -15,12 +15,12 @@ const outputFolder = '../testData/';
 
 var counter = 0;
 
-var selectMany = (() => {
-    var apply = Function.prototype.apply;
-    var flatten = apply.bind(Array.prototype.concat, []);
+// var selectMany = (() => {
+//     var apply = Function.prototype.apply;
+//     var flatten = apply.bind(Array.prototype.concat, []);
 
-    return (this_: any[], fn) => flatten(this_.map(fn));
-})();
+//     return (this_: any[], fn) => flatten(this_.map(fn));
+// })();
 
 // var path = 'C:/src/skyrimmods/Brigandage v.4-32706-4/Brigandage.esp';
 // var path = 'C:/src/skyrimmods/Immersive Armors v8-19733-8/Hothtrooper44_ArmorCompilation.esp';

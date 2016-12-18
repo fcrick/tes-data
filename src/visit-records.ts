@@ -1,5 +1,14 @@
-import fs = require('fs');
+import * as fs from "fs";
 
+/**
+ * Walks a file, starting at a given offset, calling onVisit for each record found. After onVisit is called on all
+ * records, onDone is called. If onVisit ever returns false, the process is cancelled. Unless recurse is set to false,
+ * when a group (GRUP) record is found, it's records will all also be visited, recursively, walking the tree heirarchy 
+ * of the file. If an error is encountered, onDone is called with the error.
+ * 
+ * @export
+ * @param {number} fd file handle like one returned by fs.open
+ */
 export function visit(
   fd: number,
   onVisit?: (offset: number, size: number, type?: string, parent?: number) => boolean|void,
@@ -40,10 +49,19 @@ export function visit(
   visitRecordOffsets(fd, startOffset, callback, done);
 }
 
+/**
+ * Walks a file, starting at a given offset, calling onVisit for each record found. After onVisit is called on all
+ * records, onDone is called. If onVisit ever returns false, the process is cancelled. If an error is encountered,
+ * onDone is called with the error.
+ * 
+ * Files represent a heirarchy. To walk this heirarchy recursively, use the visit function.
+ * 
+ * @param {number} fd file handle like one returned by fs.open
+ */
 function visitRecordOffsets(
   fd: number,
   origOffset: number,
-  visit: (offset: number, size: number, type: string, parent: number) => boolean,
+  onVisit: (offset: number, size: number, type: string, parent: number) => boolean,
   done: (err: NodeJS.ErrnoException) => void
 ) {
   let isDone = false;
@@ -101,7 +119,7 @@ function visitRecordOffsets(
     var size = type === 'GRUP' ? 24 : nextOffset - offset;
 
     // true return value means user is cancelling
-    if (visit(offset, size, type, origOffset)) {
+    if (onVisit(offset, size, type, origOffset)) {
       isDone = true;
       return;
     }

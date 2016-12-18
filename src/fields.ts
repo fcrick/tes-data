@@ -127,6 +127,7 @@ function readField(record: Object, buffer: Buffer, offset: number, field: Field,
     if (reader) {
       var value = null;
 
+      // count is 0 means don't read anything
       if (count !== 0) {
         value = reader(buffer, type, offset, count);
       }
@@ -140,16 +141,22 @@ function readField(record: Object, buffer: Buffer, offset: number, field: Field,
           if (typeof value === 'number') {
             value = '0x'+value.toString(16);
           }
-          else {
+          else if (typeof value === 'string') {
             value = value.split('').map(c => c.charCodeAt(0).toString(16)).join('');
           }
         }
         record[name] = value;
       }
 
+      // count is -1 means the reader determined the count
       if (count === -1) {
-        count = value === null ? 1 : value.length + 1;
-      }
+        if (Array.isArray(value)) {
+          count = value.length + 1;
+        }
+        else {
+          count = 1
+        }
+      } 
 
       return offset + count * fieldSize[type];
     }
@@ -177,11 +184,7 @@ let range = function*(max: number) {
     yield i
 }
 
-// http://stackoverflow.com/a/34461694
-function isNegativeZero(n) {
-  n = Number( n );
-  return (n === 0) && (1 / n === -Infinity);
-}
+let isNegativeZero: (value: number) => boolean = require('is-negative-zero');
 
 function nullIfZero(value: number) {
   return value === 0 && !isNegativeZero(value) ? null : value;  
@@ -206,7 +209,7 @@ function nullIfEqual<T>(value: T, test: T) {
 }
 
 interface FieldReader {
-  (buffer:Buffer, type: FieldTypes, offset:number, count: number): any;
+  (buffer:Buffer, type: FieldTypes, offset:number, count: number): number|number[]|string;
 }
 
 var fieldReaders: {[fieldType:string]: FieldReader} = {
