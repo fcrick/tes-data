@@ -1,4 +1,7 @@
 import * as zlib from 'zlib';
+import {promisify} from 'util';
+type deflateFn = (buf: Buffer | string, options: zlib.ZlibOptions) => Promise<Buffer>;
+const deflate = <deflateFn>promisify(zlib.deflate);
 
 export type compressionLevel = 'none'|'fast'|'default'|'best';
 
@@ -16,10 +19,6 @@ var levelMap = {
   'best': zlib.Z_BEST_COMPRESSION,
 }
 
-declare module "zlib" {
-    export function deflate(buf: Buffer | string, options: ZlibOptions, callback: (error: Error, result: Buffer) => void): void;
-}
-
 export function deflateRecordBuffer(
   buffer: Buffer,
   callback: (err: Error, result: Buffer) => void,
@@ -30,19 +29,15 @@ export function deflateRecordBuffer(
   var toDeflate = buffer.slice(24); 
 
   var inflatedSize = toDeflate.length;
-  zlib.deflate(toDeflate, {level: levelMap[level] || zlib.Z_DEFAULT_COMPRESSION}, (err: Error, deflated: Buffer) => {
-    if (err) {
-      callback(err, null);
-    }
-    else {
+  deflate(toDeflate, {level: levelMap[level] || zlib.Z_DEFAULT_COMPRESSION})
+    .then((deflated: Buffer) => {
       var outBuffer = new Buffer(24 + 4 + deflated.length);
       outBuffer.set(header, 0);
       outBuffer.writeUInt32LE(inflatedSize, header.length);
       outBuffer.set(deflated, header.length + 4);
 
       callback(null, outBuffer);
-    }
-  });
+    }).catch(err => callback(err, null));
 }
 
 export function inflateRecordBuffer(
