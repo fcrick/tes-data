@@ -1,4 +1,4 @@
-import * as fs from "async-file";
+import * as fs from "fs";
 
 /**
  * Walks a file, starting at a given offset, calling onVisit for each record found. After onVisit is called on all
@@ -29,8 +29,7 @@ export function visit(
 
     if (!cancelled && type === 'GRUP' && offset !== parent && recurse) {
       outstanding += 1;
-      visitRecordOffsets(fd, offset, callback)
-        .then(() => done(null)).catch(done);
+      visitRecordOffsets(fd, offset, callback, done);
     }
 
     return cancelled;
@@ -47,8 +46,7 @@ export function visit(
   }
 
   outstanding += 1;
-  visitRecordOffsets(fd, startOffset, callback)
-    .then(() => done(null)).catch(done);
+  visitRecordOffsets(fd, startOffset, callback, done);
 }
 
 /**
@@ -60,30 +58,50 @@ export function visit(
  * 
  * @param {number} fd file handle like one returned by fs.open
  */
-async function visitRecordOffsets(
+function visitRecordOffsets(
   fd: number,
   origOffset: number,
-  onVisit: (offset: number, size: number, type: string, parent: number) => boolean
+  onVisit: (offset: number, size: number, type: string, parent: number) => boolean,
+  done: (err: NodeJS.ErrnoException) => void
 ) {
+  let isDone = false;
   let endOffset = 0;
 
-  if (!origOffset) {
-    let stats = await fs.fstat(fd);
-
-    if (stats.size == 0) {
+  let onFstat = (err: NodeJS.ErrnoException, stats: fs.Stats) => {
+    if (err) {
+      done(err);
       return;
     }
-    else if (!origOffset) {
-      // if origOffset isn't set, we're reading the whole file at the top level
-      endOffset = stats.size;
+
+    if (stats.size == 0) {
+      done(null);
     }
+    else {
+      // if origOffset isn't set, we're reading the whole file at the top level
+      if (!origOffset) {
+        endOffset = stats.size;
+      }
+
+      start();
+    }
+  };
+
+  let start = () => {
+    var buffer = new Buffer(8);
+    fs.read(fd, buffer, 0, 8, origOffset, createRead(origOffset));
   }
 
-  let buffer = new Buffer(8);
-  while (nextOffset < endOffset) {
-    let result = await fs.read(fd, buffer, 0, 8, origOffset);
+  let createRead = (offset: number) => (err: NodeJS.ErrnoException, bytesRead: number, buffer: Buffer) => {
+    offset = offset || 0;
 
-    let offset = origOffset || 0;
+    if (err) {
+      done(err);
+      isDone = true;
+    }
+
+    if (isDone) {
+      return;
+    }
 
     var nextOffset = offset + buffer.readUInt32LE(4);
     var type = buffer.toString('utf8', 0, 4);
@@ -102,7 +120,23 @@ async function visitRecordOffsets(
 
     // true return value means user is cancelling
     if (onVisit(offset, size, type, origOffset)) {
+      isDone = true;
       return;
     }
+
+    if (nextOffset < endOffset) {
+      fs.read(fd, buffer, 0, 8, nextOffset, createRead(nextOffset));
+    }
+    else {
+      done(null);
+    }
+  }
+
+  // only need to fstat if it's the start of the file
+  if (origOffset) {
+    start();
+  }
+  else {
+    fs.fstat(fd, onFstat);
   }
 }

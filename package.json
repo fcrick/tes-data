@@ -30,13 +30,12 @@
     "@types/text-encoding": "0.0.30",
     "chai": "^3.5.0",
     "mocha": "^2.5.3",
-    "typescript": "^2.4.1"
+    "typescript": "^2.1.4"
   },
   "bugs": {
     "url": "https://github.com/fcrick/tes-data/issues"
   },
   "dependencies": {
-    "async-file": "^2.0.2",
     "is-negative-zero": "^2.0.0",
     "text-encoding": "^0.6.0"
   }
