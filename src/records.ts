@@ -69,18 +69,14 @@ export function readRecord(
       callback(err, record);
     };
 
-    inflateRecordBuffer(buffer, (err, inflated, level) => {
-      if (err) {
-        newCallback(err, null);
-      }
-      else {
+    inflateRecordBuffer(buffer)
+      .then(({buffer: inflated, level: level}) => {
         if (level) {
           record['compressed'] = true;
           record['compressionLevel'] = level;
         }
-        readSubrecords(inflated.slice(24), record, contextCopy, newCallback)
-      }
-    });
+        readSubrecords(inflated.slice(24), record, contextCopy, newCallback);
+      }).catch(err => newCallback(err, null));
   }
   catch (err) {
     callback(err, null);

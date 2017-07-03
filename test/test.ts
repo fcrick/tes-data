@@ -142,14 +142,14 @@ if (process.env.TES5_PATH) {
             assert.isNull(err);
             assert.isNotNull(buffer);
 
-            tesData.inflateRecordBuffer(buffer, (err, inflated) => {
-              assert.isNull(err);
-              assert.isNotNull(inflated);
+            tesData.inflateRecordBuffer(buffer)
+              .then(({buffer}) => {
+                assert.isNotNull(buffer);
 
-              subrecordCount += tesData.getSubrecordOffsets(inflated).length;
-              --outstanding;
-              checkDone();
-            });
+                subrecordCount += tesData.getSubrecordOffsets(buffer).length;
+                --outstanding;
+                checkDone();
+              });
           });
         }, err => {
           assert.isNull(err);

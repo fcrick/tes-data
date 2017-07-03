@@ -44,10 +44,7 @@ export function deflateRecordBuffer(
     }).catch(err => callback(err, null));
 }
 
-export function inflateRecordBuffer(
-  buffer: Buffer,
-  callback: (err: Error, result?: Buffer, level?: compressionLevel) => void
-) {
+export async function inflateRecordBuffer(buffer: Buffer) {
   var flags = buffer.readUInt32LE(8);
   if (buffer.toString('utf8', 0,4) !== 'GRUP' && flags & 0x40000) {
     var level = compressionLevels[buffer.readUInt8(29) >> 6];
@@ -55,14 +52,14 @@ export function inflateRecordBuffer(
     var inflatedRecordBuffer = new Buffer(24 + dataSize);
     buffer.copy(inflatedRecordBuffer, 0, 0, 24);
 
-    inflate(buffer.slice(28))
-      .then((inflated: Buffer) => {
-        inflated.copy(inflatedRecordBuffer, 24, 0);
-        inflatedRecordBuffer.writeInt32LE(flags & ~0x40000, 8);
-        callback(null, inflatedRecordBuffer, level);
-      }).catch(callback);
+    let inflated = await inflate(buffer.slice(28));
+    inflated.copy(inflatedRecordBuffer, 24, 0);
+    inflatedRecordBuffer.writeInt32LE(flags & ~0x40000, 8);
+
+    return {
+      buffer: inflatedRecordBuffer,
+      level: level,
+    }
   }
-  else {
-    callback(null, buffer);
-  }
+  return {buffer: buffer, level: null};
 }
