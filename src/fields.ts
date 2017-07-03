@@ -31,7 +31,7 @@ function handleField<T>(
   let name = field[0];
 
   if (typeof field[1] === 'string') {
-    return handleSimple(name, <FieldTypes>field[1], getFieldCount(field, record, context), field[2] || {});
+    return handleSimple(name, <FieldTypes>field[1], getFieldCount(field, record, context), field[2] || <FieldOptions>{});
   }
   else if (Array.isArray(field[1])) {
     return handleNesting(name, <FieldArray>field[1] || [], getFieldCount(field, record, context));
