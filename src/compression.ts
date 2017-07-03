@@ -1,7 +1,11 @@
 import * as zlib from 'zlib';
 import {promisify} from 'util';
+
 type deflateFn = (buf: Buffer | string, options: zlib.ZlibOptions) => Promise<Buffer>;
 const deflate = <deflateFn>promisify(zlib.deflate);
+
+type inflateFn = (buf: Buffer) => Promise<Buffer>;
+const inflate = <inflateFn>promisify(zlib.inflate);
 
 export type compressionLevel = 'none'|'fast'|'default'|'best';
 
@@ -51,19 +55,12 @@ export function inflateRecordBuffer(
     var inflatedRecordBuffer = new Buffer(24 + dataSize);
     buffer.copy(inflatedRecordBuffer, 0, 0, 24);
 
-    zlib.inflate(
-      buffer.slice(28),
-      (err, inflated: Buffer) => {
-        if (err) {
-          callback(err);
-        }
-        else {
-          inflated.copy(inflatedRecordBuffer, 24, 0);
-          inflatedRecordBuffer.writeInt32LE(flags & ~0x40000, 8);
-          callback(null, inflatedRecordBuffer, level);
-        }
-      }
-    );
+    inflate(buffer.slice(28))
+      .then((inflated: Buffer) => {
+        inflated.copy(inflatedRecordBuffer, 24, 0);
+        inflatedRecordBuffer.writeInt32LE(flags & ~0x40000, 8);
+        callback(null, inflatedRecordBuffer, level);
+      }).catch(callback);
   }
   else {
     callback(null, buffer);
