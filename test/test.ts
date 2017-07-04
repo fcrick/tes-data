@@ -59,32 +59,41 @@ describe('validate inputs to writeRecord', () => {
 });
 
 describe('validate inputs to readRecord', () => {
-  it('should error if give null', done => {
-    tesData.readRecord(null).then(result => {
-      assert.isNull(result);
-      done();
-    }).catch(err => {
-      assert.isNotNull(err);
-      done();
-    });
+  it('should error if give null', async done => {
+    let err = null;
+    let result = null;
+    try {
+      result = await tesData.readRecord(null);
+    } catch(e) { 
+      err = e;
+    }
+    assert.isNull(result);
+    assert.isNotNull(err);
+    done();
   });
-  it('should error if given an empty object', done => {
-    tesData.readRecord(<Buffer>{}).then(result => {
-      assert.isNull(result);
-      done();
-    }).catch(err => {
-      assert.isNotNull(err);
-      done();
-    });
+  it('should error if given an empty object', async done => {
+    let err = null;
+    let result = null;
+    try {
+      result = await tesData.readRecord(<Buffer>{});
+    } catch(e) { 
+      err = e;
+    }
+    assert.isNull(result);
+    assert.isNotNull(err);
+    done();
   });
-  it('should give back a valid object on valid input', done => {
-    tesData.readRecord(recordBinary).then(result => {
-      assert.isNotNull(result);
-      done();
-    }).catch(err => {
-      assert.isNull(err);
-      done();
-    });
+  it('should give back a valid object on valid input', async done => {
+    let err = null;
+    let result = null;
+    try {
+      result = await tesData.readRecord(recordBinary);
+    } catch(e) { 
+      err = e;
+    }
+    assert.isNull(err);
+    assert.isNotNull(result);
+    done();
   });
 });
 
