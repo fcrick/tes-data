@@ -75,19 +75,20 @@ export function readRecord(
           record['compressed'] = true;
           record['compressionLevel'] = level;
         }
-        readSubrecords(inflated.slice(24), record, contextCopy, newCallback);
-      }).catch(err => newCallback(err, null));
+        readSubrecords(inflated.slice(24), record, contextCopy)
+          .then(record => newCallback(null, record))
+          .catch(err => newCallback(err, null));
+      });
   }
   catch (err) {
     callback(err, null);
   }
 }
 
-function readSubrecords(
+async function readSubrecords(
   buffer: Buffer,
   record: Object,
   context: Object,
-  callback: (err: NodeJS.ErrnoException, record: Object) => void
 ) {
   var offset = 0;
 
@@ -115,7 +116,7 @@ function readSubrecords(
     record['subrecords'].push(subrecord);
   }
 
-  callback(null, record);
+  return record;
 }
 
 /**
