@@ -160,14 +160,9 @@ export function writeRecord(
     }
 
     if (record['compressed']) {
-      deflateRecordBuffer(buffer, (err, deflated) => {
-        if (err) {
-          callback(err, null);
-        }
-        else {
-          callback(null, deflated);
-        }
-      }, record['compressionLevel']);
+      deflateRecordBuffer(buffer, record['compressionLevel'])
+        .then(deflated => callback(null, deflated))
+        .catch(err => callback(err, null));
     }
     else {
       callback(null, buffer);

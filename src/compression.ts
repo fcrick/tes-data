@@ -8,7 +8,6 @@ type inflateFn = (buf: Buffer) => Promise<Buffer>;
 const inflate = <inflateFn>promisify(zlib.inflate);
 
 export type compressionLevel = 'none'|'fast'|'default'|'best';
-
 export var compressionLevels: compressionLevel[] = [
   'none',
   'fast',
@@ -23,9 +22,8 @@ var levelMap = {
   'best': zlib.Z_BEST_COMPRESSION,
 }
 
-export function deflateRecordBuffer(
+export async function deflateRecordBuffer(
   buffer: Buffer,
-  callback: (err: Error, result: Buffer) => void,
   level?: compressionLevel
 ) {
   // header is always 24 bytes
@@ -33,15 +31,16 @@ export function deflateRecordBuffer(
   var toDeflate = buffer.slice(24); 
 
   var inflatedSize = toDeflate.length;
-  deflate(toDeflate, {level: levelMap[level] || zlib.Z_DEFAULT_COMPRESSION})
-    .then((deflated: Buffer) => {
-      var outBuffer = new Buffer(24 + 4 + deflated.length);
-      outBuffer.set(header, 0);
-      outBuffer.writeUInt32LE(inflatedSize, header.length);
-      outBuffer.set(deflated, header.length + 4);
+  let deflated = await deflate(
+    toDeflate, 
+    {level: levelMap[level] || zlib.Z_DEFAULT_COMPRESSION}
+  );
+  var outBuffer = new Buffer(24 + 4 + deflated.length);
+  outBuffer.set(header, 0);
+  outBuffer.writeUInt32LE(inflatedSize, header.length);
+  outBuffer.set(deflated, header.length + 4);
 
-      callback(null, outBuffer);
-    }).catch(err => callback(err, null));
+  return outBuffer;
 }
 
 export async function inflateRecordBuffer(buffer: Buffer) {
