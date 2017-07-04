@@ -34,14 +34,9 @@ function checkBuffer(buffer: Buffer, offset: number, type: string) {
     return;
   }
   allCount += 1;
-  var record = readRecord(buffer, (err, record) => {
+  var record = readRecord(buffer, context).then(record => {
     if (allCount % 10000 === 0) {
       console.log(allCount);
-    }
-
-    if (err) {
-      console.log(err);
-      return;
     }
 
     writeRecord(record, (err, newBuffer) => {
@@ -65,7 +60,7 @@ function checkBuffer(buffer: Buffer, offset: number, type: string) {
         enqueueSave(folder, offsetHex, JSON.stringify(record, null, 2));
       }
     }, context);
-  }, context);
+  }).catch(console.log);
 }
 
 var queue: [string, string, string][] = [];

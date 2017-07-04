@@ -12,6 +12,10 @@ function getAllOfType(path: string, outDir: string, typeToGet: string) {
   var fd = fs.openSync(path, 'r');
   var context = {};
 
+  if (!fs.existsSync(outDir)) {
+    fs.mkdirSync(outDir);
+  }
+
   var outFile = `${outDir}/${typeToGet}.json`;
   var outFds: {[type: string]: number} = {};
 
@@ -37,9 +41,10 @@ function getAllOfType(path: string, outDir: string, typeToGet: string) {
     }
     var buffer = new Buffer(size);
     fs.read(fd, buffer, 0, size, offset, (err, bytesRead, buffer) => {
-      tesData.readRecord(buffer, (err, record) => {
-        fs.write(outFds[type], JSON.stringify(record, null, 2) + ',\n', err => onDone(err));
-      }, context);
+      tesData.readRecord(buffer, context)
+        .then(record => {
+          fs.write(outFds[type], JSON.stringify(record, null, 2) + ',\n', err => onDone(err));
+        });
     });
   }, err => onDone(err));
 }

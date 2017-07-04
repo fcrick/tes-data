@@ -31,58 +31,46 @@ export function getSubrecordOffsets(buffer: Buffer) {
  * Reads a Skyrim record, firing a callback with the record as an object that can be serialized to json and back.
  * Supports compressed records.
  */
-export function readRecord(
+export async function readRecord(
   buffer: Buffer,
-  callback: (err: NodeJS.ErrnoException, record: Object) => void,
   context?: Object
-) {
-  try {
-    var record = {};
+): Promise<Object> {
+  var record = {};
 
-    if (typeof context === 'undefined') {
-      // context is a way to persist values that are considered
-      // elsewhere in parsing. Fields with the persist flag are added.
-      // hopefully good enough
-      context = {};
-    }
-
-    var contextCopy = {};
-    Object.keys(context).forEach(k => contextCopy[k] = context[k]);
-
-    // read in the header
-    readFields(record, buffer, 0, tes5.recordHeader, contextCopy);
-
-    // header is always the same size
-    var offset = 24;
-
-    if (offset < buffer.length) {
-      record['subrecords'] = [];
-    }
-
-    // localization flag check
-    if (record['recordType'] === 'TES4' && record['flags'] & 0x80) {
-      contextCopy['localized'] = true;
-    }
-
-    var newCallback = (err: NodeJS.ErrnoException, record: Object) => {
-      Object.keys(contextCopy).forEach(k => context[k] = contextCopy[k]);
-      callback(err, record);
-    };
-
-    inflateRecordBuffer(buffer)
-      .then(({buffer: inflated, level: level}) => {
-        if (level) {
-          record['compressed'] = true;
-          record['compressionLevel'] = level;
-        }
-        readSubrecords(inflated.slice(24), record, contextCopy)
-          .then(record => newCallback(null, record))
-          .catch(err => newCallback(err, null));
-      });
+  if (typeof context === 'undefined') {
+    // context is a way to persist values that are considered
+    // elsewhere in parsing. Fields with the persist flag are added.
+    // hopefully good enough
+    context = {};
   }
-  catch (err) {
-    callback(err, null);
+
+  var contextCopy = {};
+  Object.keys(context).forEach(k => contextCopy[k] = context[k]);
+
+  // read in the header
+  readFields(record, buffer, 0, tes5.recordHeader, contextCopy);
+
+  // header is always the same size
+  var offset = 24;
+
+  if (offset < buffer.length) {
+    record['subrecords'] = [];
   }
+
+  // localization flag check
+  if (record['recordType'] === 'TES4' && record['flags'] & 0x80) {
+    contextCopy['localized'] = true;
+  }
+
+  let {buffer: inflated, level} = await inflateRecordBuffer(buffer);
+  if (level) {
+    record['compressed'] = true;
+    record['compressionLevel'] = level;
+  }
+
+  record = await readSubrecords(inflated.slice(24), record, contextCopy);
+  Object.keys(contextCopy).forEach(k => context[k] = contextCopy[k]);
+  return record;
 }
 
 async function readSubrecords(

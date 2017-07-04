@@ -21,7 +21,7 @@ function findCompressedRecords(path: string) {
         if (type !== 'GRUP' && flags & 0x40000 && count++ < 10) {
           var buffer = new Buffer(size);
           fs.read(fd, buffer, 0, size, offset, (err, bytesRead, buffer) => {
-            readRecord(buffer, (err, record) => {
+            readRecord(buffer).then(record => {
               console.log(JSON.stringify(record));
             });
           });
