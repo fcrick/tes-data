@@ -39,7 +39,7 @@ function checkBuffer(buffer: Buffer, offset: number, type: string) {
       console.log(allCount);
     }
 
-    writeRecord(record, (err, newBuffer) => {
+    writeRecord(record, context).then(newBuffer => {
       var folder = outputFolder;
       var offsetHex = offset.toString(16);
       var mismatch = buffer.compare(newBuffer) !== 0;
@@ -59,7 +59,7 @@ function checkBuffer(buffer: Buffer, offset: number, type: string) {
       if (mismatch || allCount < 0) {
         enqueueSave(folder, offsetHex, JSON.stringify(record, null, 2));
       }
-    }, context);
+    }).catch(console.log);
   }).catch(console.log);
 }
 

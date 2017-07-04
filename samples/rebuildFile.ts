@@ -19,7 +19,7 @@ function rebuildFile(path: string, outFile: string) {
     var buffer = new Buffer(size);
     fs.read(fd, buffer, 0, size, offset, (err, bytesRead, buffer) => {
       tesData.readRecord(buffer, context).then(record => {
-        tesData.writeRecord(record, (err, outBuffer) => {
+        tesData.writeRecord(record, context).then(outBuffer => {
           fs.write(outFd, outBuffer, 0, outBuffer.length, offset, (err, written, str) => {
             remaining--;
             finished++;
@@ -43,7 +43,7 @@ function rebuildFile(path: string, outFile: string) {
               })
             }
           });
-        }, context);
+        });
       });
     })
   }, err => {

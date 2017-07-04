@@ -68,12 +68,12 @@ export async function readRecord(
     record['compressionLevel'] = level;
   }
 
-  record = await readSubrecords(inflated.slice(24), record, contextCopy);
+  record = readSubrecords(inflated.slice(24), record, contextCopy);
   Object.keys(contextCopy).forEach(k => context[k] = contextCopy[k]);
   return record;
 }
 
-async function readSubrecords(
+function readSubrecords(
   buffer: Buffer,
   record: Object,
   context: Object,
@@ -111,53 +111,42 @@ async function readSubrecords(
  * Creates a binary buffer from a javascript object, reversing readRecord. Writing a read record should always create an
  * identical binary buffer.
  */
-export function writeRecord(
-  record: Object,
-  callback: (err: Error, result: Buffer) => void,
-  context?: Object
-) {
-  try {
-    if (typeof context === 'undefined') {
-      // context is a way to persist values that are considered
-      // elsewhere in parsing. Fields with the persist flag are added.
-      // hopefully good enough
-      context = {};
-    }
+export async function writeRecord(record: Object, context?: Object) {
+  if (typeof context === 'undefined') {
+    // context is a way to persist values that are considered
+    // elsewhere in parsing. Fields with the persist flag are added.
+    // hopefully good enough
+    context = {};
+  }
 
-    var results: Uint8Array[] = [];
-    var write = (arr: Uint8Array) => results.push(arr); 
+  var results: Uint8Array[] = [];
+  var write = (arr: Uint8Array) => results.push(arr); 
 
-    writeFields(write, record, tes5.recordHeader, context);
+  writeFields(write, record, tes5.recordHeader, context);
 
-    if (record['subrecords']) {
-      for (let subrecord of record['subrecords']) {
-        let hadXXXX = 'xxxxSize' in context;
-        writeFields(write, subrecord, tes5.subrecordFields, context);
-        if (hadXXXX) {
-          delete context['xxxxSize'];
-        }
+  if (record['subrecords']) {
+    for (let subrecord of record['subrecords']) {
+      let hadXXXX = 'xxxxSize' in context;
+      writeFields(write, subrecord, tes5.subrecordFields, context);
+      if (hadXXXX) {
+        delete context['xxxxSize'];
       }
     }
-
-    let length = results.reduce((sum, array) => sum + array.length, 0);
-    let buffer = new Buffer(length);
-
-    let offset = 0;
-    for (let result of results) {
-      buffer.set(result, offset);
-      offset += result.length;
-    }
-
-    if (record['compressed']) {
-      deflateRecordBuffer(buffer, record['compressionLevel'])
-        .then(deflated => callback(null, deflated))
-        .catch(err => callback(err, null));
-    }
-    else {
-      callback(null, buffer);
-    }
   }
-  catch (err) {
-    callback(err, null);
+
+  let length = results.reduce((sum, array) => sum + array.length, 0);
+  let buffer = new Buffer(length);
+
+  let offset = 0;
+  for (let result of results) {
+    buffer.set(result, offset);
+    offset += result.length;
+  }
+
+  if (record['compressed']) {
+    return await deflateRecordBuffer(buffer, record['compressionLevel']);
+  }
+  else {
+    return buffer;
   }
 }
