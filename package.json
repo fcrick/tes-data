@@ -24,13 +24,13 @@
   },
   "license": "Unlicense",
   "devDependencies": {
-    "@types/chai": "^3.4.34",
-    "@types/mocha": "^2.2.33",
-    "@types/node": "^8.0.7",
+    "@types/chai": "^4.1.4",
+    "@types/mocha": "^5.2.4",
+    "@types/node": "^10.5.2",
     "@types/text-encoding": "0.0.30",
-    "chai": "^3.5.0",
-    "mocha": "^2.5.3",
-    "typescript": "^2.1.4"
+    "chai": "^4.1.2",
+    "mocha": "^5.2.0",
+    "typescript": "^2.9.2"
   },
   "bugs": {
     "url": "https://github.com/fcrick/tes-data/issues"

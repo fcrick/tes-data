@@ -4,5 +4,7 @@
     },
     "editor.tabSize": 2,
     "typescript.check.workspaceVersion": true,
-    "typescript.tsdk": "./node_modules/typescript/lib"
+    "typescript.tsdk": "./node_modules/typescript/lib",
+    "files.insertFinalNewline": true,
+    "files.eol": "\n"
   }

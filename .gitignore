@@ -47,5 +47,7 @@ Temporary Items
 .apdisk
 
 node_modules
-typings
 dist
+
+package-lock.json
+yarn.lock
