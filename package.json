@@ -7,7 +7,7 @@
     "skyrim"
   ],
   "scripts": {
-    "prepublish": "tsc",
+    "prepare": "node ./node_modules/typescript/bin/tsc",
     "test": "mocha dist/test/*.js"
   },
   "files": [
@@ -27,7 +27,7 @@
     "@types/chai": "^4.1.4",
     "@types/mocha": "^5.2.4",
     "@types/node": "^10.5.2",
-    "@types/text-encoding": "0.0.30",
+    "@types/text-encoding": "0.0.33",
     "chai": "^4.1.2",
     "mocha": "^5.2.0",
     "typescript": "^2.9.2"
@@ -37,6 +37,6 @@
   },
   "dependencies": {
     "is-negative-zero": "^2.0.0",
-    "text-encoding": "^0.6.0"
+    "text-encoding": "^0.6.4"
   }
 }
