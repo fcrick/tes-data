@@ -17,9 +17,10 @@
             "env": {
                 "NODE_ENV": "development"
             },
-            "externalConsole": false,
             "sourceMaps": true,
-            "outDir": "${workspaceRoot}/dist"
+            "outFiles": [
+                "${workspaceRoot}/dist",
+            ]
         },
         {
             "name": "Run mocha",
@@ -37,9 +38,10 @@
             "env": {
                 "NODE_ENV": "development"
             },
-            "externalConsole": false,
             "sourceMaps": true,
-            "outDir": "${workspaceRoot}/dist"
+            "outFiles": [
+                "${workspaceRoot}/dist",
+            ]
         },
         {
             "name": "Run full mocha",
@@ -58,9 +60,10 @@
                 "NODE_ENV": "development",
                 "TES5_PATH": "C:/Program Files (x86)/Steam/steamapps/common/Skyrim/Data/"
             },
-            "externalConsole": false,
             "sourceMaps": true,
-            "outDir": "${workspaceRoot}/dist"
+            "outFiles": [
+                "${workspaceRoot}/dist",
+            ]
         },
         {
             "name": "Attach",
@@ -70,7 +73,6 @@
             "address": "localhost",
             "restart": false,
             "sourceMaps": true,
-            "outDir": null,
             "localRoot": "${workspaceRoot}",
             "remoteRoot": null
         }
